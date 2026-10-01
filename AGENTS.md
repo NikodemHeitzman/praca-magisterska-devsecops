@@ -18,7 +18,7 @@ Ten plik opisuje projekt dla asystentów AI (Claude Code, Copilot, Codex i innyc
 - `experiment/`: skrypty pomiarowe, surowe dane (`experiment/data/`), analiza
 - `docs/adr/`: decyzje architektoniczne, `NNNN-tytul.md`
 - `docs/meetings/`: notatki ze spotkań, `RRRR-MM-DD-promotor.md`
-- `docs/log/`: dziennik badawczy
+- `docs/log/`: dziennik badawczy, `RRRR-MM-DD.md` (zasady w `docs/log/README.md`)
 
 ## Konwencje
 
@@ -29,6 +29,7 @@ Ten plik opisuje projekt dla asystentów AI (Claude Code, Copilot, Codex i innyc
 5. **Akcje GitHub** przypinamy do pełnego SHA commita (wymóg łańcucha dostaw, NIST SP 800-204D).
 6. **Odtwarzalność:** wersje narzędzi i obrazów bazowych przypięte; wyniki eksperymentu zapisujemy jako surowe dane, nie tylko wykresy.
 7. **Nie wymyślaj** wyników pomiarów, numerów CVE, źródeł ani cytatów. Czego nie wiadomo, oznacz `TODO: zweryfikować`.
+8. **Dziennik badawczy:** na koniec każdej sesji pracy dopisz wpis do `docs/log/RRRR-MM-DD.md` według `docs/log/_szablon.md`: autor (nazwa narzędzia), czas, co zrobiono, decyzje, problemy, następne kroki. Czasu, którego nie znasz, nie szacuj, tylko wpisz `TODO: zweryfikować`.
 
 ## Powiązane miejsca
 
