@@ -1,0 +1,45 @@
+# Sekrety i dane dostępowe
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials
+.aws/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+*.auto.tfvars
+terraform.tfvars
+
+# Ansible
+*.retry
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Raporty skanerów generowane lokalnie
+reports/
+*.sarif
+
+# Edytory i system
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
