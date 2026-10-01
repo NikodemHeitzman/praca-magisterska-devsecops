@@ -14,19 +14,22 @@ Praca porównuje dwa potoki CI/CD: bazowy i DevSecOps. Potrzebna jest platforma,
 - nakład pracy na utrzymanie infrastruktury CI (jedna osoba, ograniczony czas),
 - integracja z repozytorium, w którym jest kod,
 - koszt w ramach projektu bez budżetu,
-- możliwość dołączenia skanerów bezpieczeństwa i publikowania ich wyników.
+- możliwość dołączenia skanerów bezpieczeństwa i publikowania ich wyników,
+- znajomość narzędzia przez autora.
 
 ## Rozważane opcje
 
 1. GitHub Actions
 2. Jenkins
-3. GitLab CI <!-- TODO: zweryfikować, czy była realnie rozważana -->
+3. GitLab CI
 
 ## Decyzja
 
 Wybrano **GitHub Actions**, ponieważ działa w tym samym serwisie, w którym jest repozytorium, i nie wymaga utrzymywania własnego serwera CI.
 
 Jenkins odpadł, bo wymaga samodzielnego hostowania (*self-hosted*): instalacji, aktualizacji i zabezpieczenia własnego serwera. W pracy o bezpieczeństwie potoku taki serwer byłby dodatkowym elementem do utrzymania i zabezpieczenia, niezwiązanym z celem badania. Jenkinsa nie analizowano bardziej szczegółowo.
+
+GitLab CI rozważano krótko i odrzucono, bo autor najlepiej zna GitHuba. Ta platforma dawałaby podobne możliwości, ale wymagałaby nauki nowego narzędzia bez korzyści dla celu badania.
 
 ## Konsekwencje
 

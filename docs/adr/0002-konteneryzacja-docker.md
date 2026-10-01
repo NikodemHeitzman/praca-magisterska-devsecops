@@ -25,7 +25,7 @@ Aplikację webową trzeba zbudować, przetestować w potoku i wdrożyć do chmur
 
 Wybrano **kontenery Docker**, ponieważ łatwiej pracuje się na kilku małych obrazach, które składa się w całość, niż na jednym dużym pakiecie. Każdy obraz można osobno zbudować, przeskanować i wymienić.
 
-Podział na kilka obrazów dotyczy komponentów uruchomieniowych (np. aplikacja, baza danych, serwer pośredniczący). Nie oznacza architektury mikroserwisowej, która jest poza zakresem pracy (`AGENTS.md`). Orkiestracja w Kubernetesie również jest poza zakresem. <!-- TODO: zweryfikować docelowy podział na obrazy po zaprojektowaniu aplikacji (E04) -->
+Konkretnego podziału na obrazy jeszcze nie ustalono. Ustali się go przy projektowaniu aplikacji (epik E04). Podział musi zmieścić się w zakresie pracy, bo architektura mikroserwisowa i orkiestracja w Kubernetesie są wyłączone (`AGENTS.md`). Rozdzielenie komponentów uruchomieniowych, np. aplikacji i bazy danych, nie jest jeszcze architekturą mikroserwisową. Jest nią dopiero dzielenie samej logiki aplikacji na wiele usług. <!-- TODO: zweryfikować docelowy podział na obrazy w E04 -->
 
 ## Konsekwencje
 

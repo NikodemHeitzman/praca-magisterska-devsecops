@@ -13,13 +13,13 @@ Aplikacja ma być wdrażana do chmury publicznej, a potok DevSecOps ma obejmowa�
 
 - pozycja dostawcy na rynku i dostępność materiałów (dokumentacja, kursy, przykłady),
 - darmowe limity (*free tier*),
-- wygoda pracy autora z konsolą i usługami dostawcy.
+- znajomość dostawcy i wygoda pracy autora z jego konsolą i usługami.
 
 ## Rozważane opcje
 
 1. Amazon Web Services (AWS)
 2. Microsoft Azure
-3. Google Cloud Platform <!-- TODO: zweryfikować, czy była realnie rozważana -->
+3. Google Cloud Platform
 
 ## Decyzja
 
@@ -29,6 +29,8 @@ Wybrano **AWS**, ponieważ:
 - według oceny autora ma najkorzystniejszy darmowy pakiet (*free tier*) spośród rozważanych dostawców. <!-- TODO: zweryfikować w aktualnych warunkach AWS i Azure -->
 
 Azure odpadł, bo autorowi pracuje się na nim nieprzyjemnie. To subiektywny powód, ale w projekcie realizowanym przez jedną osobę wygoda pracy z narzędziem przekłada się na czas realizacji.
+
+Google Cloud Platform rozważano krótko i odrzucono, bo autor najlepiej zna AWS.
 
 Regionu AWS ten ADR nie rozstrzyga. Wybór regionu należy do zadania E01-07.
 
