@@ -79,7 +79,7 @@ Miejsce DAST rozstrzygnięto w E03-05 (decyzja autora z 2026-10-13): OWASP ZAP w
 
 Pułap może się obniżyć, jeśli ZAP w trybie pasywnym nie wykryje którejś z pozycji GT-12–14 (zwłaszcza GT-14, która wymaga wywołania błędu serwera), a SAST nie ma dla niej reguły. TODO: zweryfikować w E02-10.
 
-Skład katalogu ustalono 2026-10-09, **przed** decyzją o miejscu DAST, i nie dopasowujemy go do progu H1, żeby nie dobierać podatności pod narzędzia (zagrożenie trafności wewnętrznej, E03-06).
+Skład katalogu ustalono 2026-10-09, **przed** decyzją o miejscu DAST, i nie dopasowujemy go do progu H1, żeby nie dobierać podatności pod narzędzia (zagrożenie trafności wewnętrznej TW1, `docs/metodyka.md`, p. 4.5).
 
 ### Bezpieczeństwo eksperymentu
 

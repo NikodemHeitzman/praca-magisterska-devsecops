@@ -27,7 +27,7 @@ Kroki P1–P5 są wymaganiami dla zadań implementacyjnych (aplikacja E04, potok
 - Ochrona gałęzi `exp/variant-b` (branch protection): joby-bramki są wymaganymi status checks, więc nieudana bramka uniemożliwia scalenie, a tym samym wdrożenie.
 - Narzędzia wariantu B zapisują pełne raporty, także zgłoszenia poniżej progu blokady (potrzebne do M1). Próg blokady stosuje osobny krok bramki.
 
-Po rozpoczęciu serii właściwej nie zmieniamy żadnego z tych elementów. Zmiana progu po obejrzeniu wyników byłaby dopasowaniem potoku do wyniku (zagrożenie trafności wewnętrznej, sekcja 4 metodyki). Jeśli zmiana okaże się konieczna, zapisujemy ją w dzienniku z uzasadnieniem i powtarzamy całą serię.
+Po rozpoczęciu serii właściwej nie zmieniamy żadnego z tych elementów. Zmiana progu po obejrzeniu wyników byłaby dopasowaniem potoku do wyniku (zagrożenie trafności wewnętrznej TW2, `docs/metodyka.md`, p. 4.5). Jeśli zmiana okaże się konieczna, zapisujemy ją w dzienniku z uzasadnieniem i powtarzamy całą serię.
 
 ### P2. Przypięcie wersji
 
@@ -60,7 +60,8 @@ Przed serią właściwą wykonujemy 1–2 próby i kilka przebiegów czasowych, 
 - skrypty tworzenia gałęzi, pobierania danych i zapisu,
 - znaczenie pola `created_at` joba jako chwili wejścia do kolejki (otwarta kwestia z E03-04), przez porównanie z czasami w interfejsie GitHub,
 - czy łatki przechodzą testy funkcjonalne w wariancie A (P3),
-- czy workflow A różni się od workflow B wyłącznie krokami bezpieczeństwa (diff plików, K2 w sekcji 5).
+- czy workflow A różni się od workflow B wyłącznie krokami bezpieczeństwa (diff plików, K2 w sekcji 5),
+- czy wynik próby jest powtarzalny: próbę wariantu B dla wybranych pozycji, zwłaszcza GT-12–14 wykrywanych przez ZAP, wykonujemy dwukrotnie i porównujemy zgłoszenia (zagrożenie TN5, `docs/metodyka.md`, p. 4.5).
 
 Dane pilotażu oznaczamy jako pilotażowe i nie wchodzą do wyników.
 

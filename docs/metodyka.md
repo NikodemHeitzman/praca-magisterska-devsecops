@@ -91,13 +91,13 @@ Samo porównanie wykryć w wariantach A i B byłoby trywialne, bo wariant A nie 
 
 Doprecyzowania:
 
-- **„Zatrzymana” (H1).** Podatność jest zatrzymana, jeśli bramka blokująca wariantu B uniemożliwiła wdrożenie na produkcję artefaktu, który ją zawiera, a wśród zgłoszeń, które wywołały blokadę, jest trafienie tej podatności. Samo zgłoszenie bez zablokowania się nie liczy. Blokada wywołana wyłącznie innymi zgłoszeniami (np. fałszywym alarmem) też się nie liczy (decyzja autora z 2026-10-13; klasy wyniku próby: `experiment/PROTOCOL.md`, p. 3.3). Rozróżnienie „wykryta” i „zablokowana” to zagrożenie trafności konstruktu omawiane w sekcji 4 (E03-06).
+- **„Zatrzymana” (H1).** Podatność jest zatrzymana, jeśli bramka blokująca wariantu B uniemożliwiła wdrożenie na produkcję artefaktu, który ją zawiera, a wśród zgłoszeń, które wywołały blokadę, jest trafienie tej podatności. Samo zgłoszenie bez zablokowania się nie liczy. Blokada wywołana wyłącznie innymi zgłoszeniami (np. fałszywym alarmem) też się nie liczy (decyzja autora z 2026-10-13; klasy wyniku próby: `experiment/PROTOCOL.md`, p. 3.3). Rozróżnienie „wykryta” i „zablokowana” to zagrożenie trafności konstruktu (p. 4.5, TK1).
 - **Zakres czasu (H2a).** Próg dotyczy workflow wyzwalanego przez pull request, czyli pętli informacji zwrotnej dla programisty. Pełny potok na gałęzi głównej (z wdrożeniem do AWS) raportujemy opisowo, bo jego czas zależy też od AWS, a nie tylko od skanerów. Próg 10 minut to heurystyka praktyki ciągłej integracji: etap commit powinien trwać najlepiej poniżej 5 minut i nie dłużej niż 10 [@Humble2010, s. TODO]. TODO: zweryfikować po lekturze (rozdz. 7 „The Commit Stage”; źródło ma w rejestrze `zweryfikowane: nie`). Sposób pomiaru: p. 3.2, M4.
 - **Precyzja (H2b).** Liczymy zgłoszenia unikalne (ta sama reguła w tym samym miejscu kodu w kolejnych przebiegach to jedno zgłoszenie). Klasy zgłoszeń: trafienie z katalogu, prawdziwy problem spoza katalogu, fałszywy alarm. Reguły klasyfikacji ustali E03-04.
 - **Pokrycie (H3a).** Do progu liczymy wyłącznie oceny „spełniona”, więc wynik jest dolną granicą i nie zależy od wartości oceny „częściowo”, którą ustali E03-04. Wynik z oceną „częściowo” podajemy obok, opisowo.
 - **SLSA (H3b).** Próg L2 to propozycja wstępna. TODO: zweryfikować po lekturze specyfikacji SLSA (E02-05), które wymagania poziomów Build da się spełnić na runnerach hostowanych GitHuba, i wtedy potwierdzić albo zmienić próg. Zmianę zapisujemy w dzienniku.
 
-Progi są decyzją autora z 2026-10-09 (E03-02). Literatura z rdzenia nie podaje gotowych wartości progowych dla tych miar, więc progi ustalono przed eksperymentem, żeby wynik nie wpływał na kryterium oceny. Sposób wnioskowania (np. przedział ufności dla proporcji przy H1, test dla czasów przy H2a) określi sekcja 4 (E03-06).
+Progi są decyzją autora z 2026-10-09 (E03-02). Literatura z rdzenia nie podaje gotowych wartości progowych dla tych miar, więc progi ustalono przed eksperymentem, żeby wynik nie wpływał na kryterium oceny. Reguły rozstrzygania hipotez i sposób wnioskowania są w p. 4.3.
 
 ### 2.3. Metryki przypisane do pytań
 
@@ -173,7 +173,7 @@ Uwagi do wzorów:
    - **Z_FP, fałszywy alarm:** zgłoszenie nie wskazuje rzeczywistej słabości w danym kontekście, np. wzorzec uznany za niebezpieczny, choć dane są stałe albo zwalidowane.
 4. **Zapis.** Każde zgłoszenie unikalne dostaje wiersz w pliku klasyfikacji w `experiment/data/` z kluczem, klasą, identyfikatorem pozycji katalogu (dla Z_kat) i jednozdaniowym uzasadnieniem. Format pliku ustali E09.
 5. **Przypadki wątpliwe** klasyfikujemy jako Z_poza albo Z_FP z dopiskiem „wątpliwe”. W wynikach podajemy, jak zmienia się M6, gdy wszystkie wątpliwe uznać za fałszywe alarmy.
-6. **Klasyfikator.** Klasyfikuje autor pracy. Brak drugiej osoby i miary zgodności klasyfikatorów to zagrożenie trafności opisywane w sekcji 4 (E03-06).
+6. **Klasyfikator.** Klasyfikuje autor pracy. Brak drugiej osoby i miary zgodności klasyfikatorów to zagrożenie trafności; mitygacja w p. 4.5 (TN4).
 
 ### 3.4. Uzasadnienie metryk w literaturze
 
@@ -183,18 +183,113 @@ TODO: zweryfikować po lekturze. Wszystkie źródła tego akapitu mają w rejest
 
 ## 4. Analiza danych i zagrożenia trafności
 
-TODO: E03-06.
+Sekcja ustala, jak z surowych danych eksperymentu (`experiment/data/`) wyprowadzamy wyniki i rozstrzygnięcia hipotez (4.1–4.4) oraz co może te wnioski osłabić (4.5). Reguły zapisujemy przed eksperymentem, żeby wynik nie wpływał na sposób jego oceny. Decyzje autora z 2026-10-13 (E03-06).
 
-Materiał z E03-05 do uwzględnienia (`experiment/PROTOCOL.md`):
+### 4.1. Zasady ogólne
 
-- **Trafność wewnętrzna:**
-  - progi bramek zamrożone przed serią; zmiana po obejrzeniu wyników wymaga powtórzenia serii (P1),
-  - skład katalogu ustalony przed decyzją o miejscu DAST,
-  - blokada bez trafienia pozycji (klasa Z3) nie jest zatrzymaniem, więc fałszywe alarmy nie poprawiają H1 (p. 3.3),
-  - workflow A = workflow B bez kroków bezpieczeństwa (K2).
-- **Trafność zewnętrzna:** jedna pozycja na próbę, więc nie badamy interakcji między podatnościami; wersje zbiorcze są konstrukcją pomiarową, a nie realnym przebiegiem rozwoju.
-- **Trafność konstruktu:**
-  - „zatrzymana” = blokada z trafieniem pozycji (p. 2.2),
-  - dla pozycji workflow „dotarła na produkcję” = scalona do gałęzi bazowej,
-  - potwierdzenie audytem (R1) korzysta z wiedzy o katalogu i nie jest wykryciem w sensie M2.
-- **Niezawodność:** zmienność infrastruktury GitHub (przeplatanie A/B, mediana i p90, kolejka osobno), aktualizacje obrazu runnera i baz podatności w trakcie serii (zapis wersji), czas operacji AWS (składnik wspólny obu wariantów).
+1. **Dwa rodzaje danych.**
+   - **Dane deterministyczne:** wyniki prób na katalogu (M1–M3), zbiór zgłoszeń bramek (M6, M9), lista kontrolna (M7) i wymagania SLSA (M8). Katalog i lista kontrolna nie są losowymi próbami z większej populacji, tylko całym badanym zbiorem. Skaner uruchomiony na tym samym kodzie z tą samą bazą podatności daje ten sam wynik. Rozstrzygamy więc regułą na wartości punktowej, bez wnioskowania statystycznego. Ograniczenia uogólnienia opisujemy jako zagrożenia trafności zewnętrznej (4.5).
+   - **Dane losowe:** czasy przebiegów (M4, M5). Czas zależy od kolejki, obciążenia runnerów i sieci, więc 20 przebiegów to próba z procesu losowego. Tu stosujemy przedziały ufności i testy.
+2. **Metody nieparametryczne.** Przy 20 pomiarach nie zakładamy rozkładu normalnego czasów. Rozkład czasów potoku bywa prawostronnie skośny przez pojedyncze przebiegi z długą kolejką.
+3. **Poziom istotności i przedziały.** α = 0,05, przedziały ufności 95%.
+4. **Odtwarzalność analizy.** Wszystkie wyniki liczą skrypty w `experiment/scripts/` wprost z surowych danych, bez ręcznych kroków pośrednich (wyjątek: klasyfikacja zgłoszeń, p. 3.3, zapisana w pliku). Wersje bibliotek analizy przypinamy jak wersje narzędzi potoku. Język i biblioteki: TODO (E09).
+5. **Stany rozstrzygnięcia.** Hipoteza jest **potwierdzona**, **odrzucona** albo, tam gdzie reguła to przewiduje (H2a, H2b), **nierozstrzygnięta**. Stan „nierozstrzygnięta” raportujemy z wartością punktową i przyczyną.
+
+### 4.2. Plan analizy metryk
+
+| Metryka | Statystyka opisowa | Prezentacja | Wnioskowanie |
+|---|---|---|---|
+| M1 | odsetek na \|K\| = 20, obok M1_z (17) i M1_g dla każdej grupy | tabela pozycja × wariant × klasa wyniku (Z1–Z4) z narzędziem, które trafiło; wykres słupkowy M1_g | brak (dane deterministyczne) |
+| M2 | liczba pozycji na każdym etapie | tabela etap × grupa | brak |
+| M3 | odsetek pozycji, które dotarły na produkcję, w A i w B; zgodność z audytem (PROTOCOL.md, p. 4.5) | tabela jak przy M1, kolumna wyniku audytu | reguła H1 (4.3) |
+| M4 | mediana, p90, min, max; T_czek i T_wyk; kolejka pierwszego joba (T_czek − T_wyk) osobno | wykres pudełkowy dla każdej pary (wariant, wyzwalacz); wykres przebiegów w kolejności wykonania (pokazuje dryf, np. po zmianie obrazu runnera) | 95% CI mediany; reguła H2a (4.3) |
+| M5 | różnica median Δ i Δ%; mediana czasu kroków każdego skanera | wykres skumulowany kroków wariantu B | 4.4 |
+| M6 | odsetek na zbiorze Z, \|Z_FP\| ogółem i dla każdego narzędzia; zawsze z \|Z\| | tabela narzędzie × klasa zgłoszenia | reguła H2b (4.3) |
+| M7 | M7(MUST), M7(SHOULD), obok M7' | tabela pokrycia z dowodem przy każdej pozycji | reguła H3a (4.3) |
+| M8 | osiągnięty poziom i niespełnione wymagania wyższego poziomu | tabela wymagań SLSA Build | reguła H3b (4.3) |
+| M9 | N_blok, N_FP, N_FP / N_blok | tabela | brak |
+
+Przy małych liczbach (np. \|Z\| < 10) podajemy odsetek razem z licznikiem i mianownikiem, np. „7/9 (78%)”, bo sam odsetek sugeruje większą dokładność, niż mają dane.
+
+### 4.3. Reguły rozstrzygania hipotez
+
+| Hipoteza | Reguła | Stany |
+|---|---|---|
+| **H1** | potwierdzona, gdy wariant B zatrzymał co najmniej 16 z 20 pozycji (klasa Z1, PROTOCOL.md p. 3.3), czyli M3(B) ≤ 20% | potwierdzona / odrzucona |
+| **H2a** | 95% przedział ufności mediany T_czek(B, PR) z 20 przebiegów, bez założeń o rozkładzie: (x₍₆₎, x₍₁₅₎), pokrycie 95,9%. Potwierdzona, gdy górna granica ≤ 10 min, czyli co najmniej 15 z 20 przebiegów trwa ≤ 10 min. Odrzucona, gdy dolna granica > 10 min, czyli co najmniej 15 z 20 przebiegów trwa > 10 min. | potwierdzona / odrzucona / nierozstrzygnięta |
+| **H2b** | M6 z klasyfikacji podstawowej i M6 w wariancie pesymistycznym (wszystkie zgłoszenia „wątpliwe” jako Z_FP, p. 3.3 pkt 5). Potwierdzona, gdy oba ≥ 50%. Odrzucona, gdy M6 podstawowe < 50%. Nierozstrzygnięta (wrażliwa na klasyfikację), gdy podstawowe ≥ 50%, a pesymistyczne < 50%. | potwierdzona / odrzucona / nierozstrzygnięta |
+| **H3a** | potwierdzona, gdy M7(MUST) ≥ 80% i M7(SHOULD) ≥ 50% (tylko oceny „spełniona”) | potwierdzona / odrzucona |
+| **H3b** | potwierdzona, gdy M8 ≥ L2 | potwierdzona / odrzucona |
+
+Uzasadnienia:
+
+- **H1 bez przedziału ufności** (decyzja autora z 2026-10-13). Katalog to cały badany zbiór, a nie losowa próba podatności (4.1), więc wynik jest dokładny dla tego katalogu. Rozstrzyganie dolną granicą przedziału Clopper-Pearsona byłoby też niewykonalne. Przy n = 20 dolna granica dwustronnego 95% CI wynosi 62,1% dla 17/20 i 83,2% dla 20/20, więc próg 80% wymagałby wyniku 20/20, a pułap to 17/20 (3 pozycje poza zasięgiem narzędzi). H1 przegrałaby wtedy z samej konstrukcji eksperymentu, tak samo w teście dwumianowym. Granice wyliczone przez agenta 2026-10-13; TODO: zweryfikować skryptem analizy (E09).
+- **H1 ma mały zapas.** Przy pułapie 17/20 i progu 16/20 jedna niewykryta pozycja w zasięgu narzędzi nie zmienia wyniku, a dwie go odwracają. Tabela pozycji (4.2, M1) pokazuje, które pozycje rozstrzygnęły wynik.
+- **H2a z przedziałem** (decyzja autora z 2026-10-13). Hipoteza dotyczy typowego czasu procesu, a 20 przebiegów to próba. Przy medianie bliskiej 10 min sama wartość punktowa nie wystarcza do rozstrzygnięcia, więc reguła ma stan „nierozstrzygnięta”. Granice przedziału to statystyki pozycyjne wynikające z rozkładu dwumianowego Bin(20; 0,5). TODO: źródło metody (przedział ufności mediany bez założeń o rozkładzie).
+- **H2b z analizą wrażliwości** (decyzja autora z 2026-10-13). Zbiór Z jest deterministyczny, ale jego klasyfikacja zależy od oceny jednej osoby. Wariant pesymistyczny zawsze daje M6 nie większe od podstawowego, dlatego reguła ma trzy, a nie cztery przypadki.
+- **H3a i H3b** są deterministyczne. Zagrożenie leży w ocenie pozycji przez autora (4.5, trafność konstruktu), a nie w zmienności danych.
+
+### 4.4. Porównanie czasów wariantów (M5)
+
+M5 nie ma hipotezy, ale wielkość narzutu jest głównym wynikiem RQ2 obok H2a. Analizę wykonujemy osobno dla wyzwalaczy PR i main, na T_wyk (p. 3.2) (decyzja autora z 2026-10-13):
+
+1. **Test Manna-Whitneya**, dwustronny, α = 0,05: czy rozkłady T_wyk(A, w) i T_wyk(B, w) się różnią. Przebiegi traktujemy jako niezależne. Przeplatanie A/B (PROTOCOL.md, p. 2.3) służy wyrównaniu warunków, a nie parowaniu.
+2. **Estymator Hodgesa-Lehmanna** przesunięcia (mediana wszystkich różnic b − a) z 95% CI: „o ile minut wariant B jest wolniejszy”. To główna liczba wyniku. Sam test przy spodziewanej wyraźnej różnicy niesie niewiele informacji.
+3. **Miara efektu Vargha-Delaney A12**: prawdopodobieństwo, że losowy przebieg B trwa dłużej niż losowy przebieg A. Wartość 0,5 oznacza brak różnicy. Progi interpretacji: TODO, według źródła.
+4. Obok: różnica median Δ i Δ% (p. 3.2) oraz rozbicie na kroki skanerów.
+
+Dwa porównania (PR, main) nie testują hipotezy, więc nie stosujemy korekty na wielokrotne porównania.
+
+TODO: źródła metod. Kandydaci do sprawdzenia i dopisania do rejestru: przewodnik po testach statystycznych w inżynierii oprogramowania (Arcuri, Briand) i oryginalna praca o A12 (Vargha, Delaney). Metadanych nie wpisujemy z pamięci (`Zrodla/_Zrodla.md`).
+
+### 4.5. Zagrożenia trafności
+
+Zagrożenia grupujemy w cztery rodzaje: trafność wewnętrzną (czy wynik wynika z wariantu potoku, a nie z innych czynników), zewnętrzną (na ile wynik się uogólnia), konstruktu (czy metryki mierzą to, co deklarujemy) oraz niezawodność i trafność wniosków (czy pomiar jest powtarzalny, a wnioskowanie poprawne). TODO: źródło klasyfikacji zagrożeń trafności (kandydat: podręcznik eksperymentów w inżynierii oprogramowania, Wohlin i in.; do sprawdzenia i dopisania do rejestru).
+
+Kolumna „Ryzyko szczątkowe” mówi, co mimo mitygacji opisujemy w rozdz. 5.3.
+
+#### Trafność wewnętrzna
+
+| # | Zagrożenie | Mitygacja | Ryzyko szczątkowe |
+|---|---|---|---|
+| TW1 | **Podatności dobrane pod narzędzia.** Katalog i potok projektuje ta sama osoba, więc może (świadomie albo nie) wybrać podatności, które skanery łatwo wykrywają. | Skład katalogu wynika z pokrycia OWASP Top 10:2025 i grup artefaktów, a nie z reguł narzędzi (E03-03); 3 z 20 pozycji celowo poza zasięgiem narzędzi; oczekiwany detektor i pewność detekcji zapisane przed eksperymentem (`ground-truth.yaml`); skład ustalony przed decyzją o miejscu DAST; katalog zamrożony w v1 (K6); zamiana na pozycję rezerwową tylko przy niewykonalności, z wpisem w dzienniku. | Postać łatki (sposób zapisania podatności w kodzie) może ułatwiać albo utrudniać wykrycie. Opisujemy ją przy każdej pozycji. |
+| TW2 | **Progi bramek dostrojone do wyniku.** | Progi i konfiguracja bramek zamrożone przed serią (P1, K5); zmiana po obejrzeniu wyników wymaga powtórzenia serii i wpisu w dzienniku. | brak |
+| TW3 | **Fałszywe alarmy poprawiają H1.** Blokada wywołana zgłoszeniem niezwiązanym z pozycją wyglądałaby jak zatrzymanie. | Klasa Z3 nie liczy się jako zatrzymanie (PROTOCOL.md, p. 3.3); próby Z3 raportowane osobno z przyczyną. | brak |
+| TW4 | **Warianty różnią się czymś więcej niż kontrolami bezpieczeństwa.** | Workflow A powstaje z workflow B przez usunięcie kroków bezpieczeństwa, kontrola diffem w pilotażu (K2); zmienne K1–K12 (PROTOCOL.md, sekcja 5). | brak |
+| TW5 | **Warunki zmieniają się między próbami** (nowe CVE w bazach, aktualizacja obrazu runnera). | Próby parami dla każdej pozycji, jedna seria w krótkim oknie (K10, K11); zapis wersji baz i obrazu przy każdym przebiegu; nowe CVE jako zgłoszenia spoza katalogu (Z_poza). | Nowe CVE może wywołać blokadę Z3 w części prób. Raportujemy liczbę takich prób. |
+| TW6 | **Wiedza o katalogu wpływa na ocenę trafień.** Eksperymentator zna prawdę, więc może „dopasować” zgłoszenie do pozycji. | Reguła trafienia zapisana przed eksperymentem (`experiment/README.md`); audyt rozdzielony na R1 (potwierdzenie, z wiedzą o katalogu) i R2 (wykrycie, bez niej), do M2 liczy się tylko R2. | Przypadki graniczne reguły trafienia opisujemy przy pozycji. |
+
+#### Trafność zewnętrzna
+
+| # | Zagrożenie | Mitygacja | Ryzyko szczątkowe |
+|---|---|---|---|
+| TZ1 | **Jedna mała aplikacja i jeden stos** (FastAPI, Docker, AWS, GitHub Actions). | Opis kontekstu (rozdz. 4); rekomendacje (C6) formułowane warunkowo, z zakresem stosowalności. | Wyniki nie przenoszą się wprost na inne języki, frameworki i platformy CI. |
+| TZ2 | **Katalog celowy, nie losowy, 20 pozycji.** | Wynik podajemy jako dokładny dla katalogu, bez wnioskowania o populacji podatności (4.1); M1_g dla każdej grupy pozwala czytelnikowi ocenić przenośność na własny profil ryzyka. | Odsetek wykrytych zależy od składu katalogu. |
+| TZ3 | **Jedna podatność na próbę.** | Świadoma decyzja (PROTOCOL.md, sekcja 0): blokadę da się przypisać jednej pozycji. | Nie badamy interakcji między podatnościami; wersje zbiorcze są konstrukcją pomiarową, a nie realnym przebiegiem rozwoju. |
+| TZ4 | **Projekt jednoosobowy.** | Wymagania przeglądu przez drugą osobę ocenione jako ograniczenie (p. 1.5). | Nie badamy, jak zespół obsługuje alarmy w codziennej pracy. |
+| TZ5 | **Stan narzędzi i baz z dnia eksperymentu.** | Przypięte wersje (K4); zapis wersji baz podatności. | Wynik opisuje stan narzędzi na datę serii. |
+| TZ6 | **Runnery hostowane GitHuba.** | Etykieta i typ maszyny stałe (K3). | Czasy na innych runnerach (np. własnych) mogą się różnić. |
+
+#### Trafność konstruktu
+
+| # | Zagrożenie | Mitygacja | Ryzyko szczątkowe |
+|---|---|---|---|
+| TK1 | **„Wykryta” to nie „zablokowana”.** | Dwie osobne miary: M1 (wykrycie) i M3/H1 (zatrzymanie); klasy Z1–Z4 (PROTOCOL.md, p. 3.3); definicja „zatrzymanej” w p. 2.2. | brak |
+| TK2 | **„Dotarła na produkcję” dla pozycji workflow** (GT-15–17) znaczy co innego niż dla pozycji aplikacji. | Definicja: scalenie do gałęzi bazowej, która wdraża produkcję (p. 3.2, uwagi). | Opisujemy różnicę znaczeń w 5.3. |
+| TK3 | **Czas potoku to tylko część kosztu.** | Osobne miary kosztu obsługi alarmów: M6 i M9. | Nie mierzymy czasu pracy człowieka nad alarmami. |
+| TK4 | **T_czek zależy od znaczenia pola `created_at` joba.** | Weryfikacja na pierwszych przebiegach przez porównanie z interfejsem GitHuba (p. 3.2, uwagi; E09). | Do czasu weryfikacji: TODO. |
+| TK5 | **Próg 10 min to heurystyka praktyki, nie norma.** | Źródło progu [@Humble2010] (TODO: zweryfikować po lekturze); obok progu raportujemy cały rozkład czasów. | Inny próg zmieniłby rozstrzygnięcie H2a; czytelnik ma rozkład, żeby to ocenić. |
+| TK6 | **„Zgodność” to ocena autora, a nie certyfikacja.** | Operacyjna definicja zgodności (p. 1.1); dowód przy każdej pozycji listy kontrolnej; H3a liczona tylko na ocenach „spełniona” (dolna granica). | Ocena stosowalności i spełnienia zależy od interpretacji wytycznych przez autora. |
+| TK7 | **Reguła trafienia może uznać przypadkowe zgłoszenie za trafienie** (np. inna reguła w tym samym pliku). | Reguła trafienia zapisana przed eksperymentem (`experiment/README.md`); w tabeli wyników podajemy regułę narzędzia przy każdym trafieniu. | Przypadki graniczne opisujemy przy pozycji. |
+
+#### Niezawodność i trafność wniosków
+
+| # | Zagrożenie | Mitygacja | Ryzyko szczątkowe |
+|---|---|---|---|
+| TN1 | **Zmienność infrastruktury GitHub** (kolejka, obciążenie runnerów). | Jeden przebieg naraz, przeplatanie A/B (PROTOCOL.md, p. 2.3); mediana i p90 zamiast średniej; 95% CI mediany; kolejka pierwszego joba raportowana osobno. | Systematyczne zmiany obciążenia w skali dni nie są kontrolowane. |
+| TN2 | **Aktualizacja obrazu runnera w trakcie serii.** | Zapis wersji obrazu przy każdym przebiegu. Jeśli obraz zmieni się w trakcie serii czasowej, wyniki M4 i M5 podajemy łącznie oraz osobno przed i po zmianie. | Przy małej liczbie przebiegów po jednej stronie zmiany porównanie jest tylko orientacyjne. |
+| TN3 | **Mała liczba pomiarów** (20 na parę wariant–wyzwalacz). | Metody nieparametryczne i przedziały (4.1, 4.4); stan „nierozstrzygnięta” w H2a. | Szerokie przedziały przy dużej zmienności czasów. |
+| TN4 | **Jeden klasyfikator zgłoszeń** (M6, M9; p. 3.3 pkt 6). | Uzasadnienie każdej klasyfikacji w publicznym repozytorium (p. 3.3 pkt 4). Ponowna, ślepa klasyfikacja wszystkich zgłoszeń przez autora po co najmniej 2 tygodniach, bez wglądu w pierwszą; zgodność wewnątrz klasyfikatora mierzona współczynnikiem kappa Cohena. Rozbieżności rozstrzygamy ponowną analizą z zapisem uzasadnienia; do wyników wchodzi klasyfikacja po rozstrzygnięciu. Decyzja autora z 2026-10-13. | Brak drugiej osoby: zgodność wewnątrz jednego klasyfikatora nie wyklucza jego systematycznego błędu. TODO: źródło dla kappa Cohena i jej interpretacji. |
+| TN5 | **Niepowtarzalność wyników skanerów.** Reguła H1 zakłada, że próba daje ten sam wynik przy powtórzeniu (4.1). Skaner dynamiczny (ZAP) może dawać różne zgłoszenia zależnie od przebiegu przeszukiwania aplikacji i limitu czasu. | W pilotażu (P5) powtarzamy próbę wariantu B dla wybranych pozycji, zwłaszcza GT-12–14 wykrywanych przez ZAP, i porównujemy zgłoszenia. | Jeśli wynik okaże się niepowtarzalny, opisujemy to w 5.3 i rozważamy powtórzenia prób dla pozycji DAST (zmiana protokołu z wpisem w dzienniku). |
+| TN6 | **Mały zapas H1** (pułap 17/20, próg 16/20). | Tabela wyników pozycja po pozycji (4.2), z której widać, które pozycje rozstrzygnęły wynik. | Ryzyko, że H1 nie przejdzie przez pozycje GT-12–14, jeśli ZAP w trybie pasywnym ich nie wykryje (TODO: zweryfikować w E02-10). |
+| TN7 | **Odtwarzalność.** | Przypięte wersje (K4), surowe dane w repozytorium, analiza skryptami z danych surowych (4.1 pkt 4), instrukcja odtworzenia (C3). | Runnery hostowane i bazy podatności zmieniają się w czasie, więc dokładne powtórzenie liczb nie jest możliwe; możliwe jest powtórzenie procedury. |
