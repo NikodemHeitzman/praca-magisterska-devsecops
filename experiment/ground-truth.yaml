@@ -1,0 +1,401 @@
+# Katalog podatności referencyjnych (ground truth)
+#
+# Zadanie E03-03. Zasady, definicje pól i sposób liczenia metryk: experiment/README.md.
+# Wersja katalogu: v0 (2026-10-09). Po akceptacji metodyki (E03-07) katalog zostaje zamrożony jako v1;
+# każdą późniejszą zmianę zapisujemy w dzienniku badawczym (docs/log/) z uzasadnieniem.
+#
+# Źródła klasyfikacji:
+#   cwe               – nazwy i status mapowania sprawdzone w MITRE CWE (cwe-api.mitre.org), 2026-10-09
+#   owasp_top10_2025  – tylko gdy CWE jest na liście „List of Mapped CWEs” danej kategorii [@OWASP-Top10-2025]
+#   owasp_cicd        – wstępne przypisanie do OWASP Top 10 CI/CD [@OWASP-Top10-CICD]; do weryfikacji w E02-04
+#   asvs              – wymaganie łamane przez pozycję [@OWASP-ASVS-5.0]
+#   oczekiwany_detektor – hipoteza przed eksperymentem; narzędzia z listy kandydatów E02-10, reguły do ustalenia w E02-10/E07
+
+wersja: v0
+data: 2026-10-09
+pozycje:
+
+  # ---------------------------------------------------------------- kod aplikacji
+  - id: GT-01
+    tytul: SQL injection w wyszukiwaniu
+    grupa: kod
+    cwe: CWE-89
+    owasp_top10_2025: A05
+    owasp_cicd: null
+    asvs: v5.0.0-1.2.4
+    lokalizacja: endpoint wyszukiwania (E04-01)
+    wprowadzenie: zapytanie SQL składane z parametru wyszukiwania przez f-string zamiast parametru zapytania
+    w_zasiegu_narzedzi: true
+    pewnosc_detekcji: wysoka
+    oczekiwany_detektor:
+      - {klasa: SAST, narzedzie: Semgrep}
+      - {klasa: SAST, narzedzie: Bandit}
+      - {klasa: DAST, narzedzie: OWASP ZAP}
+    najwczesniejszy_etap: PR
+    uzasadnienie: klasyczna podatność wstrzyknięcia, wzorcowy cel SAST i DAST
+
+  - id: GT-02
+    tytul: Zakodowany klucz podpisywania tokenów JWT
+    grupa: kod
+    cwe: CWE-798
+    owasp_top10_2025: A07
+    owasp_cicd: CICD-SEC-6
+    asvs: v5.0.0-13.3.1
+    lokalizacja: moduł konfiguracji aplikacji
+    wprowadzenie: >-
+      sekret JWT jako stała w kodzie zamiast zmiennej środowiskowej; wartość fikcyjna o wysokiej entropii,
+      nigdy prawdziwe poświadczenie (repozytorium jest publiczne)
+    w_zasiegu_narzedzi: true
+    pewnosc_detekcji: srednia
+    oczekiwany_detektor:
+      - {klasa: sekrety, narzedzie: Gitleaks}
+      - {klasa: SAST, narzedzie: Bandit}
+    najwczesniejszy_etap: PR
+    uzasadnienie: >-
+      wyciek sekretu przez repozytorium; pewność średnia, bo wykrycie generycznego sekretu zależy od reguł
+      entropii i nazwy zmiennej (TODO: zweryfikować w E02-10)
+
+  - id: GT-03
+    tytul: Hashowanie haseł funkcją MD5
+    grupa: kod
+    cwe: CWE-916
+    owasp_top10_2025: A04
+    owasp_cicd: null
+    asvs: v5.0.0-11.4.2
+    lokalizacja: moduł rejestracji i logowania
+    wprowadzenie: hasło zapisywane jako hashlib.md5(haslo) zamiast funkcji wyprowadzania klucza (np. Argon2, bcrypt)
+    w_zasiegu_narzedzi: true
+    pewnosc_detekcji: wysoka
+    oczekiwany_detektor:
+      - {klasa: SAST, narzedzie: Bandit}
+      - {klasa: SAST, narzedzie: Semgrep}
+    najwczesniejszy_etap: PR
+    uzasadnienie: błąd kryptograficzny typowy dla małych aplikacji; łamie też v5.0.0-11.4.1 (brak MD5)
+
+  - id: GT-04
+    tytul: eval() na danych użytkownika
+    grupa: kod
+    cwe: CWE-95
+    owasp_top10_2025: A05
+    owasp_cicd: null
+    asvs: v5.0.0-1.3.2
+    lokalizacja: funkcja filtrowania lub sortowania wyników (E04-01)
+    wprowadzenie: wyrażenie z parametru żądania przekazane do eval()
+    w_zasiegu_narzedzi: true
+    pewnosc_detekcji: wysoka
+    oczekiwany_detektor:
+      - {klasa: SAST, narzedzie: Bandit}
+      - {klasa: SAST, narzedzie: Semgrep}
+    najwczesniejszy_etap: PR
+    uzasadnienie: dynamiczne wykonanie kodu prowadzi do zdalnego wykonania poleceń; łatwy cel SAST
+
+  - id: GT-05
+    tytul: Path traversal przy pobieraniu pliku
+    grupa: kod
+    cwe: CWE-22
+    owasp_top10_2025: A01
+    owasp_cicd: null
+    asvs: v5.0.0-5.3.2
+    lokalizacja: endpoint pobierania pliku (E04-01)
+    wprowadzenie: ścieżka pliku składana z nazwy podanej przez użytkownika bez normalizacji i sprawdzenia katalogu
+    w_zasiegu_narzedzi: true
+    pewnosc_detekcji: srednia
+    oczekiwany_detektor:
+      - {klasa: SAST, narzedzie: Semgrep}
+      - {klasa: DAST, narzedzie: OWASP ZAP}
+    najwczesniejszy_etap: PR
+    uzasadnienie: >-
+      wykrycie wymaga analizy przepływu danych (taint) w SAST albo aktywnego testu DAST, więc pewność średnia
+
+  - id: GT-06
+    tytul: Log injection w logowaniu nieudanego logowania
+    grupa: kod
+    cwe: CWE-117
+    owasp_top10_2025: A09
+    owasp_cicd: null
+    asvs: v5.0.0-16.4.1
+    lokalizacja: moduł logowania zdarzeń uwierzytelniania
+    wprowadzenie: nazwa użytkownika z żądania zapisywana do logu bez neutralizacji znaków nowej linii
+    w_zasiegu_narzedzi: true
+    pewnosc_detekcji: niska
+    oczekiwany_detektor:
+      - {klasa: SAST, narzedzie: Semgrep}
+    najwczesniejszy_etap: PR
+    uzasadnienie: >-
+      jedyna pozycja z kategorii A09; pewność niska, bo nie wiadomo, czy wybrane reguły SAST obejmują log injection
+      w Pythonie (TODO: zweryfikować w E02-10). Jeśli żadna reguła nie obejmuje, pozycja zostaje w katalogu,
+      a zmianę w_zasiegu_narzedzi zapisujemy w dzienniku przed eksperymentem
+
+  # ---------------------------------------------------------------- zależności
+  - id: GT-07
+    tytul: Jinja2 w wersji ze znanymi podatnościami
+    grupa: zaleznosci
+    cwe: CWE-1395
+    owasp_top10_2025: A03
+    owasp_cicd: CICD-SEC-3
+    asvs: v5.0.0-15.2.1
+    lokalizacja: plik zależności z blokadą wersji (lockfile, E04-02)
+    wprowadzenie: jinja2 przypięte do 3.1.2 zamiast wersji bez znanych podatności
+    referencje:
+      # sprawdzone w OSV (api.osv.dev), 2026-10-09: jinja2==3.1.2 ma 5 znanych podatności
+      - {id: GHSA-h5c8-rqwp-cp95, cve: CVE-2024-22195, naprawione_w: 3.1.3, cwe: CWE-79}
+      - {id: GHSA-h75v-3vvj-5mfj, cve: CVE-2024-34064, naprawione_w: 3.1.4, cwe: CWE-79}
+      - {id: GHSA-gmj6-6f8f-6699, cve: CVE-2024-56201, naprawione_w: 3.1.5, cwe: CWE-150}
+      - {id: GHSA-q2x7-8rv6-6q7h, cve: CVE-2024-56326, naprawione_w: 3.1.5, cwe: CWE-693}
+      - {id: GHSA-cpwx-vrp4-4pq7, cve: CVE-2025-27516, naprawione_w: 3.1.6, cwe: CWE-1336}
+    w_zasiegu_narzedzi: true
+    pewnosc_detekcji: wysoka
+    oczekiwany_detektor:
+      - {klasa: SCA, narzedzie: pip-audit}
+      - {klasa: SCA, narzedzie: Trivy}
+    najwczesniejszy_etap: PR
+    uzasadnienie: >-
+      aplikacja i tak używa Jinja2 (strona HTML, E04-01), więc obniżenie wersji jest realistyczne. Trafienie =
+      zgłoszenie dowolnej z podatności z listy referencji dla jinja2. Zgodność 3.1.2 z wybraną wersją FastAPI/Starlette:
+      TODO: zweryfikować w E04-02
+
+  # ---------------------------------------------------------------- kontener
+  - id: GT-08
+    tytul: Obraz bazowy z nieutrzymywanym systemem i interpreterem
+    grupa: kontener
+    cwe: CWE-1104
+    owasp_top10_2025: A03
+    owasp_cicd: CICD-SEC-3
+    asvs: v5.0.0-15.2.1
+    lokalizacja: Dockerfile, instrukcja FROM
+    wprowadzenie: >-
+      FROM python:3.9-slim-bullseye przypięty digestem zamiast aktualnego obrazu bazowego wersji czystej
+    referencje:
+      # Docker Hub (hub.docker.com/v2), 2026-10-09: tag ostatnio aktualizowany 2025-07-23
+      - {obraz: "python:3.9-slim-bullseye", digest_indeksu: "sha256:b9e06687fbfc57f6fe563e94e4c8751e39513dde89afc120dc6f56afe5ffc761", digest_amd64: "sha256:2d9d670c924fc332b15d9565e24a2b76ba781e51ea3eb8305ccbf7c86f3f88be"}
+    w_zasiegu_narzedzi: true
+    pewnosc_detekcji: wysoka
+    oczekiwany_detektor:
+      - {klasa: skaner-obrazu, narzedzie: Trivy}
+    najwczesniejszy_etap: PR
+    uzasadnienie: >-
+      obraz nieaktualizowany od 2025-07; Python 3.9 i Debian 11 są po końcu wsparcia (TODO: zweryfikować daty EOL
+      przed cytowaniem). Trafienie = zgłoszenie systemu po końcu wsparcia albo podatności w pakietach systemowych
+      obrazu bazowego. Warunek: kod aplikacji działa na Pythonie 3.9 (TODO: zweryfikować w E04-02); jeśli nie,
+      zamiennik: starszy digest tego samego obrazu, z którego korzysta wersja czysta
+
+  - id: GT-09
+    tytul: Kontener uruchamiany jako root
+    grupa: kontener
+    cwe: CWE-250
+    owasp_top10_2025: null   # CWE-250 nie ma na listach Top 10:2025 (decyzja autora 2026-10-09: bez kategorii)
+    owasp_cicd: null
+    asvs: null
+    lokalizacja: Dockerfile
+    wprowadzenie: usunięcie instrukcji USER z nieuprzywilejowanym użytkownikiem, którą ma wersja czysta
+    w_zasiegu_narzedzi: true
+    pewnosc_detekcji: srednia
+    oczekiwany_detektor:
+      - {klasa: IaC/Dockerfile, narzedzie: Checkov}
+      - {klasa: IaC/Dockerfile, narzedzie: Trivy}
+      - {klasa: lint-Dockerfile, narzedzie: hadolint}
+    najwczesniejszy_etap: PR
+    uzasadnienie: >-
+      najczęstszy błąd utwardzenia kontenera; pewność średnia, bo część reguł reaguje tylko na jawne USER root,
+      a nie na brak instrukcji USER (TODO: zweryfikować reguły w E02-10)
+
+  # ---------------------------------------------------------------- infrastruktura jako kod
+  - id: GT-10
+    tytul: Grupa zabezpieczeń otwiera port 22 dla 0.0.0.0/0
+    grupa: iac
+    cwe: CWE-923
+    owasp_top10_2025: null   # CWE-923 nie ma na listach Top 10:2025; MITRE odradza CWE-284 (Pillar)
+    owasp_cicd: null
+    asvs: null
+    lokalizacja: Terraform, zasób grupy zabezpieczeń (E05)
+    wprowadzenie: reguła ingress tcp/22 z cidr_blocks = ["0.0.0.0/0"]
+    w_zasiegu_narzedzi: true
+    pewnosc_detekcji: wysoka
+    oczekiwany_detektor:
+      - {klasa: IaC, narzedzie: Checkov}
+      - {klasa: IaC, narzedzie: Trivy}
+    najwczesniejszy_etap: PR
+    uzasadnienie: >-
+      wzorcowy błąd konfiguracji chmury. Bezpieczeństwo eksperymentu: na instancji nie ma klucza SSH ani
+      aktywnego logowania hasłem (patrz README, „Bezpieczeństwo eksperymentu”)
+
+  - id: GT-11
+    tytul: Nieszyfrowany magazyn danych aplikacji
+    grupa: iac
+    cwe: CWE-312
+    owasp_top10_2025: A06
+    owasp_cicd: null
+    asvs: null
+    lokalizacja: Terraform, wolumen EBS albo kubełek S3 z danymi aplikacji (zależnie od architektury E05)
+    wprowadzenie: wyłączenie szyfrowania w spoczynku, które ma wersja czysta
+    w_zasiegu_narzedzi: true
+    pewnosc_detekcji: wysoka
+    oczekiwany_detektor:
+      - {klasa: IaC, narzedzie: Checkov}
+      - {klasa: IaC, narzedzie: Trivy}
+    najwczesniejszy_etap: PR
+    uzasadnienie: >-
+      CWE-312 zamiast CWE-311, bo MITRE odradza mapowanie na CWE-311 i wskazuje CWE-312 dla przechowywania.
+      Uwaga: nowe kubełki S3 są domyślnie szyfrowane po stronie AWS (TODO: zweryfikować), więc dla S3 pozycja może
+      wymagać jawnego wyłączenia albo wyboru wolumenu EBS
+
+  # ---------------------------------------------------------------- konfiguracja web
+  - id: GT-12
+    tytul: CORS zezwalający na dowolne źródło
+    grupa: konfiguracja-web
+    cwe: CWE-942
+    owasp_top10_2025: A02
+    owasp_cicd: null
+    asvs: v5.0.0-3.4.2
+    lokalizacja: konfiguracja CORSMiddleware w aplikacji
+    wprowadzenie: allow_origins=["*"] zamiast listy dozwolonych źródeł
+    w_zasiegu_narzedzi: true
+    pewnosc_detekcji: srednia
+    oczekiwany_detektor:
+      - {klasa: SAST, narzedzie: Semgrep}
+      - {klasa: DAST, narzedzie: OWASP ZAP}
+    najwczesniejszy_etap: PR
+    uzasadnienie: >-
+      etap PR tylko wtedy, gdy wybrany SAST ma regułę dla CORS w FastAPI (TODO: zweryfikować w E02-10); w przeciwnym
+      razie wykrywa dopiero DAST na działającej aplikacji
+
+  - id: GT-13
+    tytul: Brak ochrony przed osadzaniem w ramkach (clickjacking)
+    grupa: konfiguracja-web
+    cwe: CWE-1021
+    owasp_top10_2025: A06
+    owasp_cicd: null
+    asvs: v5.0.0-3.4.6
+    lokalizacja: middleware nagłówków bezpieczeństwa
+    wprowadzenie: usunięcie dyrektywy CSP frame-ancestors i nagłówka X-Frame-Options z odpowiedzi
+    w_zasiegu_narzedzi: true
+    pewnosc_detekcji: wysoka
+    oczekiwany_detektor:
+      - {klasa: DAST, narzedzie: OWASP ZAP}
+    najwczesniejszy_etap: po-uruchomieniu
+    uzasadnienie: >-
+      pozycja tylko dla DAST; może zostać zatrzymana, bo ZAP baseline jest w wariancie B bramką na pull requeście
+      (decyzja autora z 2026-10-13, PROTOCOL.md). CWE-1021 zamiast CWE-693, bo MITRE odradza CWE-693 (Pillar)
+
+  - id: GT-14
+    tytul: Tryb debug ujawniający stack trace
+    grupa: konfiguracja-web
+    cwe: CWE-209
+    owasp_top10_2025: A10
+    owasp_cicd: null
+    asvs: v5.0.0-16.5.1
+    lokalizacja: inicjalizacja aplikacji FastAPI
+    wprowadzenie: FastAPI(debug=True), więc nieobsłużony wyjątek zwraca klientowi pełny stack trace
+    w_zasiegu_narzedzi: true
+    pewnosc_detekcji: srednia
+    oczekiwany_detektor:
+      - {klasa: SAST, narzedzie: Semgrep}
+      - {klasa: DAST, narzedzie: OWASP ZAP}
+    najwczesniejszy_etap: PR
+    uzasadnienie: >-
+      jedyna pozycja z kategorii A10; łamie też v5.0.0-13.4.2 (debug na produkcji). DAST wykryje tylko wtedy,
+      gdy wywoła błąd serwera, a SAST tylko z regułą dla debug=True (TODO: zweryfikować w E02-10)
+
+  # ---------------------------------------------------------------- workflow GitHub Actions
+  - id: GT-15
+    tytul: Nadmierne uprawnienia GITHUB_TOKEN
+    grupa: workflow
+    cwe: CWE-732
+    owasp_top10_2025: A01
+    owasp_cicd: CICD-SEC-5
+    asvs: null
+    lokalizacja: plik workflow wariantu wdrożeniowego
+    wprowadzenie: permissions write-all zamiast minimalnych uprawnień per job
+    w_zasiegu_narzedzi: true
+    pewnosc_detekcji: wysoka
+    oczekiwany_detektor:
+      - {klasa: lint-workflow, narzedzie: zizmor}
+    najwczesniejszy_etap: PR
+    uzasadnienie: zasada najmniejszych uprawnień w potoku [@NIST-SP800-204D]
+
+  - id: GT-16
+    tytul: Akcja zewnętrzna niepinowana do SHA
+    grupa: workflow
+    cwe: CWE-829
+    owasp_top10_2025: A08
+    owasp_cicd: CICD-SEC-3   # TODO: zweryfikować w E02-04 (CICD-SEC-3 albo CICD-SEC-8)
+    asvs: null
+    lokalizacja: plik workflow
+    wprowadzenie: odwołanie uses do akcji zewnętrznej przez tag zamiast pełnego SHA commita
+    w_zasiegu_narzedzi: true
+    pewnosc_detekcji: wysoka
+    oczekiwany_detektor:
+      - {klasa: lint-workflow, narzedzie: zizmor}
+    najwczesniejszy_etap: PR
+    uzasadnienie: wymóg przypinania akcji do SHA (AGENTS.md, zasada 5) [@NIST-SP800-204D]
+
+  - id: GT-17
+    tytul: Wstrzyknięcie skryptu przez kontekst zdarzenia w workflow
+    grupa: workflow
+    cwe: CWE-78
+    owasp_top10_2025: A05
+    owasp_cicd: CICD-SEC-4
+    asvs: null
+    lokalizacja: plik workflow wyzwalany przez pull request
+    wprowadzenie: >-
+      tytuł pull requesta wstawiony wyrażeniem kontekstu bezpośrednio do kroku run (skrypt powłoki)
+    w_zasiegu_narzedzi: true
+    pewnosc_detekcji: wysoka
+    oczekiwany_detektor:
+      - {klasa: lint-workflow, narzedzie: zizmor}
+      - {klasa: lint-workflow, narzedzie: actionlint}
+    najwczesniejszy_etap: PR
+    uzasadnienie: >-
+      scenariusz zatrutego potoku (Poisoned Pipeline Execution). Bezpieczeństwo eksperymentu: workflow
+      bez pull_request_target i bez sekretów, PR-y tylko z gałęzi własnych (patrz README)
+
+  # ---------------------------------------------------------------- poza zasięgiem narzędzi
+  - id: GT-18
+    tytul: IDOR przy odczycie zasobu innego użytkownika
+    grupa: kod
+    cwe: CWE-639
+    owasp_top10_2025: A01
+    owasp_cicd: null
+    asvs: v5.0.0-8.2.2
+    lokalizacja: endpoint odczytu zasobu po identyfikatorze (E04-01)
+    wprowadzenie: brak sprawdzenia, czy zasób należy do zalogowanego użytkownika
+    w_zasiegu_narzedzi: false
+    pewnosc_detekcji: brak
+    oczekiwany_detektor: []
+    najwczesniejszy_etap: brak
+    uzasadnienie: >-
+      błąd logiki autoryzacji: narzędzia nie znają reguły „zasób należy do właściciela”. Pozycja kontrolna
+      dla uczciwości wyników (kryterium E03-03)
+
+  - id: GT-19
+    tytul: Brak autoryzacji funkcji administracyjnej
+    grupa: kod
+    cwe: CWE-862
+    owasp_top10_2025: A01
+    owasp_cicd: null
+    asvs: v5.0.0-8.2.1
+    lokalizacja: endpoint administracyjny (E04-01)
+    wprowadzenie: endpoint wymaga zalogowania, ale nie sprawdza roli administratora
+    w_zasiegu_narzedzi: false
+    pewnosc_detekcji: brak
+    oczekiwany_detektor: []
+    najwczesniejszy_etap: brak
+    uzasadnienie: >-
+      DAST widzi, że endpoint odpowiada zalogowanemu użytkownikowi, ale nie wie, że powinien być tylko dla
+      administratora
+
+  - id: GT-20
+    tytul: Mass assignment roli użytkownika
+    grupa: kod
+    cwe: CWE-915
+    owasp_top10_2025: A08
+    owasp_cicd: null
+    asvs: v5.0.0-15.3.3
+    lokalizacja: model Pydantic aktualizacji profilu użytkownika
+    wprowadzenie: model wejściowy zawiera pole roli, więc użytkownik może sam nadać sobie uprawnienia administratora
+    w_zasiegu_narzedzi: false
+    pewnosc_detekcji: brak
+    oczekiwany_detektor: []
+    najwczesniejszy_etap: brak
+    uzasadnienie: >-
+      kod jest poprawny składniowo i typowy dla FastAPI; błąd wynika z modelu domeny, którego narzędzia nie znają
