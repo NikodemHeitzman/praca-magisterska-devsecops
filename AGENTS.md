@@ -35,3 +35,4 @@ Ten plik opisuje projekt dla asystentów AI (Claude Code, Copilot, Codex i innyc
 
 - Planowanie zadań i statusy: tablica zadań na claude.ai oraz vault Obsidiana `Magisterka-Vault` (kontrakt w jego `CLAUDE.md`, notatki zadań w `Zadania/`).
 - Tekst pracy jest pisany poza repozytorium (Claude Docs). Repozytorium dostarcza do niego materiał: ADR-y, dane, opisy potoków.
+- Źródła: rejestr w vaulcie (`Zrodla/`, zasady w `Zrodla/_Zrodla.md`) i rdzeń literatury z planem lektur (`Zrodla/_Rdzen.md`). W dokumentacji repozytorium cytuj kluczem `[@KLUCZ]`, np. `[@NIST-SP800-204D]`. Weryfikacja źródeł z propozycji tematu jest w [`docs/weryfikacja-zrodel.md`](docs/weryfikacja-zrodel.md). Notatki z lektur trafiają do `docs/notes/`.
