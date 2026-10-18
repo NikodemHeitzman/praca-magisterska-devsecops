@@ -1,6 +1,6 @@
 # Mapa książek na podrozdziały pracy
 
-- **Źródła:** posiadane książki z rejestru (`Zrodla/` w vaulcie): rdzeń [@Suehring2024], [@Laster2023], [@Brikman2022]; zastępca [@Hoffman2024]; pomocnicze [@Lubanovic2023], [@Meijer2022], [@Gift2019], [@Skoulikari2023].
+- **Źródła:** posiadane książki z rejestru (`Zrodla/` w vaulcie): rdzeń [@Suehring2024], [@Laster2023], [@Brikman2022]; zastępca [@Hoffman2024]; pomocnicze [@Lubanovic2023], [@Meijer2022], [@Gift2019], [@Skoulikari2023], [@Kane2023] (dodana 2026-10-18 decyzją autora).
 - **Zadanie:** E02-09 (tablica zadań). Mapa wskazuje, który rozdział której książki czytać przy pisaniu danego podrozdziału. Pełna lektura rozdziałów odbywa się dopiero przy pisaniu (`Zrodla/_Rdzen.md`, kolejność lektur, p. 6).
 - **Zakres:** mapa, nie lektura. Pole `zweryfikowane` w rejestrze zostaje `nie`, dopóki autor nie przeczyta danego rozdziału.
 - **Konspekt pracy:** według szkieletu `thesis/praca-magisterska-szkielet.docx` w vaulcie (stan z 2026-10-18).
@@ -38,6 +38,7 @@ Dane ze stron redakcyjnych egzemplarzy (2026-10-18).
 | [@Meijer2022] | Third Edition, lipiec 2022 (First Release 2022-07-12) | 978-1-098-10915-8 | +22 |
 | [@Gift2019] | First Edition, grudzień 2019 (First Release 2019-12-11); copyright 2020 | 978-1-492-05769-7 | +22 |
 | [@Skoulikari2023] | First Edition, maj 2023 (First Release 2023-05-16) | 978-1-098-13391-7 | +22 |
+| [@Kane2023] | Third Edition, kwiecień 2023 (First Release 2023-04-13) | 978-1-098-13182-1 | +26 |
 
 Przykład: s. 204 u Brikmana to strona 230 w przeglądarce PDF.
 
@@ -53,10 +54,10 @@ Przykład: s. 204 u Brikmana to strona 230 w przeglądarce PDF.
 | 2.5. Krytyczna analiza literatury | — (prace naukowe, `docs/literature-matrix.md`) |
 | 3.1–3.5. Standardy i wytyczne | — (dokumenty źródłowe). Pomocniczo: Suehring rozdz. 5 (SBOM, s. 97–101), Laster rozdz. 9 (s. 199–201, zależności od akcji) |
 | 4.1. Aplikacja badawcza | **Lubanovic rozdz. 11**, rozdz. 3, 5, 7, 8–10; **Hoffman rozdz. 10–18** i 28–36 (dobór i opis podatności) |
-| 4.2. Architektura Docker i AWS | **Brikman rozdz. 1, 3, 6**, rozdz. 4, 8; Suehring rozdz. 5 (Docker, s. 101–112); Lubanovic rozdz. 13; Gift rozdz. 9, 11; Meijer (jeśli Ansible zostaje w zakresie) |
-| 4.3. Projekt potoku CI/CD | **Laster rozdz. 2, 6, 9**, rozdz. 1, 3, 5, 12; **Brikman rozdz. 6** (s. 204–206, GitHub Actions + OIDC), **rozdz. 10**; **Skoulikari rozdz. 12**; Suehring rozdz. 4 |
-| 4.4. Integracja testów bezpieczeństwa | **Suehring rozdz. 3** (s. 59–74: analiza statyczna, OWASP ZAP); **Brikman rozdz. 9** (s. 364–370); **Hoffman rozdz. 26, 27**; Laster rozdz. 9 (s. 201–205); Lubanovic rozdz. 12 |
-| 4.5. Logowanie, audyt i artefakty | Laster rozdz. 7 (artefakty), 10 (logi, podsumowania jobów); Suehring rozdz. 5 (SBOM), 6 (monitoring) |
+| 4.2. Architektura Docker i AWS | **Brikman rozdz. 1, 3, 6**, rozdz. 4, 8; **Kane rozdz. 2, 4, 11**, rozdz. 5, 9, 13; Suehring rozdz. 5 (Docker, s. 101–112); Lubanovic rozdz. 13; Gift rozdz. 9, 11; Meijer (jeśli Ansible zostaje w zakresie) |
+| 4.3. Projekt potoku CI/CD | **Laster rozdz. 2, 6, 9**, rozdz. 1, 3, 5, 12; **Brikman rozdz. 6** (s. 204–206, GitHub Actions + OIDC), **rozdz. 10**; **Skoulikari rozdz. 12**; Suehring rozdz. 4; Kane rozdz. 9 (s. 225–229), rejestry (s. 62–68) |
+| 4.4. Integracja testów bezpieczeństwa | **Suehring rozdz. 3** (s. 59–74: analiza statyczna, OWASP ZAP); **Brikman rozdz. 9** (s. 364–370); **Hoffman rozdz. 26, 27**; Laster rozdz. 9 (s. 201–205); Lubanovic rozdz. 12; Kane rozdz. 11 (s. 297–315, bezpieczeństwo kontenerów) |
+| 4.5. Logowanie, audyt i artefakty | Laster rozdz. 7 (artefakty), 10 (logi, podsumowania jobów); Suehring rozdz. 5 (SBOM), 6 (monitoring); Kane rozdz. 6 (s. 150–170, logi i monitorowanie kontenerów) |
 | 5.1. Metryki oceny | **Hoffman rozdz. 27** (CVSS, progi istotności). Metryki DORA i skuteczności skanerów w innych źródłach (E02-11, E02-13) |
 | 5.3. Dyskusja i ograniczenia | Suehring rozdz. 8; Brikman rozdz. 9 (s. 364–370: mocne i słabe strony analizy statycznej) |
 | 6.2. Rekomendacje praktyczne | Suehring rozdz. 8; Brikman rozdz. 8 (checklista produkcyjna) |
@@ -183,13 +184,33 @@ Mapa obowiązuje tylko wtedy, gdy Ansible zostanie w zakresie (pierwszy kandydat
 | 8. Cloning and Fetching (część „Git Collaboration and Branches”) | 125–132 | 4.3 | Współpraca na gałęziach | C |
 | 12. Pull Requests (Merge Requests) | 231–258 | 4.3 | Po co PR (s. 235), sposoby scalania (s. 237), review i zatwierdzenie (s. 246–248): model pracy z PR i ochrona gałęzi | A |
 
+### 2.9. Kane, Matthias, *Docker: Up & Running*, wyd. 3 (2023): pomocnicza
+
+Książkę dodano 2026-10-18 decyzją autora, jako jedyną posiadaną książkę, która omawia Dockera w całości.
+
+| Rozdział książki | Strony | Podrozdział pracy | Do czego | Priorytet |
+|---|---|---|---|---|
+| 1. Introduction | 1–8 | 4.2 | Korzyści przepływu pracy z Dockerem, czym Docker nie jest, terminologia | B |
+| 2. The Docker Landscape | 9–31 | 4.2 | Architektura klient–serwer (s. 14–19). Kontenery a maszyny wirtualne, ograniczona izolacja (s. 20–22). Infrastruktura niezmienna, aplikacje bezstanowe (s. 22–24). Przepływ pracy z Dockerem: wersjonowanie, budowa, testy, pakowanie, wdrożenie (s. 25–29) | A |
+| 3. Installing Docker | 33–49 | — | Instalacja: warsztat | C |
+| 4. Working with Docker Images | 51–102 | 4.2, 4.3 | Anatomia Dockerfile (s. 52–55). Argumenty budowy i zmienne środowiskowe jako konfiguracja (s. 59–61). Rejestry i uwierzytelnianie (s. 62–68). Małe obrazy, warstwy, cache, budowy wieloetapowe (s. 73–87) | A |
+| 5. Working with Containers | 103–135 | 4.2 | Konfiguracja kontenera, wolumeny, limity zasobów (s. 106–124) | B |
+| 6. Exploring Docker | 137–170 | 4.5 | Logi kontenerów (s. 150–155). Monitorowanie, health checks, zdarzenia (s. 155–170) | B |
+| 7. Debugging Containers | 171–188 | — | Diagnostyka: warsztat | C |
+| 8. Exploring Docker Compose | 189–212 | 4.2 | Compose, zarządzanie konfiguracją i plikiem `.env` (s. 207–212) | B |
+| 9. The Path to Production Containers | 213–229 | 4.2, 4.3 | Rola Dockera w produkcji: konfiguracja, pakowanie i dostarczanie, logi, monitorowanie (s. 213–224). Docker w potoku DevOps (s. 225–229) | A |
+| 10. Containers at Scale | 231–285 | 4.2 | Swarm i Kubernetes poza zakresem. Amazon ECS i Fargate z rolą IAM (s. 270–285) to kandydat, jeśli usługą wdrożeniową AWS będzie ECS | B, warunkowo |
+| 11. Advanced Topics | 287–340 | 4.2, 4.4 | cgroups i namespaces (s. 288–297). **Bezpieczeństwo: UID 0, tryb rootless, kontenery uprzywilejowane, seccomp, SELinux i AppArmor (s. 297–315)** | A (s. 287–315) |
+| 12. The Expanding Landscape | 341–347 | — | podman, nerdctl i inne narzędzia | — |
+| 13. Container Platform Design | 349–360 | 4.2 | Twelve-Factor App (s. 350–359): konfiguracja w zmiennych środowiskowych, parytet środowisk, logi | B |
+| 14. Conclusion | 361–366 | — | Podsumowanie | C |
+
 ## 3. Książki poza mapą
 
 | Książka | Powód |
 |---|---|
 | [@Barrett2022], *Efficient Linux at the Command Line* | Pomoc warsztatowa, raczej nie do cytowania (rejestr, E02-01). Definicja E02-09 jej nie obejmuje. |
 | [@Oswalt2023], *Network Programmability and Automation* | Poza zakresem pracy. Definicja E02-09 jej nie obejmuje. |
-| *Docker: Up & Running*, wyd. 3 (O'Reilly) | Decyzja autora (2026-10-18): dodać do rejestru jako źródło pomocnicze do 4.2. Notatka w rejestrze i mapa powstaną po przekazaniu PDF-a (sekcja 4, p. 4). |
 | *Kubernetes: Up and Running*, książki o Linuksie | Poza zakresem pracy (Kubernetes wyłączony) albo czysto warsztatowe. |
 
 ## 4. Ustalenia i otwarte kwestie
@@ -197,7 +218,7 @@ Mapa obowiązuje tylko wtedy, gdy Ansible zostanie w zakresie (pierwszy kandydat
 1. **Suehring nie obejmuje standardów.** W tekście książki nie ma odwołań do NIST, SSDF ani SLSA, a łańcuch dostaw pojawia się tylko przy SBOM (s. 101). Przypisanie „Suehring → rozdz. 3” z definicji zadania nie potwierdza się dla rozdziału 3 pracy. **Rozstrzygnięte 2026-10-18:** Suehring nie jest źródłem do rozdziału 3 pracy. Rozdział 3 opiera się na dokumentach źródłowych (NIST, OWASP, SLSA). Rozdz. 3 książki („Integrating Security”) jest zmapowany do 2.1, 2.4 i 4.4. Decyzję podjął agent, bo autor ją agentowi przekazał. Zmiana jest też w `Zrodla/_Rdzen.md` w vaulcie.
 2. **Laster nie opisuje OIDC** (wydanie z 2023; brak trafień w pełnym tekście). Uwierzytelnianie GitHub Actions w AWS przez OIDC opisuje Brikman (s. 204–206), a szczegóły trzeba sprawdzić w aktualnej dokumentacji GitHub i AWS (E02-10).
 3. **2.3 (chmura) ma słabe pokrycie w książkach:** tylko Brikman rozdz. 1 i Gift rozdz. 9. Oparcie w pracach z rdzenia (Alghawli2024, Janczewski2025) i w dokumentacji AWS (model współdzielonej odpowiedzialności, E02-10).
-4. **Docker: Up & Running.** Żadna książka z rdzenia nie opisuje Dockera w całości (Suehring s. 101–112, Gift rozdz. 11, Brikman s. 249–252 to krótkie wprowadzenia). **Decyzja autora (2026-10-18): dodać.** TODO: autor przekazuje PDF. Potem agent zakłada notatkę w rejestrze z metadanymi ze strony redakcyjnej i dopisuje książkę do sekcji 0–2.
+4. **Docker: Up & Running.** Żadna książka z rdzenia nie opisuje Dockera w całości (Suehring s. 101–112, Gift rozdz. 11, Brikman s. 249–252 to krótkie wprowadzenia). **Decyzja autora (2026-10-18): dodać.** Dodano jako [@Kane2023] (sekcja 2.9). Książka nie opisuje skanowania ani podpisywania obrazów (brak trafień w pełnym tekście), więc te tematy trzeba oprzeć na dokumentacji narzędzi (E02-10).
 5. **Ansible warunkowo.** Mapa Meijer2022 ma sens tylko wtedy, gdy Ansible zostanie w zakresie (harmonogram, ADR).
 6. **Metadane potwierdzone na stronach redakcyjnych** (otwarte kwestie z E02-01):
    - ISBN Meijer2022 to 978-1-098-10915-8,
