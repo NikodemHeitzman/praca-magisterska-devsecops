@@ -4,9 +4,9 @@
 - **Zadanie:** E02-09 (tablica zadań). Mapa wskazuje, który rozdział której książki czytać przy pisaniu danego podrozdziału. Pełna lektura rozdziałów odbywa się dopiero przy pisaniu (`Zrodla/_Rdzen.md`, kolejność lektur, p. 6).
 - **Zakres:** mapa, nie lektura. Pole `zweryfikowane` w rejestrze zostaje `nie`, dopóki autor nie przeczyta danego rozdziału.
 - **Konspekt pracy:** według szkieletu `thesis/praca-magisterska-szkielet.docx` w vaulcie (stan z 2026-10-18).
-- **Skąd tekst:** spisy treści i strony redakcyjne z egzemplarzy PDF autora (wydania O'Reilly, pobrane 2026-10-18; pliki poza repozytorium ze względu na prawa autorskie). Agent (Claude Code) wyciągnął spisy treści narzędziem `pdftotext`. Tematy przekrojowe (np. OIDC, tfsec/Checkov, przypinanie akcji) zlokalizował wyszukiwaniem w pełnym tekście, nie z pamięci.
+- **Skąd tekst:** spisy treści i strony redakcyjne z egzemplarzy PDF autora (wydania O'Reilly, pobrane 2026-10-18). Pliki leżą w vaulcie w `Zrodla/pdf/<KLUCZ>-<tytuł>.pdf`, poza repozytorium ze względu na prawa autorskie. Agent (Claude Code) wyciągnął spisy treści narzędziem `pdftotext`. Tematy przekrojowe (np. OIDC, tfsec/Checkov, przypinanie akcji) zlokalizował wyszukiwaniem w pełnym tekście, nie z pamięci.
 - **Numeracja stron:** numery wydrukowane w książce. **W przeglądarce PDF dodaj przesunięcie** z tabeli w sekcji 0.
-- **Stan:** przypisania rozdziałów do podrozdziałów pracy to **propozycje agenta** na podstawie spisów treści. Autor je akceptuje albo poprawia.
+- **Stan:** przypisania rozdziałów do podrozdziałów pracy zaproponował agent na podstawie spisów treści. Autor je zaakceptował 2026-10-18.
 
 ## Jak czytać ten plik
 
@@ -189,15 +189,15 @@ Mapa obowiązuje tylko wtedy, gdy Ansible zostanie w zakresie (pierwszy kandydat
 |---|---|
 | [@Barrett2022], *Efficient Linux at the Command Line* | Pomoc warsztatowa, raczej nie do cytowania (rejestr, E02-01). Definicja E02-09 jej nie obejmuje. |
 | [@Oswalt2023], *Network Programmability and Automation* | Poza zakresem pracy. Definicja E02-09 jej nie obejmuje. |
-| *Docker: Up & Running*, wyd. 3 (O'Reilly) | Autor ma egzemplarz, ale książki nie ma w rejestrze źródeł. Kandydat do 4.2 (sekcja 4, p. 4). |
+| *Docker: Up & Running*, wyd. 3 (O'Reilly) | Decyzja autora (2026-10-18): dodać do rejestru jako źródło pomocnicze do 4.2. Notatka w rejestrze i mapa powstaną po przekazaniu PDF-a (sekcja 4, p. 4). |
 | *Kubernetes: Up and Running*, książki o Linuksie | Poza zakresem pracy (Kubernetes wyłączony) albo czysto warsztatowe. |
 
 ## 4. Ustalenia i otwarte kwestie
 
-1. **Suehring nie obejmuje standardów.** W tekście książki nie ma odwołań do NIST, SSDF ani SLSA, a łańcuch dostaw pojawia się tylko przy SBOM (s. 101). Przypisanie „Suehring → rozdz. 3” z definicji zadania nie potwierdza się dla rozdziału 3 pracy. Możliwe, że definicja miała na myśli rozdz. 3 książki („Integrating Security”), który jest zmapowany do 2.1, 2.4 i 4.4. Rozdział 3 pracy opiera się na dokumentach źródłowych. TODO: autor potwierdza.
+1. **Suehring nie obejmuje standardów.** W tekście książki nie ma odwołań do NIST, SSDF ani SLSA, a łańcuch dostaw pojawia się tylko przy SBOM (s. 101). Przypisanie „Suehring → rozdz. 3” z definicji zadania nie potwierdza się dla rozdziału 3 pracy. **Rozstrzygnięte 2026-10-18:** Suehring nie jest źródłem do rozdziału 3 pracy. Rozdział 3 opiera się na dokumentach źródłowych (NIST, OWASP, SLSA). Rozdz. 3 książki („Integrating Security”) jest zmapowany do 2.1, 2.4 i 4.4. Decyzję podjął agent, bo autor ją agentowi przekazał. Zmiana jest też w `Zrodla/_Rdzen.md` w vaulcie.
 2. **Laster nie opisuje OIDC** (wydanie z 2023; brak trafień w pełnym tekście). Uwierzytelnianie GitHub Actions w AWS przez OIDC opisuje Brikman (s. 204–206), a szczegóły trzeba sprawdzić w aktualnej dokumentacji GitHub i AWS (E02-10).
 3. **2.3 (chmura) ma słabe pokrycie w książkach:** tylko Brikman rozdz. 1 i Gift rozdz. 9. Oparcie w pracach z rdzenia (Alghawli2024, Janczewski2025) i w dokumentacji AWS (model współdzielonej odpowiedzialności, E02-10).
-4. **Docker: Up & Running.** Żadna książka z rdzenia nie opisuje Dockera w całości (Suehring s. 101–112, Gift rozdz. 11, Brikman s. 249–252 to krótkie wprowadzenia). Do decyzji autora: czy dodać tę książkę do rejestru jako źródło do 4.2. Wtedy trzeba ją dopisać do mapy.
+4. **Docker: Up & Running.** Żadna książka z rdzenia nie opisuje Dockera w całości (Suehring s. 101–112, Gift rozdz. 11, Brikman s. 249–252 to krótkie wprowadzenia). **Decyzja autora (2026-10-18): dodać.** TODO: autor przekazuje PDF. Potem agent zakłada notatkę w rejestrze z metadanymi ze strony redakcyjnej i dopisuje książkę do sekcji 0–2.
 5. **Ansible warunkowo.** Mapa Meijer2022 ma sens tylko wtedy, gdy Ansible zostanie w zakresie (harmonogram, ADR).
 6. **Metadane potwierdzone na stronach redakcyjnych** (otwarte kwestie z E02-01):
    - ISBN Meijer2022 to 978-1-098-10915-8,
