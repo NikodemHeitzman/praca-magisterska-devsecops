@@ -179,7 +179,11 @@ Odrzucone: przeniesienie GT-06 i GT-14 poza zasięg narzędzi (pułap 15/20, pon
 
 Decyzje dla GT-09 (hadolint) oraz postaci łatek GT-02 i GT-12 są otwarte.
 
-### 4.3 Otwarte
+### 4.3 Reguły własne (2026-10-20)
+
+Reguły `python-log-injection` (GT-06) i `python-asgi-debug-enabled` (GT-14) są w `semgrep-rules/`, z testami i z wynikiem testu na dwóch projektach spoza katalogu (`semgrep-rules/README.md`). Sprawdzono je w Semgrep 1.181.0. Na projekcie `Netflix/dispatch` reguła GT-06 dała 14 zgłoszeń, z czego 8 ocenionych jako trafne. Fałszywe alarmy wynikają z aliasów zależności, pól liczbowych modeli i przenoszenia taint przez wywołania funkcji.
+
+### 4.4 Otwarte
 
 - [ ] Format SBOM (SPDX albo CycloneDX), otwarte w `docs/notes/nist-800-204d.md`.
 - [ ] Potwierdzenie wyników 4.1 uruchomieniem narzędzi na łatkach (pilotaż P5).

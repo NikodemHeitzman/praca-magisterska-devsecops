@@ -1,0 +1,35 @@
+rules:
+  - id: python-asgi-debug-enabled
+    message: >-
+      FastAPI/Starlette application created with debug mode hard-coded on. Unhandled exceptions
+      return a full stack trace to the client (CWE-209, CWE-489). Keep debug off in deployed code
+      or read it from configuration that is off by default.
+    severity: ERROR
+    languages: [python]
+    metadata:
+      category: security
+      cwe:
+        - "CWE-209: Generation of Error Message Containing Sensitive Information"
+        - "CWE-489: Active Debug Code"
+      owasp:
+        - A10:2025 - Mishandling of Exceptional Conditions
+      technology: [fastapi, starlette]
+      confidence: HIGH
+      custom_rule: true
+      references:
+        - https://cwe.mitre.org/data/definitions/209.html
+        - docs/narzedzia.md (section 4, E02-10)
+    pattern-either:
+      # Constructor argument (constant propagation also covers DEBUG = True; FastAPI(debug=DEBUG)).
+      - pattern: fastapi.FastAPI(..., debug=True, ...)
+      - pattern: starlette.applications.Starlette(..., debug=True, ...)
+      # Attribute set after construction.
+      - patterns:
+          - pattern-either:
+              - pattern-inside: |
+                  $APP = fastapi.FastAPI(...)
+                  ...
+              - pattern-inside: |
+                  $APP = starlette.applications.Starlette(...)
+                  ...
+          - pattern: $APP.debug = True

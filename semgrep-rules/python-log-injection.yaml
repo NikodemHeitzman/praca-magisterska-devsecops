@@ -1,0 +1,127 @@
+rules:
+  - id: python-log-injection
+    message: >-
+      Data from an HTTP request reaches a logging call without neutralising CR/LF characters.
+      An attacker can inject forged log entries (CWE-117). Neutralise line breaks before logging,
+      e.g. value.replace("\r", "\\r").replace("\n", "\\n"), or log repr(value).
+    severity: ERROR
+    languages: [python]
+    mode: taint
+    metadata:
+      category: security
+      cwe:
+        - "CWE-117: Improper Output Neutralization for Logs"
+      owasp:
+        - A09:2025 - Security Logging and Alerting Failures
+      technology: [fastapi, starlette]
+      confidence: MEDIUM
+      custom_rule: true
+      references:
+        - https://cwe.mitre.org/data/definitions/117.html
+        - docs/narzedzia.md (section 4, E02-10)
+    pattern-sources:
+      # Parameters of FastAPI/Starlette route handlers (path, query, header, cookie, form and body values).
+      - patterns:
+          - pattern-either:
+              - pattern-inside: |
+                  @$APP.$METHOD(...)
+                  def $FUNC(..., $PARAM, ...):
+                    ...
+              - pattern-inside: |
+                  @$APP.$METHOD(...)
+                  async def $FUNC(..., $PARAM, ...):
+                    ...
+          - metavariable-regex:
+              metavariable: $METHOD
+              regex: ^(get|post|put|patch|delete|head|options|api_route|route|websocket)$
+          # Parameters validated by FastAPI as numbers, booleans or UUIDs cannot carry line breaks.
+          - pattern-not-inside: |
+              def $FUNC(..., $PARAM: int, ...):
+                ...
+          - pattern-not-inside: |
+              async def $FUNC(..., $PARAM: int, ...):
+                ...
+          - pattern-not-inside: |
+              def $FUNC(..., $PARAM: float, ...):
+                ...
+          - pattern-not-inside: |
+              async def $FUNC(..., $PARAM: float, ...):
+                ...
+          - pattern-not-inside: |
+              def $FUNC(..., $PARAM: bool, ...):
+                ...
+          - pattern-not-inside: |
+              async def $FUNC(..., $PARAM: bool, ...):
+                ...
+          - pattern-not-inside: |
+              def $FUNC(..., $PARAM: uuid.UUID, ...):
+                ...
+          - pattern-not-inside: |
+              async def $FUNC(..., $PARAM: uuid.UUID, ...):
+                ...
+          # Dependencies (fastapi.Depends) are values built by the application, not raw request data.
+          - pattern-not-inside: |
+              def $FUNC(..., $PARAM = fastapi.Depends(...), ...):
+                ...
+          - pattern-not-inside: |
+              async def $FUNC(..., $PARAM = fastapi.Depends(...), ...):
+                ...
+          - pattern-not-inside: |
+              def $FUNC(..., $PARAM: $T = fastapi.Depends(...), ...):
+                ...
+          - pattern-not-inside: |
+              async def $FUNC(..., $PARAM: $T = fastapi.Depends(...), ...):
+                ...
+          - pattern-not-inside: |
+              def $FUNC(..., $PARAM: Annotated[$T, fastapi.Depends(...)], ...):
+                ...
+          - pattern-not-inside: |
+              async def $FUNC(..., $PARAM: Annotated[$T, fastapi.Depends(...)], ...):
+                ...
+          - pattern: $PARAM
+      # Raw request object (starlette.requests.Request).
+      - patterns:
+          - pattern-either:
+              - pattern: $REQ.query_params
+              - pattern: $REQ.path_params
+              - pattern: $REQ.headers
+              - pattern: $REQ.cookies
+              - pattern: $REQ.url
+              - pattern: await $REQ.json()
+              - pattern: await $REQ.form()
+              - pattern: await $REQ.body()
+          - pattern-either:
+              - pattern-inside: |
+                  def $FUNC(..., $REQ: Request, ...):
+                    ...
+              - pattern-inside: |
+                  async def $FUNC(..., $REQ: Request, ...):
+                    ...
+              - pattern-inside: |
+                  def $FUNC(..., $REQ: starlette.requests.Request, ...):
+                    ...
+              - pattern-inside: |
+                  async def $FUNC(..., $REQ: starlette.requests.Request, ...):
+                    ...
+    pattern-sanitizers:
+      # Explicit neutralisation of line breaks or encoding of the whole value.
+      - pattern: $X.replace("\n", ...)
+      - pattern: $X.replace("\r", ...)
+      - pattern: $X.replace("\r\n", ...)
+      - pattern: re.sub(...)
+      - pattern: repr(...)
+      - pattern: json.dumps(...)
+      - pattern: $X.encode("unicode_escape")
+      # Conversions that cannot carry line breaks.
+      - pattern: int(...)
+      - pattern: float(...)
+      - pattern: bool(...)
+      - pattern: len(...)
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: logging.$LEVEL(...)
+              - pattern: $LOGGER.$LEVEL(...)
+          - metavariable-regex:
+              metavariable: $LEVEL
+              regex: ^(debug|info|warning|warn|error|exception|critical|fatal|log)$
