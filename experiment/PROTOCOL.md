@@ -21,7 +21,7 @@ Kroki P1–P5 są wymaganiami dla zadań implementacyjnych (aplikacja E04, potok
 ### P1. Zamrożenie badanych elementów
 
 - Katalog podatności referencyjnych w wersji v1 (po E03-07), razem z regułami własnymi Semgrep dla GT-06 i GT-14 (decyzja autora z 2026-10-20, `docs/metodyka.md`, p. 4.3).
-- Konfiguracja serii porównawczej CodeQL (decyzja autora z 2026-10-20, `docs/metodyka.md`, p. 4.3; szczegóły: TODO).
+- Konfiguracja serii porównawczej CodeQL: 14 pozycji, zestaw `security-extended`, osobny workflow uruchamiany ręcznie po serii właściwej (decyzje autora z 2026-10-20, `docs/metodyka.md`, p. 4.3).
 - Czysta wersja aplikacji oznaczona tagiem git (roboczo `exp-clean-v1`).
 - Workflow obu wariantów w wersji końcowej.
 - Progi bramek wariantu B (np. minimalna ważność zgłoszenia, które blokuje) zapisane w konfiguracji i w dzienniku badawczym.

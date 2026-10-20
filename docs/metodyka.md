@@ -230,11 +230,12 @@ Uzasadnienia:
   - **Czemu nie CodeQL.** Regułę własną dopisujemy w Semgrepie, który już jest w potoku, więc nie dochodzi kolejne narzędzie SAST obok Semgrepa i Bandita. CodeQL buduje bazę kodu, co może wydłużyć czas PR (H2a). TODO: zweryfikować pomiarem albo źródłem.
   - **Rola reguł własnych.** Są częścią proponowanego wzorca potoku: małemu zespołowi zalecamy dopisanie kilku reguł dla własnego frameworka. Opis w podrozdziale 4.3 pracy, razem z kosztem.
 - **Koszt reguł własnych (RQ2)** (decyzja autora z 2026-10-20). Czas pisania i testowania reguł własnych zapisujemy w dzienniku badawczym i podajemy opisowo obok kosztu czasowego potoku. Nie wchodzi do H2a.
-- **Porównanie z CodeQL** (decyzja autora z 2026-10-20). Poza wariantem B uruchamiamy CodeQL na pozycjach katalogu w kodzie aplikacji jako dodatkową serię porównawczą. CodeQL nie jest bramką i nie wpływa na H1 ani na H2a. Wynik porównujemy z wykryciami Semgrepa (z regułami własnymi i bez nich) w 5.3. TODO (E03-05/E07):
-  - które pozycje obejmuje seria (np. grupa `kod` oraz GT-12 i GT-14),
-  - zestaw zapytań (domyślny czy `security-extended`),
-  - miejsce uruchomienia (osobny workflow na tych samych gałęziach prób),
-  - czy wynik wchodzi do M1.
+- **Porównanie z CodeQL** (decyzje autora z 2026-10-20). Poza wariantem B uruchamiamy CodeQL jako dodatkową serię porównawczą. CodeQL nie jest bramką i nie wpływa na H1 ani na H2a. W 5.3 porównujemy jego wynik z wykryciami Semgrepa (z regułami własnymi i bez nich) oraz zizmora.
+  - **Pozycje:** 14 pozycji, w których łatka zmienia kod aplikacji albo workflow: GT-01–06, GT-12, GT-14, GT-15–17 i GT-18–20 (te trzy są poza zasięgiem narzędzi; sprawdzamy, czy CodeQL coś znajdzie). CodeQL ma zapytania dla Pythona i dla GitHub Actions (`docs/narzedzia.md`, p. 4.3).
+  - **Zestaw zapytań:** jeden przebieg z `security-extended`. W wynikach zaznaczamy, które zgłoszenia pochodzą z zapytań zestawu domyślnego. Zestaw domyślny ma tylko zapytania o precyzji high i very-high, więc nie zawiera `py/log-injection` (precyzja medium).
+  - **Kiedy:** po zakończeniu serii właściwej, osobnym workflow uruchamianym ręcznie na tych samych gałęziach prób. Nie wpływa więc na czasy PR wariantu B. Odrzucone: uruchamianie równolegle na PR prób (wspólny limit runnerów z wariantem B). Dla GT-15–17, które mają osobne łatki w każdym wariancie, używamy gałęzi: TODO (A czy B).
+  - **Rozmiar serii:** odrzucone warianty to tylko pilotaż na GT-06 i tylko opis w pracy.
+  - **Czy wynik wchodzi do M1:** TODO, decyzja autora (domyślnie osobna tabela porównawcza, bo M1 opisuje wariant B).
 - **H2a z przedziałem** (decyzja autora z 2026-10-13). Hipoteza dotyczy typowego czasu procesu, a 20 przebiegów to próba. Przy medianie bliskiej 10 min sama wartość punktowa nie wystarcza do rozstrzygnięcia, więc reguła ma stan „nierozstrzygnięta”. Granice przedziału to statystyki pozycyjne wynikające z rozkładu dwumianowego Bin(20; 0,5). TODO: źródło metody (przedział ufności mediany bez założeń o rozkładzie).
 - **H2b z analizą wrażliwości** (decyzja autora z 2026-10-13). Zbiór Z jest deterministyczny, ale jego klasyfikacja zależy od oceny jednej osoby. Wariant pesymistyczny zawsze daje M6 nie większe od podstawowego, dlatego reguła ma trzy, a nie cztery przypadki.
 - **H3a i H3b** są deterministyczne. Zagrożenie leży w ocenie pozycji przez autora (4.5, trafność konstruktu), a nie w zmienności danych.
