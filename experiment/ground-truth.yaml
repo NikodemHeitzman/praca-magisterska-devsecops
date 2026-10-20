@@ -10,6 +10,8 @@
 #   owasp_cicd        – wstępne przypisanie do OWASP Top 10 CI/CD [@OWASP-Top10-CICD]; do weryfikacji w E02-04
 #   asvs              – wymaganie łamane przez pozycję [@OWASP-ASVS-5.0]
 #   oczekiwany_detektor – hipoteza przed eksperymentem; narzędzia z listy kandydatów E02-10, reguły do ustalenia w E02-10/E07
+#                         regula_wlasna: true = detektor działa dzięki regule własnej w repozytorium, której nie ma
+#                         w rejestrze narzędzia (decyzja autora z 2026-10-20, E02-10; docs/narzedzia.md, p. 4)
 
 wersja: v0
 data: 2026-10-09
@@ -119,12 +121,13 @@ pozycje:
     w_zasiegu_narzedzi: true
     pewnosc_detekcji: niska
     oczekiwany_detektor:
-      - {klasa: SAST, narzedzie: Semgrep}
+      - {klasa: SAST, narzedzie: Semgrep, regula_wlasna: true}
     najwczesniejszy_etap: PR
     uzasadnienie: >-
-      jedyna pozycja z kategorii A09; pewność niska, bo nie wiadomo, czy wybrane reguły SAST obejmują log injection
-      w Pythonie (TODO: zweryfikować w E02-10). Jeśli żadna reguła nie obejmuje, pozycja zostaje w katalogu,
-      a zmianę w_zasiegu_narzedzi zapisujemy w dzienniku przed eksperymentem
+      jedyna pozycja z kategorii A09. Rejestr Semgrep (p/python, p/default) ani Bandit nie mają reguły
+      dla log injection w Pythonie (E02-10, docs/narzedzia.md, p. 4.1), więc detektorem jest reguła własna
+      Semgrep pisana pod klasę CWE-117 (decyzja autora z 2026-10-20). Pewność do ponownej oceny po napisaniu
+      i przetestowaniu reguły (TODO)
 
   # ---------------------------------------------------------------- zależności
   - id: GT-07
@@ -289,12 +292,15 @@ pozycje:
     w_zasiegu_narzedzi: true
     pewnosc_detekcji: srednia
     oczekiwany_detektor:
-      - {klasa: SAST, narzedzie: Semgrep}
+      - {klasa: SAST, narzedzie: Semgrep, regula_wlasna: true}
       - {klasa: DAST, narzedzie: OWASP ZAP}
     najwczesniejszy_etap: PR
     uzasadnienie: >-
-      jedyna pozycja z kategorii A10; łamie też v5.0.0-13.4.2 (debug na produkcji). DAST wykryje tylko wtedy,
-      gdy wywoła błąd serwera, a SAST tylko z regułą dla debug=True (TODO: zweryfikować w E02-10)
+      jedyna pozycja z kategorii A10; łamie też v5.0.0-13.4.2 (debug na produkcji). Rejestr Semgrep ma regułę
+      debug tylko dla Flaska, więc detektorem SAST jest reguła własna Semgrep dla trybu debug w FastAPI
+      i Starlette (decyzja autora z 2026-10-20). ZAP baseline zgłasza każdy błąd 500 (reguły 90022, 10023)
+      niezależnie od trybu debug i tylko wtedy, gdy pająk trafi na adres wywołujący błąd (E02-10,
+      docs/narzedzia.md, p. 4.1)
 
   # ---------------------------------------------------------------- workflow GitHub Actions
   - id: GT-15

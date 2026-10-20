@@ -50,7 +50,7 @@ Decyzje autora z 2026-10-09: 20 pozycji, w tym 3 poza zasięgiem narzędzi (15%)
 | `referencje` | identyfikatory podatności i obrazów sprawdzone w źródle (OSV, Docker Hub), z datą |
 | `w_zasiegu_narzedzi` | `false` = żadna klasa narzędzi w potoku nie jest zaprojektowana do wykrycia tej podatności |
 | `pewnosc_detekcji` | hipoteza autora przed eksperymentem: `wysoka`, `srednia`, `niska`, `brak` |
-| `oczekiwany_detektor` | klasa narzędzia i kandydat z listy E02-10; konkretne reguły ustali E02-10/E07 |
+| `oczekiwany_detektor` | klasa narzędzia i kandydat z listy E02-10; konkretne reguły ustali E02-10/E07. `regula_wlasna: true` oznacza detektor oparty na regule własnej w repozytorium, której nie ma w rejestrze narzędzia |
 | `najwczesniejszy_etap` | najwcześniejszy etap, na którym może zadziałać detektor danej klasy: `PR`, `main-przed-wdrozeniem`, `po-uruchomieniu`, `brak` |
 
 Oczekiwany detektor i etap to **hipotezy zapisane przed eksperymentem**. Wynik eksperymentu może je potwierdzić albo obalić; rozbieżności są wynikiem, a nie błędem katalogu.
@@ -77,7 +77,7 @@ H1 wymaga, żeby wariant B zatrzymał co najmniej 80% pozycji. Skład katalogu w
 
 Miejsce DAST rozstrzygnięto w E03-05 (decyzja autora z 2026-10-13): OWASP ZAP w trybie baseline jest w wariancie B bramką na każdym pull requeście, na kontenerze uruchomionym w runnerze ([`PROTOCOL.md`](PROTOCOL.md), sekcja 0). Pozycje wykrywane tylko przez DAST (GT-13, a bez reguł SAST także GT-12 i GT-14) mogą więc zostać zatrzymane przed wdrożeniem, a pułap pozostaje na 85%. Odrzucone warianty z 2026-10-09 dawały pułap 80% albo 70% (DAST tylko po wdrożeniu).
 
-Pułap może się obniżyć, jeśli ZAP w trybie pasywnym nie wykryje którejś z pozycji GT-12–14 (zwłaszcza GT-14, która wymaga wywołania błędu serwera), a SAST nie ma dla niej reguły. TODO: zweryfikować w E02-10.
+Analiza reguł z E02-10 (`docs/narzedzia.md`, p. 4) pokazała, że rejestr Semgrep i Bandit nie mają reguł dla GT-06 i GT-14, a ZAP baseline nie odróżnia GT-14 od zwykłego błędu 500. Wariant B ma więc reguły własne Semgrep dla tych dwóch pozycji (pole `regula_wlasna`). Blokują one tak samo jak reguły z rejestru (decyzja autora z 2026-10-20). H1 rozstrzyga wynik z regułami własnymi (pułap 85%). Wynik bez nich podajemy opisowo: pułap wynosi 80% według listy detektorów i realnie 75%, gdy ZAP nie wykryje GT-14 (`docs/metodyka.md`, p. 4.3).
 
 Skład katalogu ustalono 2026-10-09, **przed** decyzją o miejscu DAST, i nie dopasowujemy go do progu H1, żeby nie dobierać podatności pod narzędzia (zagrożenie trafności wewnętrznej TW1, `docs/metodyka.md`, p. 4.5).
 

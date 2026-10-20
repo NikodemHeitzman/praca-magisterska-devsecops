@@ -1,6 +1,6 @@
 # Narzędzia potoku: dokumentacja i wersje
 
-> **Status:** szkic (E02-10, sesja 2026-10-18). Sekcje 1–3 mają dane z oficjalnych źródeł. Sekcja 4 (reguły dla pozycji katalogu) i podział ról narzędzi czekają na kolejne kroki zadania.
+> **Status:** szkic (E02-10, sesja 2026-10-18). Sekcje 1–3 mają dane z oficjalnych źródeł. Sekcja 4 ma analizę reguł dla pozycji katalogu o niepewnej detekcji; jej skutki dla katalogu i H1 czekają na decyzję autora (4.2). Podział ról narzędzi zapada w ADR-ach i E07.
 
 Plik zbiera w jednym miejscu narzędzia rozważane dla wariantu B potoku, ich dokumentację i wersje. Służy dwóm celom:
 
@@ -89,17 +89,100 @@ Tytuły dokumentów GitHuba trzeba potwierdzić na stronach przed cytowaniem. Do
 
 ## 4. Reguły dla pozycji katalogu
 
-TODO (kolejny krok E02-10). Dla każdej z pozycji o niepewnej detekcji sprawdzić w dokumentacji albo w rejestrze reguł, czy wybrany detektor ma regułę, i podać jej identyfikator:
+Sprawdzono 2026-10-18 w kodzie źródłowym reguł, a nie w opisach: dla każdej pozycji o niepewnej detekcji, czy oczekiwany detektor z `experiment/ground-truth.yaml` ma regułę i kiedy ta reguła się uruchamia. To analiza statyczna reguł. Zachowanie narzędzi trzeba jeszcze potwierdzić uruchomieniem w pilotażu (P5).
 
-- [ ] GT-02 (zakodowany klucz JWT): reguły Gitleaks (entropia, nazwa zmiennej) i Bandit (B105 i pokrewne, TODO: zweryfikować).
-- [ ] GT-06 (log injection, CWE-117): reguła Semgrep dla Pythona. Brak reguły oznacza zmianę `w_zasiegu_narzedzi` z wpisem w dzienniku przed eksperymentem.
-- [ ] GT-09 (brak instrukcji USER): czy Checkov, Trivy i hadolint reagują na brak `USER`, czy tylko na jawne `USER root`.
-- [ ] GT-12 (CORS `*` w FastAPI): reguła Semgrep; reguła pasywna ZAP.
-- [ ] GT-13 (brak `frame-ancestors` i `X-Frame-Options`): reguła pasywna ZAP baseline.
-- [ ] GT-14 (`FastAPI(debug=True)`): reguła Semgrep; czy ZAP baseline wywoła błąd serwera i wykryje stack trace.
+### 4.0 Wersje, na których sprawdzono reguły
+
+| Źródło | Wersja (commit) |
+|---|---|
+| `gitleaks/gitleaks`, `config/gitleaks.toml` | v8.30.1 (`83d9cd68`) |
+| `PyCQA/bandit`, `bandit/plugins/general_hardcoded_password.py` | 1.9.4 (`92ae8b82`) |
+| `semgrep/semgrep-rules` | gałąź główna (`17e31e11`) |
+| Zestawy rejestru Semgrep `p/python`, `p/default`, `p/security-audit`, `p/fastapi`, `p/jwt` | pobrane z `https://semgrep.dev/c/p/<zestaw>` 2026-10-18 (odpowiednio 151, 1073, 225, 1, 16 reguł) |
+| `bridgecrewio/checkov`, `checkov/dockerfile/checks/` | 3.3.29 (`e40023ab`) |
+| `aquasecurity/trivy-checks`, `checks/docker/root_user.rego` | gałąź główna (`80a59294`) |
+| `hadolint/hadolint`, `src/Hadolint/Rule/DL3002.hs` | v2.15.1 (`2eece559`) |
+| `zaproxy/zap-extensions`, dodatek `pscanrules` | gałąź główna (`15fc3d10`) |
+| `zaproxy/zaproxy`, `docker/zap-baseline.py` | v2.17.0 (`8a1bff31`) |
+| `encode/starlette`, `middleware/cors.py`, `middleware/errors.py` | 1.9.0, gałąź główna (`1840c9dd`) |
+
+Reguły z gałęzi głównej mogą się różnić od tych, które pobierze potok. Trivy pobiera paczkę reguł (`trivy-checks`) w czasie działania, a obraz ZAP ma własne wersje dodatków. TODO: zweryfikować wersje reguł w obrazie i paczce przy P1.
+
+### 4.1 Wyniki dla pozycji
+
+**GT-02, zakodowany klucz JWT.**
+
+- **Gitleaks `generic-api-key`.** Reguła łapie przypisanie, w którym nazwa zawiera m.in. `key`, `secret` albo `token`, a wartość ma 10–150 znaków `[\w.=-]` i entropię co najmniej 3,5. Wynik odrzucają *stopwords*, jeśli wystąpią w samej wartości. Na liście są m.in. `demo`, `example`, `fake`, `sample` i `testing`. Fikcyjna wartość w rodzaju `fake-jwt-key-…` nie zostanie więc zgłoszona.
+- **Bandit B105 (`hardcoded_password_string`).** Nazwa zmiennej musi zawierać człon `password`, `pass`, `pwd`, `token` albo `secret` (lub `secrete`), oddzielony podkreślnikiem albo na całą nazwę, np. `JWT_SECRET` albo `SECRET_KEY`. `JWT_KEY` nie pasuje. Reguła obsługuje tylko zwykłe przypisanie (`ast.Assign`). Przypisanie z adnotacją typu (`jwt_secret: str = "…"`, typowe dla klas ustawień pydantic) nie jest sprawdzane: w Bandit 1.9.4 nie ma obsługi `ast.AnnAssign`.
+- **Semgrep `python.jwt.security.jwt-hardcode.jwt-python-hardcoded-secret`** (w `p/python` i `p/default`, nie było w katalogu) ma wzorzec `jwt.encode($_, "...", ...)`, czyli literał w wywołaniu. Czy obejmie stałą zdefiniowaną w innym module: TODO: zweryfikować w pilotażu.
+- **Wniosek:** wykrywalne, jeśli łatka ma postać `JWT_SECRET = "<losowa wartość bez słów ze stopwords>"` (zwykłe przypisanie). Pewność można podnieść ze średniej do wysokiej, gdy postać łatki zostanie tak ustalona.
+
+**GT-06, log injection (CWE-117).**
+
+- W `semgrep-rules` nie ma reguły dla Pythona z CWE-117. Jedyna reguła z tym CWE jest dla C#. W `p/python` i `p/default` z logowaniem w Pythonie wiążą się tylko `python-logger-credential-disclosure` (wyciek poświadczeń do logu) i `listen-eval`. Pozostałe reguły log injection w `p/default` dotyczą Javy.
+- Bandit nie ma wtyczki dla log injection (z logowaniem wiąże się tylko B612, `logging.config.listen`).
+- **Wniosek:** reguły z rejestru i Bandit nie wykryją GT-06.
+
+**GT-09, kontener bez instrukcji USER.**
+
+- **Checkov `CKV_DOCKER_3`** („Ensure that a user for the container has been created”) zgłasza błąd, gdy w Dockerfile nie ma żadnej instrukcji `USER`. **`CKV_DOCKER_8`** sprawdza tylko jawne `USER root`.
+- **Trivy `DS-0002`** (alias `DS002`, ważność HIGH) zgłasza zarówno brak instrukcji `USER`, jak i ostatnie `USER root` albo `USER 0`.
+- **hadolint `DL3002`** reaguje tylko na jawne `USER root`, `USER 0` albo `root:`/`0:` w danym etapie. Brak instrukcji `USER` tej reguły nie uruchamia.
+- **Wniosek:** wykrywalne przez Checkov i Trivy. hadolint nie wykryje łatki w obecnej postaci (usunięcie `USER`). Uwaga: `CKV_DOCKER_3` sprawdza cały plik, więc w Dockerfile wieloetapowym `USER` w dowolnym etapie wystarczy, żeby kontrola przeszła (TODO: zweryfikować w pilotażu).
+
+**GT-12, CORS z `*`.**
+
+- **Semgrep `python.fastapi.security.wildcard-cors.wildcard-cors`** (w `p/python`, `p/default` i `p/fastapi`) to reguła typu *taint*: lista z `"*"` trafia do `allow_origins` w wywołaniu `$APP.add_middleware(CORSMiddleware, allow_origins=..., ...)`. Inna postać, np. `FastAPI(middleware=[Middleware(CORSMiddleware, ...)])`, nie pasuje do wzorca.
+- **ZAP `10098` (Cross-Domain Misconfiguration, pasywna)** zgłasza odpowiedź z `Access-Control-Allow-Origin: *`. Starlette dodaje nagłówki CORS **tylko wtedy, gdy żądanie ma nagłówek `Origin`**. Przy `allow_credentials=True` odsyła konkretne źródło zamiast `*`, więc reguła 10098 się nie uruchomi. Pająk ZAP zwykle nie wysyła nagłówka `Origin` (TODO: zweryfikować w pilotażu).
+- **Wniosek:** wykrywalne na etapie PR przez Semgrep, jeśli łatka używa `app.add_middleware(CORSMiddleware, allow_origins=["*"])`. ZAP baseline prawdopodobnie tego nie zobaczy bez dodania nagłówka `Origin` do żądań (np. regułą *replacer* w konfiguracji ZAP, TODO: zweryfikować).
+
+**GT-13, brak ochrony przed osadzaniem w ramkach.**
+
+- **ZAP `10020` (Anti-clickjacking Header, pasywna)** zgłasza odpowiedź bez `X-Frame-Options` i bez `frame-ancestors` w CSP. Przy domyślnym progu (MEDIUM) sprawdza tylko odpowiedzi **HTML**, z niepustą treścią, bez błędów i przekierowań. Dopiero przy progu LOW obejmuje inne odpowiedzi.
+- Skrypt `zap-baseline.py` domyślnie przez 1 minutę przeszukuje aplikację tradycyjnym pająkiem, potem czeka na skan pasywny (`-m`, `-j` dla pająka AJAX, `-a` dla reguł alfa).
+- **Wniosek:** wykrywalne, jeśli pająk dotrze do strony HTML, a middleware nagłówków w wersji czystej obejmuje tę stronę. Odpowiedzi JSON przy progu MEDIUM nie dają zgłoszenia. Strony HTML w aplikacji: TODO, zależy od E04 (szablony jinja2 z GT-07, `/docs` FastAPI).
+
+**GT-14, tryb debug ujawniający stack trace.**
+
+- **Semgrep:** w rejestrze nie ma reguły dla `FastAPI(debug=True)`. `python.flask.security.audit.debug-enabled` sprawdza tylko `$APP.run(..., debug=True)` w kodzie, który importuje `flask`.
+- **ZAP `90022` (Application Error Disclosure, pasywna)** zgłasza **każdą** odpowiedź 500, a **`10023`** (Information Disclosure - Debug Error Messages) szuka w treści m.in. napisu `Internal Server Error`. W pliku wzorców `application_errors.xml` nie ma wzorców Pythona (`Traceback`). Starlette przy `debug=True` zwraca traceback jako HTML (gdy `Accept` zawiera `text/html`) albo tekst. Przy `debug=False` zwraca `Internal Server Error`.
+- ZAP baseline nie wysyła ataków, więc błąd 500 pojawi się tylko wtedy, gdy pająk trafi na adres, który go wywołuje przy zwykłym żądaniu.
+- **Wniosek:** reguły z rejestru Semgrep nie wykryją GT-14. ZAP baseline zgłosi błąd 500 niezależnie od trybu debug, więc samo zgłoszenie nie odróżnia GT-14 od zwykłego błędu serwera. Reguła trafienia musiałaby sprawdzać treść odpowiedzi (traceback).
+
+### 4.2 Skutki dla katalogu i H1
+
+| Pozycja | Detektor z katalogu | Wynik analizy reguł | Proponowana zmiana (do decyzji autora) |
+|---|---|---|---|
+| GT-02 | Gitleaks, Bandit | wykrywalne przy ustalonej postaci łatki | Zapisać postać łatki: zwykłe przypisanie `JWT_SECRET = "…"`, wartość bez słów ze *stopwords*. Dopisać Semgrep jako detektor przy literale w `jwt.encode` |
+| GT-06 | Semgrep | brak reguły w rejestrze | **Decyzja 2026-10-20:** reguła własna Semgrep (`regula_wlasna: true`) |
+| GT-09 | Checkov, Trivy, hadolint | Checkov i Trivy tak, hadolint nie | Usunąć hadolint z detektorów albo zmienić łatkę na `USER root` |
+| GT-12 | Semgrep, ZAP | Semgrep tak (przy `add_middleware`), ZAP raczej nie | Bez zmiany pewności; zapisać postać łatki; ZAP z nagłówkiem `Origin` opcjonalnie |
+| GT-13 | ZAP | tak, jeśli są strony HTML | Zapisać w E04 wymóg strony HTML osiągalnej dla pająka |
+| GT-14 | Semgrep, ZAP | brak reguły Semgrep; ZAP nie odróżnia debug od zwykłego 500 | **Decyzja 2026-10-20:** reguła własna Semgrep (`regula_wlasna: true`) |
+
+**Ryzyko dla H1 (TN6).** Pułap 17/20 zakłada, że narzędzia wykryją wszystkie pozycje w zasięgu. Jeśli potok użyje tylko reguł z rejestru, GT-06 i GT-14 prawdopodobnie przejdą. Pułap spadnie wtedy do 15/20, poniżej progu 16/20, i H1 przegra z konstrukcji eksperymentu. Są dwie drogi wyjścia, każda z kosztem:
+
+- **Reguły własne Semgrep** dla GT-06 i GT-14. Wzmacniają zagrożenie TW1 (podatności i reguły od tej samej osoby), bo reguła powstaje pod konkretną pozycję katalogu. Wymaga to opisu w 5.3 i najlepiej wyniku osobno z regułami własnymi i bez nich.
+- **Przeniesienie GT-06 i GT-14 poza zasięg narzędzi** (`w_zasiegu_narzedzi: false`). Zmienia pułap i może wymagać zmiany progu H1 w metodyce przed eksperymentem, z wpisem w dzienniku.
+
+**Decyzja autora (2026-10-20) dla GT-06 i GT-14: reguły własne Semgrep w repozytorium.**
+
+- Reguły są pisane pod klasę CWE (GT-06: dane z żądania trafiające do loggera bez neutralizacji; GT-14: tryb debug w FastAPI i Starlette, w konstruktorze i jako atrybut), a nie pod postać łatki. Testujemy je także na kodzie spoza katalogu.
+- Reguły powstają i są zamrażane razem z katalogiem v1, przed akceptacją promotora (E03-07).
+- Blokują pull request tak samo jak reguły z rejestru, więc ich zgłoszenia wchodzą do H1 i do precyzji bramek (H2b, M6).
+- H1 rozstrzyga wynik z regułami własnymi. Wynik bez nich podajemy opisowo (`docs/metodyka.md`, p. 4.3).
+- W katalogu detektory oznaczono polem `regula_wlasna: true`.
+
+Odrzucone: przeniesienie GT-06 i GT-14 poza zasięg narzędzi (pułap 15/20, poniżej progu); wynik bez reguł własnych jako rozstrzygający albo wymóg przejścia w obu wariantach (H1 przegrałaby z konstrukcji eksperymentu); obniżenie progu H1; reguły pod postać łatki (słaba obrona przed TW1); reguły tylko raportujące (nie podnoszą H1).
+
+Alternatywa do opisania w uzasadnieniu: CodeQL ma zapytanie `py/log-injection` (CWE-117, `@precision medium`; `github/codeql`, `python/ql/src/Security/CWE-117/LogInjection.ql`, sprawdzone 2026-10-20). Dla trybu debug ma tylko `FlaskDebug.ql`. Czy `py/log-injection` jest w domyślnym zestawie zapytań code scanning: TODO: zweryfikować.
+
+Decyzje dla GT-09 (hadolint) oraz postaci łatek GT-02 i GT-12 są otwarte.
+
+### 4.3 Otwarte
+
 - [ ] Format SBOM (SPDX albo CycloneDX), otwarte w `docs/notes/nist-800-204d.md`.
-
-Wynik tego kroku rozstrzyga ryzyko TN6 w `docs/metodyka.md` (pułap H1 przy ZAP w trybie pasywnym).
+- [ ] Potwierdzenie wyników 4.1 uruchomieniem narzędzi na łatkach (pilotaż P5).
 
 ## 5. Uwagi
 

@@ -60,6 +60,8 @@ def check_entry(e, errors):
     for d in detectors:
         if not isinstance(d, dict) or not d.get("klasa") or not d.get("narzedzie"):
             errors.append(f"{gid}: detector needs klasa and narzedzie: {d!r}")
+        elif not isinstance(d.get("regula_wlasna", False), bool):
+            errors.append(f"{gid}: regula_wlasna must be true or false: {d!r}")
     in_reach = e["w_zasiegu_narzedzi"]
     if in_reach is True:
         if not detectors:
@@ -94,6 +96,11 @@ def main(path):
         if e.get("oczekiwany_detektor")
         and all(d.get("klasa") == "DAST" for d in e["oczekiwany_detektor"])
     ]
+    custom_only = [
+        e["id"] for e in entries
+        if e.get("oczekiwany_detektor")
+        and all(d.get("regula_wlasna") is True for d in e["oczekiwany_detektor"])
+    ]
     top10 = sorted({e["owasp_top10_2025"] for e in entries if e.get("owasp_top10_2025")})
 
     criteria = [
@@ -109,10 +116,13 @@ def main(path):
     print(f"Top 10:2025 categories covered: {len(top10)}/10 {top10}")
     print(f"out of tool reach: {len(out_of_reach)} {out_of_reach}")
     print(f"DAST-only: {len(dast_only)} {dast_only}")
+    print(f"custom-rule-only: {len(custom_only)} {custom_only}")
     if n:
         print(f"H1 ceiling (all in-reach entries stopped): {(n - len(out_of_reach)) / n:.0%}")
         print(f"H1 ceiling if DAST-only entries are not stopped: "
               f"{(n - len(out_of_reach) - len(dast_only)) / n:.0%}")
+        print(f"H1 ceiling without custom rules: "
+              f"{(n - len(out_of_reach) - len(custom_only)) / n:.0%}")
     for name, ok in criteria:
         print(f"[{'x' if ok else ' '}] {name}")
     for m in errors:
