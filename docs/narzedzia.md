@@ -153,10 +153,10 @@ Reguły z gałęzi głównej mogą się różnić od tych, które pobierze potok
 
 | Pozycja | Detektor z katalogu | Wynik analizy reguł | Proponowana zmiana (do decyzji autora) |
 |---|---|---|---|
-| GT-02 | Gitleaks, Bandit | wykrywalne przy ustalonej postaci łatki | Zapisać postać łatki: zwykłe przypisanie `JWT_SECRET = "…"`, wartość bez słów ze *stopwords*. Dopisać Semgrep jako detektor przy literale w `jwt.encode` |
+| GT-02 | Gitleaks, Bandit | wykrywalne przy ustalonej postaci łatki | **Decyzja 2026-10-20:** łatka `JWT_SECRET = "…"` (zwykłe przypisanie w module konfiguracji), wartość losowa bez słów ze *stopwords*. Detektory bez zmian |
 | GT-06 | Semgrep | brak reguły w rejestrze | **Decyzja 2026-10-20:** reguła własna Semgrep (`regula_wlasna: true`) |
-| GT-09 | Checkov, Trivy, hadolint | Checkov i Trivy tak, hadolint nie | Usunąć hadolint z detektorów albo zmienić łatkę na `USER root` |
-| GT-12 | Semgrep, ZAP | Semgrep tak (przy `add_middleware`), ZAP raczej nie | Bez zmiany pewności; zapisać postać łatki; ZAP z nagłówkiem `Origin` opcjonalnie |
+| GT-09 | Checkov, Trivy, hadolint | Checkov i Trivy tak, hadolint nie | **Decyzja 2026-10-20:** hadolint usunięty z detektorów, łatka bez zmian |
+| GT-12 | Semgrep, ZAP | Semgrep tak (przy `add_middleware`), ZAP raczej nie | **Decyzja 2026-10-20:** wersja czysta i łatka używają `app.add_middleware(CORSMiddleware, ...)`; ZAP bez dodawania nagłówka `Origin` |
 | GT-13 | ZAP | tak, jeśli są strony HTML | Zapisać w E04 wymóg strony HTML osiągalnej dla pająka |
 | GT-14 | Semgrep, ZAP | brak reguły Semgrep; ZAP nie odróżnia debug od zwykłego 500 | **Decyzja 2026-10-20:** reguła własna Semgrep (`regula_wlasna: true`) |
 
@@ -177,7 +177,14 @@ Odrzucone: przeniesienie GT-06 i GT-14 poza zasięg narzędzi (pułap 15/20, pon
 
 **CodeQL.** Ma zapytanie `py/log-injection` (CWE-117, `@precision medium`; `github/codeql`, `python/ql/src/Security/CWE-117/LogInjection.ql`, sprawdzone 2026-10-20). Dla trybu debug ma tylko `FlaskDebug.ql`. Czy `py/log-injection` jest w domyślnym zestawie zapytań code scanning: TODO: zweryfikować. Decyzja autora (2026-10-20): CodeQL nie wchodzi do wariantu B (bez kolejnego narzędzia SAST; możliwy dłuższy czas PR), ale jest uruchamiany jako dodatkowa seria porównawcza na pozycjach w kodzie aplikacji (`docs/metodyka.md`, p. 4.3). Uzasadnienie i rola reguł własnych we wzorcu potoku: tamże.
 
-Decyzje dla GT-09 (hadolint) oraz postaci łatek GT-02 i GT-12 są otwarte.
+**Decyzje autora (2026-10-20) dla GT-02, GT-09 i GT-12** (tabela 4.2):
+
+- **GT-02:** łatka jako zwykłe przypisanie `JWT_SECRET = "…"`. Odrzucone:
+  - pole klasy ustawień pydantic z adnotacją typu (nie wykryje go ani Gitleaks, ani Bandit; regex Gitleaks sprawdzony emulacją w Pythonie),
+  - literał w `jwt.encode` (wykrywa go tylko Semgrep).
+- **GT-09:** hadolint usunięty z oczekiwanych detektorów, łatka bez zmian (usunięcie `USER`). Odrzucone: łatka z jawnym `USER root`. hadolint zostaje kandydatem do potoku dla innych reguł Dockerfile.
+- **GT-12:** wersja czysta konfiguruje CORS przez `app.add_middleware(CORSMiddleware, ...)` (wymóg dla E04), a łatka zmienia tylko listę źródeł na `["*"]`. Odrzucone: konfiguracja w konstruktorze `FastAPI(middleware=[...])`, której reguła Semgrep nie obejmuje.
+- **ZAP bez nagłówka `Origin`.** Nie dodajemy reguły *replacer* pod GT-12. Wykrycie GT-12 przez ZAP jest hipotezą do sprawdzenia w pilotażu. Odrzucone: dodawanie `Origin` do wszystkich żądań (konfiguracja pod pozycję katalogu).
 
 ### 4.3 Reguły własne (2026-10-20)
 

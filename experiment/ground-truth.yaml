@@ -45,8 +45,10 @@ pozycje:
     asvs: v5.0.0-13.3.1
     lokalizacja: moduł konfiguracji aplikacji
     wprowadzenie: >-
-      sekret JWT jako stała w kodzie zamiast zmiennej środowiskowej; wartość fikcyjna o wysokiej entropii,
-      nigdy prawdziwe poświadczenie (repozytorium jest publiczne)
+      sekret JWT jako stała w module konfiguracji zamiast zmiennej środowiskowej, w postaci zwykłego przypisania
+      JWT_SECRET = "<wartość>" (nie pole klasy ustawień z adnotacją typu); wartość fikcyjna, losowa, o wysokiej
+      entropii, bez słów z listy stopwords Gitleaks (np. fake, example, sample, testing, demo); nigdy prawdziwe
+      poświadczenie (repozytorium jest publiczne). Postać łatki: decyzja autora z 2026-10-20 (E02-10)
     w_zasiegu_narzedzi: true
     pewnosc_detekcji: srednia
     oczekiwany_detektor:
@@ -54,8 +56,10 @@ pozycje:
       - {klasa: SAST, narzedzie: Bandit}
     najwczesniejszy_etap: PR
     uzasadnienie: >-
-      wyciek sekretu przez repozytorium; pewność średnia, bo wykrycie generycznego sekretu zależy od reguł
-      entropii i nazwy zmiennej (TODO: zweryfikować w E02-10)
+      wyciek sekretu przez repozytorium. Gitleaks generic-api-key (nazwa z członem secret, entropia co najmniej 3,5)
+      i Bandit B105 (nazwa z członem _secret) obejmują tę postać; pole z adnotacją typu (jwt_secret: str = "…")
+      nie pasowałoby do żadnej z tych reguł (E02-10, docs/narzedzia.md, p. 4.1; regex Gitleaks sprawdzony
+      emulacją w Pythonie, do potwierdzenia w pilotażu). Pewność do ponownej oceny przez autora (TODO)
 
   - id: GT-03
     tytul: Hashowanie haseł funkcją MD5
@@ -196,11 +200,12 @@ pozycje:
     oczekiwany_detektor:
       - {klasa: IaC/Dockerfile, narzedzie: Checkov}
       - {klasa: IaC/Dockerfile, narzedzie: Trivy}
-      - {klasa: lint-Dockerfile, narzedzie: hadolint}
     najwczesniejszy_etap: PR
     uzasadnienie: >-
-      najczęstszy błąd utwardzenia kontenera; pewność średnia, bo część reguł reaguje tylko na jawne USER root,
-      a nie na brak instrukcji USER (TODO: zweryfikować reguły w E02-10)
+      najczęstszy błąd utwardzenia kontenera. Brak instrukcji USER wykrywają Checkov CKV_DOCKER_3 i Trivy DS-0002;
+      hadolint DL3002 reaguje tylko na jawne USER root, więc usunięto go z oczekiwanych detektorów, a łatka zostaje
+      bez zmian (decyzja autora z 2026-10-20, E02-10, docs/narzedzia.md, p. 4.1). Pewność do ponownej oceny przez
+      autora (TODO)
 
   # ---------------------------------------------------------------- infrastruktura jako kod
   - id: GT-10
@@ -251,7 +256,9 @@ pozycje:
     owasp_cicd: null
     asvs: v5.0.0-3.4.2
     lokalizacja: konfiguracja CORSMiddleware w aplikacji
-    wprowadzenie: allow_origins=["*"] zamiast listy dozwolonych źródeł
+    wprowadzenie: >-
+      allow_origins=["*"] zamiast listy dozwolonych źródeł w wywołaniu app.add_middleware(CORSMiddleware, ...);
+      wersja czysta konfiguruje CORS tym samym wywołaniem (wymóg dla E04; decyzja autora z 2026-10-20)
     w_zasiegu_narzedzi: true
     pewnosc_detekcji: srednia
     oczekiwany_detektor:
@@ -259,8 +266,10 @@ pozycje:
       - {klasa: DAST, narzedzie: OWASP ZAP}
     najwczesniejszy_etap: PR
     uzasadnienie: >-
-      etap PR tylko wtedy, gdy wybrany SAST ma regułę dla CORS w FastAPI (TODO: zweryfikować w E02-10); w przeciwnym
-      razie wykrywa dopiero DAST na działającej aplikacji
+      etap PR: Semgrep python.fastapi.security.wildcard-cors (p/python, p/default) obejmuje postać
+      add_middleware. ZAP 10098 zobaczy Access-Control-Allow-Origin: * tylko przy żądaniu z nagłówkiem Origin
+      i allow_credentials=False; ZAP działa bez dodawania nagłówka Origin (decyzja autora z 2026-10-20), więc
+      wykrycie przez ZAP to hipoteza do sprawdzenia w pilotażu (E02-10, docs/narzedzia.md, p. 4.1)
 
   - id: GT-13
     tytul: Brak ochrony przed osadzaniem w ramkach (clickjacking)
