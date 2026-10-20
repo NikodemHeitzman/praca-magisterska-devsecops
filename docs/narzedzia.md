@@ -175,7 +175,7 @@ Reguły z gałęzi głównej mogą się różnić od tych, które pobierze potok
 
 Odrzucone: przeniesienie GT-06 i GT-14 poza zasięg narzędzi (pułap 15/20, poniżej progu); wynik bez reguł własnych jako rozstrzygający albo wymóg przejścia w obu wariantach (H1 przegrałaby z konstrukcji eksperymentu); obniżenie progu H1; reguły pod postać łatki (słaba obrona przed TW1); reguły tylko raportujące (nie podnoszą H1).
 
-Alternatywa do opisania w uzasadnieniu: CodeQL ma zapytanie `py/log-injection` (CWE-117, `@precision medium`; `github/codeql`, `python/ql/src/Security/CWE-117/LogInjection.ql`, sprawdzone 2026-10-20). Dla trybu debug ma tylko `FlaskDebug.ql`. Czy `py/log-injection` jest w domyślnym zestawie zapytań code scanning: TODO: zweryfikować.
+**CodeQL.** Ma zapytanie `py/log-injection` (CWE-117, `@precision medium`; `github/codeql`, `python/ql/src/Security/CWE-117/LogInjection.ql`, sprawdzone 2026-10-20). Dla trybu debug ma tylko `FlaskDebug.ql`. Czy `py/log-injection` jest w domyślnym zestawie zapytań code scanning: TODO: zweryfikować. Decyzja autora (2026-10-20): CodeQL nie wchodzi do wariantu B (bez kolejnego narzędzia SAST; możliwy dłuższy czas PR), ale jest uruchamiany jako dodatkowa seria porównawcza na pozycjach w kodzie aplikacji (`docs/metodyka.md`, p. 4.3). Uzasadnienie i rola reguł własnych we wzorcu potoku: tamże.
 
 Decyzje dla GT-09 (hadolint) oraz postaci łatek GT-02 i GT-12 są otwarte.
 
