@@ -56,7 +56,7 @@ Akcje przypinamy do pełnego SHA commita (`AGENTS.md`, konwencja 5). Tabela poda
 | `actions/dependency-review-action` | v5.0.0 | `a1d282b36b6f3519aa1f3fc636f609c47dddb294` | 2026-05-08 | DEPLOY-REQ-2 |
 | `actions/attest-build-provenance` | v4.2.2 | `4d101475d8b20a2381f78447822ac1eab6504dd8` | 2026-08-06 | provenance (SLSA, E02-05) |
 | `actions/attest-sbom` | v4.1.0 | `c604332985a26aa8cf1bdc465b92731239ec6b9e` | 2026-03-18 | atestacja SBOM. README v4.1.0: akcja wycofywana na rzecz `actions/attest` (działa jako nakładka na nią). SBOM w formacie SPDX albo CycloneDX JSON, do 16 MB |
-| `actions/attest` | v4.2.2 | `1e69f48acb82d1966a394da916b4c1698aa569d6` | 2026-08-04 | ogólna akcja atestacji, następca `attest-sbom` (relacja do `attest-build-provenance`: TODO: zweryfikować w dokumentacji) |
+| `actions/attest` | v4.2.2 | `1e69f48acb82d1966a394da916b4c1698aa569d6` | 2026-08-04 | ogólna akcja atestacji, następca `attest-sbom`. Także następca `attest-build-provenance`: według README `attest-build-provenance` od v4 jest nakładką na `actions/attest`, a nowe wdrożenia powinny używać `actions/attest` (dostęp 2026-10-28, E02-05) |
 | `anchore/sbom-action` | v0.24.3 | `66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c` | 2026-10-02 | SBOM przez Syft |
 | `aquasecurity/trivy-action` | v0.36.0 | `ed142fd0673e97e23eac54620cfb913e5ce36c25` | 2026-04-22 | skan Trivy |
 | `aquasecurity/setup-trivy` | v0.3.1 | `81e514348e19b6112ce2a7e3ecbafe19c1e1f567` | 2026-06-03 | instalacja Trivy w przypiętej wersji |
