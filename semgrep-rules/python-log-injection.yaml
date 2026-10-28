@@ -79,6 +79,43 @@ rules:
               async def $FUNC(..., $PARAM: Annotated[$T, fastapi.Depends(...)], ...):
                 ...
           - pattern: $PARAM
+      # OAuth2 login forms: injected with Depends(), but they carry raw form fields (username, password)
+      # from the request body, so the Depends exclusion above does not apply to them.
+      - patterns:
+          - pattern-either:
+              - pattern-inside: |
+                  @$APP.$METHOD(...)
+                  def $FUNC(..., $PARAM: $FORM = fastapi.Depends(...), ...):
+                    ...
+              - pattern-inside: |
+                  @$APP.$METHOD(...)
+                  async def $FUNC(..., $PARAM: $FORM = fastapi.Depends(...), ...):
+                    ...
+              - pattern-inside: |
+                  @$APP.$METHOD(...)
+                  def $FUNC(..., $PARAM: Annotated[$FORM, fastapi.Depends(...)], ...):
+                    ...
+              - pattern-inside: |
+                  @$APP.$METHOD(...)
+                  async def $FUNC(..., $PARAM: Annotated[$FORM, fastapi.Depends(...)], ...):
+                    ...
+              - pattern-inside: |
+                  @$APP.$METHOD(...)
+                  def $FUNC(..., $PARAM = fastapi.Depends($FORM), ...):
+                    ...
+              - pattern-inside: |
+                  @$APP.$METHOD(...)
+                  async def $FUNC(..., $PARAM = fastapi.Depends($FORM), ...):
+                    ...
+          - metavariable-regex:
+              metavariable: $METHOD
+              regex: ^(get|post|put|patch|delete|head|options|api_route|route|websocket)$
+          - metavariable-pattern:
+              metavariable: $FORM
+              pattern-either:
+                - pattern: fastapi.security.OAuth2PasswordRequestForm
+                - pattern: fastapi.security.OAuth2PasswordRequestFormStrict
+          - pattern: $PARAM
       # Raw request object (starlette.requests.Request).
       - patterns:
           - pattern-either:

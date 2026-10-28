@@ -59,7 +59,9 @@ pozycje:
       wyciek sekretu przez repozytorium. Gitleaks generic-api-key (nazwa z członem secret, entropia co najmniej 3,5)
       i Bandit B105 (nazwa z członem _secret) obejmują tę postać; pole z adnotacją typu (jwt_secret: str = "…")
       nie pasowałoby do żadnej z tych reguł (E02-10, docs/narzedzia.md, p. 4.1; regex Gitleaks sprawdzony
-      emulacją w Pythonie, do potwierdzenia w pilotażu). Pewność do ponownej oceny przez autora (TODO)
+      emulacją w Pythonie, do potwierdzenia w pilotażu). Pewność średnia (decyzja autora z 2026-10-28, E03-07):
+      Bandit B105 ma ważność LOW (kod Bandit 1.9.4), więc blokuje tylko przy progu bramki Bandit LOW (E07);
+      przy wyższym progu o zatrzymaniu decyduje sam Gitleaks, sprawdzony dotąd tylko emulacją
 
   - id: GT-03
     tytul: Hashowanie haseł funkcją MD5
@@ -123,15 +125,18 @@ pozycje:
     lokalizacja: moduł logowania zdarzeń uwierzytelniania
     wprowadzenie: nazwa użytkownika z żądania zapisywana do logu bez neutralizacji znaków nowej linii
     w_zasiegu_narzedzi: true
-    pewnosc_detekcji: niska
+    pewnosc_detekcji: srednia
     oczekiwany_detektor:
       - {klasa: SAST, narzedzie: Semgrep, regula_wlasna: true}
     najwczesniejszy_etap: PR
     uzasadnienie: >-
       jedyna pozycja z kategorii A09. Rejestr Semgrep (p/python, p/default) ani Bandit nie mają reguły
       dla log injection w Pythonie (E02-10, docs/narzedzia.md, p. 4.1), więc detektorem jest reguła własna
-      Semgrep pisana pod klasę CWE-117 (decyzja autora z 2026-10-20). Pewność do ponownej oceny po napisaniu
-      i przetestowaniu reguły (TODO)
+      Semgrep pisana pod klasę CWE-117 (decyzja autora z 2026-10-20). Pewność średnia (decyzja autora
+      z 2026-10-28, E03-07): reguła ma ważność ERROR i wykrywa wzorzec łatki w testach, ale wykrycie zależy
+      od postaci kodu z E04. Formularz OAuth2PasswordRequestForm z Depends() dodano do źródeł reguły
+      (semgrep-rules/README.md). Zostaje ograniczenie: logowanie w funkcji pomocniczej, a nie w handlerze
+      trasy, nie jest zgłaszane (analiza w obrębie jednej funkcji)
 
   # ---------------------------------------------------------------- zależności
   - id: GT-07
@@ -196,7 +201,7 @@ pozycje:
     lokalizacja: Dockerfile
     wprowadzenie: usunięcie instrukcji USER z nieuprzywilejowanym użytkownikiem, którą ma wersja czysta
     w_zasiegu_narzedzi: true
-    pewnosc_detekcji: srednia
+    pewnosc_detekcji: wysoka
     oczekiwany_detektor:
       - {klasa: IaC/Dockerfile, narzedzie: Checkov}
       - {klasa: IaC/Dockerfile, narzedzie: Trivy}
@@ -204,8 +209,10 @@ pozycje:
     uzasadnienie: >-
       najczęstszy błąd utwardzenia kontenera. Brak instrukcji USER wykrywają Checkov CKV_DOCKER_3 i Trivy DS-0002;
       hadolint DL3002 reaguje tylko na jawne USER root, więc usunięto go z oczekiwanych detektorów, a łatka zostaje
-      bez zmian (decyzja autora z 2026-10-20, E02-10, docs/narzedzia.md, p. 4.1). Pewność do ponownej oceny przez
-      autora (TODO)
+      bez zmian (decyzja autora z 2026-10-20, E02-10, docs/narzedzia.md, p. 4.1). Pewność wysoka (decyzja autora
+      z 2026-10-28, E03-07): oba detektory blokują (Checkov bez progów ważności, Trivy HIGH). Wspólny martwy punkt
+      (kod reguł z gałęzi main, 2026-10-28): obie reguły patrzą na cały plik, więc USER w etapie innym niż końcowy
+      ukrywa łatkę przed oboma. Warunek dla E04: w Dockerfile wieloetapowym USER tylko w etapie końcowym
 
   # ---------------------------------------------------------------- infrastruktura jako kod
   - id: GT-10
@@ -297,19 +304,23 @@ pozycje:
     owasp_cicd: null
     asvs: v5.0.0-16.5.1
     lokalizacja: inicjalizacja aplikacji FastAPI
-    wprowadzenie: FastAPI(debug=True), więc nieobsłużony wyjątek zwraca klientowi pełny stack trace
+    wprowadzenie: >-
+      FastAPI(debug=True), więc nieobsłużony wyjątek zwraca klientowi pełny stack trace. Warunek dla E04: łatka
+      dosłownie jako debug=True w konstruktorze (decyzja autora z 2026-10-28, E03-07)
     w_zasiegu_narzedzi: true
-    pewnosc_detekcji: srednia
+    pewnosc_detekcji: wysoka
     oczekiwany_detektor:
       - {klasa: SAST, narzedzie: Semgrep, regula_wlasna: true}
-      - {klasa: DAST, narzedzie: OWASP ZAP}
     najwczesniejszy_etap: PR
     uzasadnienie: >-
       jedyna pozycja z kategorii A10; łamie też v5.0.0-13.4.2 (debug na produkcji). Rejestr Semgrep ma regułę
       debug tylko dla Flaska, więc detektorem SAST jest reguła własna Semgrep dla trybu debug w FastAPI
       i Starlette (decyzja autora z 2026-10-20). ZAP baseline zgłasza każdy błąd 500 (reguły 90022, 10023)
       niezależnie od trybu debug i tylko wtedy, gdy pająk trafi na adres wywołujący błąd (E02-10,
-      docs/narzedzia.md, p. 4.1)
+      docs/narzedzia.md, p. 4.1). Dlatego ZAP nie jest oczekiwanym detektorem: sam alert o błędzie 500 nie jest
+      trafieniem GT-14; zgłoszenie ZAP pokazujące traceback oceniamy ręcznie według reguły trafienia. Pewność
+      wysoka: reguła własna to wzorzec składniowy dopasowany do dosłownej postaci łatki, ważność ERROR (decyzja
+      autora z 2026-10-28, E03-07)
 
   # ---------------------------------------------------------------- workflow GitHub Actions
   - id: GT-15

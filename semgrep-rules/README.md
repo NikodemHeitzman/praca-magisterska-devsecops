@@ -22,7 +22,7 @@ Każda reguła ma w metadanych `custom_rule: true`. Dzięki temu wynik H1 bez re
   - dane z obiektu `Request`: `query_params`, `path_params`, `headers`, `cookies`, `url`, `json()`, `form()`, `body()`.
 - **Pomijane źródła:**
   - parametry typu `int`, `float`, `bool`, `uuid.UUID` (FastAPI je waliduje, więc nie zawierają znaków nowej linii),
-  - parametry z `Depends(...)`, podane wprost albo w `Annotated[..., Depends(...)]`.
+  - parametry z `Depends(...)`, podane wprost albo w `Annotated[..., Depends(...)]`. Wyjątek: formularze logowania `OAuth2PasswordRequestForm` i `OAuth2PasswordRequestFormStrict` są źródłem mimo `Depends()`, bo niosą surowe pola formularza z ciała żądania (decyzja autora z 2026-10-28, E03-07).
 - **Sanityzacja:**
   - `.replace()` dla `\n` i `\r`, `re.sub()`, `repr()`, `json.dumps()`, `.encode("unicode_escape")`,
   - `int()`, `float()`, `bool()`, `len()`.
@@ -45,11 +45,15 @@ semgrep --test --metrics=off semgrep-rules/
 
 Wynik z 2026-10-20 (Semgrep 1.181.0, Windows): 2/2 pliki testów przechodzą. Reguła GT-06 ma 8 przypadków `ruleid` i 10 `ok`, a reguła GT-14 ma 5 `ruleid` i 4 `ok`.
 
+Wynik z 2026-10-28 po dodaniu formularzy OAuth2 do źródeł GT-06 (Semgrep 1.181.0, Windows): 2/2 pliki testów przechodzą. Reguła GT-06 ma 11 przypadków `ruleid` i 11 `ok`. Poprzednia wersja reguły nie zgłaszała trzech nowych przypadków `ruleid` (sprawdzone uruchomieniem obu wersji na pliku testów).
+
+Ograniczenie, którego nie usuwamy: analiza taint obejmuje jedną funkcję. Dane z żądania przekazane do funkcji pomocniczej, która sama loguje, nie są zgłaszane, bo parametr takiej funkcji nie jest źródłem.
+
 Katalog nie może mieć kropki na początku nazwy (np. `.semgrep/`). Semgrep 1.181.0 nie znajduje wtedy testów przy `--test <katalog>`.
 
 ## Test na kodzie spoza katalogu
 
-Uruchomiono 2026-10-20 na dwóch publicznych projektach FastAPI (`semgrep scan --config semgrep-rules/…`, tylko pliki `*.py`). Ocena zgłoszeń jest ręczna (agent).
+Uruchomiono 2026-10-20 na dwóch publicznych projektach FastAPI, na wersji reguły GT-06 sprzed dodania formularzy OAuth2 (TODO: powtórzyć na obecnej wersji) (`semgrep scan --config semgrep-rules/…`, tylko pliki `*.py`). Ocena zgłoszeń jest ręczna (agent).
 
 | Projekt (commit) | Plików | Zgłoszeń GT-06 | Trafne / fałszywe | Zgłoszeń GT-14 |
 |---|---|---|---|---|

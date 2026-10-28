@@ -8,6 +8,7 @@ import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, FastAPI, Form, Header
+from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordRequestFormStrict
 from pydantic import BaseModel
 from starlette.requests import Request
 
@@ -98,6 +99,31 @@ async def me2(user: Annotated[str, Depends(get_current_user)], q: Annotated[str,
     logger.info("current user %s", user)
     # ruleid: python-log-injection
     logger.info("header %s", q)
+
+
+# OAuth2 login forms are injected with Depends(), but they carry raw form fields from the request body.
+@app.post("/token")
+def token(form_data: OAuth2PasswordRequestForm = Depends()):
+    # ruleid: python-log-injection
+    logger.warning("failed login for %s", form_data.username)
+
+
+@router.post("/token-annotated")
+async def token_annotated(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
+    # ruleid: python-log-injection
+    logger.warning("failed login for %s", form_data.username)
+
+
+@app.post("/token-strict")
+def token_strict(form_data=Depends(OAuth2PasswordRequestFormStrict)):
+    # ruleid: python-log-injection
+    logger.info(f"login attempt: {form_data.username}")
+
+
+@app.post("/token-safe")
+def token_safe(form_data: OAuth2PasswordRequestForm = Depends()):
+    # ok: python-log-injection
+    logger.warning("failed login for %r", repr(form_data.username))
 
 
 def not_a_route(name):

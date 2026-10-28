@@ -128,7 +128,7 @@ Reguły z gałęzi głównej mogą się różnić od tych, które pobierze potok
 - **Checkov `CKV_DOCKER_3`** („Ensure that a user for the container has been created”) zgłasza błąd, gdy w Dockerfile nie ma żadnej instrukcji `USER`. **`CKV_DOCKER_8`** sprawdza tylko jawne `USER root`.
 - **Trivy `DS-0002`** (alias `DS002`, ważność HIGH) zgłasza zarówno brak instrukcji `USER`, jak i ostatnie `USER root` albo `USER 0`.
 - **hadolint `DL3002`** reaguje tylko na jawne `USER root`, `USER 0` albo `root:`/`0:` w danym etapie. Brak instrukcji `USER` tej reguły nie uruchamia.
-- **Wniosek:** wykrywalne przez Checkov i Trivy. hadolint nie wykryje łatki w obecnej postaci (usunięcie `USER`). Uwaga: `CKV_DOCKER_3` sprawdza cały plik, więc w Dockerfile wieloetapowym `USER` w dowolnym etapie wystarczy, żeby kontrola przeszła (TODO: zweryfikować w pilotażu).
+- **Wniosek:** wykrywalne przez Checkov i Trivy. hadolint nie wykryje łatki w obecnej postaci (usunięcie `USER`). Uwaga: `CKV_DOCKER_3` sprawdza cały plik, więc w Dockerfile wieloetapowym `USER` w dowolnym etapie wystarczy, żeby kontrola przeszła. Potwierdzone 2026-10-28 w kodzie z gałęzi `main` (`checkov/dockerfile/checks/UserExists.py`: pierwsza instrukcja `USER` w pliku daje PASSED). Trivy `DS-0002` też patrzy na cały plik (`trivy-checks`, `checks/docker/root_user.rego`: brak `USER` w pliku albo ostatnia `USER` to root/0). Oba detektory przepuszczą więc łatkę, jeśli `USER` nieuprzywilejowanego użytkownika jest w etapie innym niż końcowy. Zachowanie przypiętych wersji: TODO: zweryfikować w pilotażu.
 
 **GT-12, CORS z `*`.**
 
