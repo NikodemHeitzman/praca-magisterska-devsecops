@@ -59,12 +59,12 @@ Rodzaje celów odpowiadają kolejnym częściom pracy: analiza (rozdz. 3) → pr
   |---|---|
   | NIST SP 800-204D, rekomendacje z rozdz. 5 (tabela A w `docs/notes/nist-800-204d.md`, 34 pozycje) | pozycje listy |
   | NIST SP 800-204D, środki bazowe dla open source z 3.2.1 (tabela B, 8 pozycji) | pozycje listy |
-  | OWASP Top 10 CI/CD Security Risks | pozycje listy |
+  | OWASP Top 10 CI/CD Security Risks | pozycje listy: 17 rekomendacji stosowalnych (T lub Cz) bez odpowiednika w SP 800-204D (`docs/notes/owasp-devsecops.md`, sekcja 4). Rekomendacje pokrywające się z SP 800-204D (`=`, `≈`) są kolumną mapowania „CICD-SEC” przy pozycjach SP 800-204D. Rekomendacje niestosowalne (N) są na liście z uzasadnieniem. Decyzja autora z 2026-10-28 (E02-04) |
   | NIST SP 800-218 (SSDF) | kolumna mapowania przy każdej pozycji, bez osobnych pozycji (SP 800-204D sam jest zmapowany na SSDF, osobne pozycje liczyłyby te same wymagania dwa razy) |
   | OWASP DevSecOps Guideline | podstawa doboru etapów i narzędzi w projekcie potoku (C2) |
   | OWASP ASVS 5.0 i OWASP Top 10:2025 | podstawa katalogu podatności referencyjnych (E03-03), bo dotyczą aplikacji, nie potoku |
 
-  Część OWASP jest wstępna do czasu lektury w E02-04. Zmianę składu po lekturze zapisujemy w dzienniku z uzasadnieniem.
+  Część OWASP ustalono po lekturze w E02-04 (decyzja autora z 2026-10-28, `docs/log/2026-10-28.md`). Odrzucone: 10 ryzyk CICD-SEC jako pozycje (zbyt ogólne do oceny „spełnione / niespełnione”) i wszystkie 58 rekomendacji (część liczyłaby drugi raz wymagania SP 800-204D). Pokrycie według 10 ryzyk podajemy dodatkowo w 4.3 i 5.x.
 - Mapowanie narzędzi na praktyki SSDF przyjmujemy według definicji SSDF: SAST → PW.7, SCA → PW.4.4, DAST → PW.8. Rozbieżność z dodatkiem A SP 800-204D opisujemy w 3.1 albo 5.3 (decyzja z E02-03).
 
 ## 2. Pytania badawcze i hipotezy

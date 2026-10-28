@@ -7,7 +7,7 @@
 # Źródła klasyfikacji:
 #   cwe               – nazwy i status mapowania sprawdzone w MITRE CWE (cwe-api.mitre.org), 2026-10-09
 #   owasp_top10_2025  – tylko gdy CWE jest na liście „List of Mapped CWEs” danej kategorii [@OWASP-Top10-2025]
-#   owasp_cicd        – wstępne przypisanie do OWASP Top 10 CI/CD [@OWASP-Top10-CICD]; do weryfikacji w E02-04
+#   owasp_cicd        – przypisanie do OWASP Top 10 CI/CD [@OWASP-Top10-CICD]; zweryfikowane w E02-04 (docs/notes/owasp-devsecops.md, p. 5)
 #   asvs              – wymaganie łamane przez pozycję [@OWASP-ASVS-5.0]
 #   oczekiwany_detektor – hipoteza przed eksperymentem; narzędzia z listy kandydatów E02-10, reguły do ustalenia w E02-10/E07
 #                         regula_wlasna: true = detektor działa dzięki regule własnej w repozytorium, której nie ma
@@ -139,7 +139,7 @@ pozycje:
     grupa: zaleznosci
     cwe: CWE-1395
     owasp_top10_2025: A03
-    owasp_cicd: CICD-SEC-3
+    owasp_cicd: null   # znane CVE w pakiecie to A03:2025, nie CICD-SEC-3 (decyzja autora z 2026-10-28, E02-04)
     asvs: v5.0.0-15.2.1
     lokalizacja: plik zależności z blokadą wersji (lockfile, E04-02)
     wprowadzenie: jinja2 przypięte do 3.1.2 zamiast wersji bez znanych podatności
@@ -167,7 +167,7 @@ pozycje:
     grupa: kontener
     cwe: CWE-1104
     owasp_top10_2025: A03
-    owasp_cicd: CICD-SEC-3
+    owasp_cicd: null   # przestarzały obraz to A03:2025, nie CICD-SEC-3 (decyzja autora z 2026-10-28, E02-04)
     asvs: v5.0.0-15.2.1
     lokalizacja: Dockerfile, instrukcja FROM
     wprowadzenie: >-
@@ -333,7 +333,7 @@ pozycje:
     grupa: workflow
     cwe: CWE-829
     owasp_top10_2025: A08
-    owasp_cicd: CICD-SEC-3   # TODO: zweryfikować w E02-04 (CICD-SEC-3 albo CICD-SEC-8)
+    owasp_cicd: CICD-SEC-8   # decyzja autora z 2026-10-28 (E02-04, docs/notes/owasp-devsecops.md, p. 5)
     asvs: null
     lokalizacja: plik workflow
     wprowadzenie: odwołanie uses do akcji zewnętrznej przez tag zamiast pełnego SHA commita
