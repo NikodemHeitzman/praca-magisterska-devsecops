@@ -36,24 +36,23 @@ def test_health_reports_database_unavailable(client: TestClient) -> None:
     assert response.json() == {"status": "degraded", "database": "unavailable"}
 
 
+# No checks of frame-ancestors or X-Frame-Options: the GT-13 patch removes both (conftest.py).
 @pytest.mark.parametrize("path", ["/", "/login"])
 def test_public_pages_send_security_headers(client: TestClient, path: str) -> None:
     response = client.get(path)
 
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("text/html")
-    assert "frame-ancestors 'none'" in response.headers["content-security-policy"]
-    assert response.headers["x-frame-options"] == "DENY"
+    assert "default-src 'self'" in response.headers["content-security-policy"]
     assert response.headers["x-content-type-options"] == "nosniff"
+    assert response.headers["referrer-policy"] == "no-referrer"
 
 
 def test_docs_use_relaxed_csp(client: TestClient) -> None:
     response = client.get("/docs")
 
     assert response.status_code == 200
-    csp = response.headers["content-security-policy"]
-    assert "https://cdn.jsdelivr.net" in csp
-    assert "frame-ancestors 'none'" in csp
+    assert "https://cdn.jsdelivr.net" in response.headers["content-security-policy"]
 
 
 def test_openapi_schema_is_served(client: TestClient) -> None:

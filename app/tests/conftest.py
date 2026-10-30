@@ -2,13 +2,17 @@
 
 Requires the db service from compose.yaml (docker compose up -d db). The test database is
 TEST_DATABASE_URL, or DATABASE_URL from .env with the database name suffixed with _test.
+
+The tests check behaviour, not the properties the catalog patches change (GT-03, GT-06,
+GT-13, GT-18...GT-20 and others): every patch must pass them (experiment/PROTOCOL.md).
 """
 
 import os
 import secrets
 import tempfile
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import boto3
 import pytest
@@ -20,9 +24,14 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.engine import URL, make_url
 from sqlalchemy.orm import Session
 
+if TYPE_CHECKING:
+    from ticketing.models import User
+
 APP_DIR = Path(__file__).resolve().parent.parent
 AWS_REGION = "eu-central-1"
 TEST_BUCKET = "test-attachments"
+# Generated per run, so that no password literal sits in the repository.
+TEST_PASSWORD = secrets.token_urlsafe(16)
 
 # ticketing.main reads the settings once at import, so the environment comes first.
 os.environ.update(
@@ -119,3 +128,39 @@ def client() -> Iterator[TestClient]:
 
     with TestClient(app) as test_client:
         yield test_client
+
+
+@pytest.fixture
+def make_user(db_session: Session) -> Callable[..., "User"]:
+    """Create a user with TEST_PASSWORD directly in the database."""
+    from ticketing.models import Role, User
+    from ticketing.security import hash_password
+
+    password_hash = hash_password(TEST_PASSWORD)
+
+    def _make_user(username: str, role: Role = Role.USER) -> User:
+        user = User(
+            username=username,
+            email=f"{username}@example.com",
+            password_hash=password_hash,
+            role=role,
+        )
+        db_session.add(user)
+        db_session.commit()
+        return user
+
+    return _make_user
+
+
+@pytest.fixture
+def login(client: TestClient) -> Callable[[str], dict[str, str]]:
+    """Log in through the API and return the Authorization header."""
+
+    def _login(username: str) -> dict[str, str]:
+        response = client.post(
+            "/api/auth/login", data={"username": username, "password": TEST_PASSWORD}
+        )
+        assert response.status_code == 200, response.text
+        return {"Authorization": f"Bearer {response.json()['access_token']}"}
+
+    return _login
