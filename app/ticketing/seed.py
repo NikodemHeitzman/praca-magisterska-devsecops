@@ -32,7 +32,11 @@ ACCOUNTS = [
 
 TICKETS = {
     "alice": [
-        ("VPN connection drops every few minutes", "Happens since the client update on Monday.", TicketPriority.HIGH),
+        (
+            "VPN connection drops every few minutes",
+            "Happens since the client update on Monday.",
+            TicketPriority.HIGH,
+        ),
         ("New monitor for the second desk", "", TicketPriority.LOW),
     ],
     "bob": [
@@ -66,7 +70,11 @@ def ensure_bucket() -> None:
         client.head_bucket(Bucket=settings.s3_bucket)
     except ClientError:
         region = client.meta.region_name
-        options = {} if region == "us-east-1" else {"CreateBucketConfiguration": {"LocationConstraint": region}}
+        options = (
+            {}
+            if region == "us-east-1"
+            else {"CreateBucketConfiguration": {"LocationConstraint": region}}
+        )
         client.create_bucket(Bucket=settings.s3_bucket, **options)
 
 
@@ -84,7 +92,9 @@ def ensure_tickets(db: Session, owner: User) -> dict[str, Ticket]:
     existing = {ticket.title: ticket for ticket in owner.tickets}
     for title, description, priority in TICKETS.get(owner.username, []):
         if title not in existing:
-            existing[title] = Ticket(title=title, description=description, priority=priority, owner=owner)
+            existing[title] = Ticket(
+                title=title, description=description, priority=priority, owner=owner
+            )
             db.add(existing[title])
     return existing
 
@@ -107,7 +117,9 @@ def ensure_attachment(db: Session, ticket: Ticket, uploader: User) -> None:
 def seed() -> None:
     ensure_bucket()
     with get_sessionmaker()() as db:
-        users = {username: ensure_user(db, username, name, role) for username, name, role in ACCOUNTS}
+        users = {
+            username: ensure_user(db, username, name, role) for username, name, role in ACCOUNTS
+        }
         db.flush()
         tickets = {username: ensure_tickets(db, users[username]) for username in TICKETS}
         db.flush()

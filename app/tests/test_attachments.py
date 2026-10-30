@@ -95,9 +95,7 @@ def test_upload_rejects_too_large_file(
     assert upload(client, ticket_url, alice, content=b"x" * 11).status_code == 413
 
 
-def test_upload_rejects_duplicate_name(
-    client: TestClient, alice: Headers, ticket_url: str
-) -> None:
+def test_upload_rejects_duplicate_name(client: TestClient, alice: Headers, ticket_url: str) -> None:
     assert upload(client, ticket_url, alice).status_code == 201
 
     assert upload(client, ticket_url, alice).status_code == 409

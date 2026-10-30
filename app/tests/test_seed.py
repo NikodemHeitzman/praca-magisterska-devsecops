@@ -56,9 +56,7 @@ def test_seed_creates_bucket_in_local_s3_stand_in(s3, monkeypatch: pytest.Monkey
     bucket = get_settings().s3_bucket
     s3.delete_bucket(Bucket=bucket)
     # An AWS-style endpoint, so that mock_aws still intercepts the calls.
-    monkeypatch.setattr(
-        get_settings(), "s3_endpoint_url", "https://s3.eu-central-1.amazonaws.com"
-    )
+    monkeypatch.setattr(get_settings(), "s3_endpoint_url", "https://s3.eu-central-1.amazonaws.com")
     get_s3_client.cache_clear()
 
     seed.seed()

@@ -39,7 +39,9 @@ def register(data: UserCreate, db: Annotated[Session, Depends(get_db)]) -> User:
     except IntegrityError:
         # A concurrent registration took the name between the check and the insert.
         db.rollback()
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=ALREADY_REGISTERED) from None
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail=ALREADY_REGISTERED
+        ) from None
     return user
 
 
@@ -50,7 +52,8 @@ def login(
 ) -> Token:
     user = db.scalar(select(User).where(User.username == form_data.username))
     if user is None or not verify_password(user.password_hash, form_data.password):
-        # Logged here, not in a helper: the GT-06 rule analyses one function (semgrep-rules/README.md).
+        # Logged here, not in a helper: the GT-06 rule analyses one function
+        # (semgrep-rules/README.md).
         username = form_data.username.replace("\r", "\\r").replace("\n", "\\n")
         logger.warning("Failed login for user %s", username)
         raise HTTPException(

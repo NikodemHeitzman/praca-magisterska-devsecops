@@ -36,6 +36,17 @@ uv run pytest
 - Klient testowy to `TestClient` z httpx2 ([ADR-0013](../docs/adr/0013-klient-http-testow-httpx2.md)). Ostrzeżenia są traktowane jak błędy (`filterwarnings = ["error"]`).
 - Raport pokrycia wyświetla się po testach. Przebieg kończy się błędem, gdy pokrycie spadnie poniżej 70%.
 
+## Linting i formatowanie
+
+```
+uv run ruff check .
+uv run ruff format --check .
+```
+
+- Konfiguracja jest w `pyproject.toml` (`[tool.ruff]`). Włączone są tylko reguły stylu i poprawności (`E`, `W`, `F`, `I`, `B`, `UP`, `SIM`), bez reguł bezpieczeństwa (`S`), bo lint działa w obu wariantach potoku ([ADR-0014](../docs/adr/0014-linting-i-formatowanie-ruff.md)).
+- `target-version = "py313"` jest celowo niższy niż `requires-python`. Przy `py314` formatter zamienia `except (A, B):` na składnię z PEP 758, a pyupgrade usuwa cudzysłowy z odwołań w przód w modelach SQLAlchemy.
+- Poprawki automatyczne: `uv run ruff check --fix .` i `uv run ruff format .`.
+
 ## Zmiana zależności
 
 Po każdej zmianie w `pyproject.toml`:

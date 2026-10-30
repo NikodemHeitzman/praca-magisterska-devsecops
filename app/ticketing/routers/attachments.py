@@ -1,4 +1,7 @@
-"""Ticket attachments (docs/app-spec.md, section 4.3; docs/adr/0006-przechowywanie-zalacznikow-s3.md)."""
+"""Ticket attachments.
+
+See docs/app-spec.md, section 4.3, and docs/adr/0006-przechowywanie-zalacznikow-s3.md.
+"""
 
 import re
 from pathlib import PurePosixPath
@@ -27,7 +30,9 @@ def clean_filename(raw: str | None) -> str:
     name = PurePosixPath((raw or "").replace("\\", "/")).name
     name = re.sub(r"[^A-Za-z0-9._-]", "_", name)[-255:]
     if name.strip(".") == "":
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Invalid file name")
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Invalid file name"
+        )
     return name
 
 
@@ -55,7 +60,9 @@ def upload_attachment(
             detail=f"File larger than {settings.max_upload_bytes} bytes",
         )
     taken = db.scalar(
-        select(Attachment.id).where(Attachment.ticket_id == ticket.id, Attachment.filename == filename)
+        select(Attachment.id).where(
+            Attachment.ticket_id == ticket.id, Attachment.filename == filename
+        )
     )
     if taken is not None:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="File name already used")
@@ -101,7 +108,9 @@ def download_attachment(
 
     if not path.is_file():
         attachment = db.scalar(
-            select(Attachment).where(Attachment.ticket_id == ticket.id, Attachment.filename == filename)
+            select(Attachment).where(
+                Attachment.ticket_id == ticket.id, Attachment.filename == filename
+            )
         )
         if attachment is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=ATTACHMENT_NOT_FOUND)

@@ -129,9 +129,7 @@ def test_read_missing_ticket_returns_404(client: TestClient, alice: Headers) -> 
 def test_update_ticket(client: TestClient, alice: Headers) -> None:
     ticket = create(client, alice, "Printer jam", priority="low")
 
-    response = client.patch(
-        f"{TICKETS}/{ticket['id']}", json={"priority": "high"}, headers=alice
-    )
+    response = client.patch(f"{TICKETS}/{ticket['id']}", json={"priority": "high"}, headers=alice)
 
     assert response.status_code == 200
     assert response.json()["priority"] == "high"

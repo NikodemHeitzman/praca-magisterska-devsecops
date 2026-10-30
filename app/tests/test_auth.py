@@ -35,9 +35,7 @@ def test_register_creates_user_who_can_log_in(client: TestClient) -> None:
     assert body["role"] == "user"
     assert "password" not in body and "password_hash" not in body
 
-    login = client.post(
-        "/api/auth/login", data={"username": "carol", "password": data["password"]}
-    )
+    login = client.post("/api/auth/login", data={"username": "carol", "password": data["password"]})
     assert login.status_code == 200
     assert login.json()["token_type"] == "bearer"
 
@@ -47,9 +45,7 @@ def test_register_creates_user_who_can_log_in(client: TestClient) -> None:
     [registration(email="other@example.com"), registration(username="other")],
     ids=["same-username", "same-email"],
 )
-def test_register_rejects_taken_username_or_email(
-    client: TestClient, data: dict[str, str]
-) -> None:
+def test_register_rejects_taken_username_or_email(client: TestClient, data: dict[str, str]) -> None:
     assert client.post("/api/auth/register", json=registration()).status_code == 201
 
     response = client.post("/api/auth/register", json=data)
@@ -91,9 +87,7 @@ def test_login_rejects_bad_credentials_and_logs_attempt(
     make_user("alice")
 
     with caplog.at_level(logging.WARNING, logger="ticketing.routers.auth"):
-        response = client.post(
-            "/api/auth/login", data={"username": username, "password": "wrong"}
-        )
+        response = client.post("/api/auth/login", data={"username": username, "password": "wrong"})
 
     assert response.status_code == 401
     assert response.headers["www-authenticate"] == "Bearer"

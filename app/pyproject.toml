@@ -30,6 +30,7 @@ dev = [
     "moto[s3]>=5.2.5",
     "pytest>=9.2.0",
     "pytest-cov>=7.1.0",
+    "ruff>=0.17.3",
 ]
 
 [tool.pytest.ini_options]
@@ -39,6 +40,27 @@ pythonpath = ["."]
 addopts = ["--strict-markers", "--cov", "--cov-report=term-missing"]
 # A clean run has no warnings (docs/adr/0013-klient-http-testow-httpx2.md).
 filterwarnings = ["error"]
+
+[tool.ruff]
+# Below requires-python on purpose: with py314 the formatter rewrites
+# `except (A, B):` to the PEP 758 form `except A, B:`, which SAST parsers may not
+# support yet, and pyupgrade unquotes SQLAlchemy forward references (UP037).
+target-version = "py313"
+line-length = 100
+
+[tool.ruff.lint]
+# Style and correctness only. No security rules (S, flake8-bandit): lint runs in
+# both pipeline variants, and variant A has no security controls
+# (experiment/PROTOCOL.md). Security analysis belongs to the scanners in variant B.
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # Pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "SIM", # flake8-simplify
+]
 
 [tool.coverage.run]
 source = ["ticketing"]

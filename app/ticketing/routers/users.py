@@ -31,5 +31,7 @@ def update_me(
         db.commit()
     except IntegrityError:
         db.rollback()
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered") from None
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="Email already registered"
+        ) from None
     return user
