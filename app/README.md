@@ -40,4 +40,5 @@ Oba pliki trafiają do tego samego commita. Łatka GT-07 zmienia `jinja2` w `pyp
 - `ticketing/db.py`, `ticketing/models.py`: baza i modele,
 - `ticketing/routers/`: endpointy (`health`, strony HTML; API: E04-03),
 - `ticketing/templates/`: szablony Jinja2,
+- `ticketing/static/`: arkusz stylów stron HTML, podawany pod `/static` (plik z tej samej domeny, więc zgodny z CSP `default-src 'self'`),
 - `migrations/`: migracje Alembic.

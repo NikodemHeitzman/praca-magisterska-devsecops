@@ -5,6 +5,7 @@ import sys
 
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import RequestResponseEndpoint
 
 from ticketing.config import get_settings
@@ -54,3 +55,4 @@ async def security_headers(request: Request, call_next: RequestResponseEndpoint)
 
 app.include_router(health.router)
 app.include_router(pages.router)
+app.mount("/static", StaticFiles(directory=pages.STATIC_DIR), name="static")
