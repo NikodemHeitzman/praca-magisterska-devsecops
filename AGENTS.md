@@ -12,7 +12,7 @@ Ten plik opisuje projekt dla asystentów AI (Claude Code, Copilot, Codex i innyc
 ## Struktura
 
 - `app/`: aplikacja webowa i `Dockerfile`
-- `infra/terraform/`: infrastruktura AWS (region domyślny: TODO, np. `eu-central-1`)
+- `infra/terraform/`: infrastruktura AWS (region: `eu-central-1`, ADR-0015; konto opisane w `docs/aws-konto.md`)
 - `infra/ansible/`: konfiguracja i wdrożenie
 - `.github/workflows/`: potok bazowy i potok DevSecOps
 - `semgrep-rules/`: reguły własne Semgrep z testami (GT-06, GT-14; opis w `semgrep-rules/README.md`)
