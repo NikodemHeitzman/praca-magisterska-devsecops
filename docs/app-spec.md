@@ -166,7 +166,7 @@ Konfiguracja przez zmienne środowiskowe (klasa ustawień `pydantic-settings`):
 | `JWT_EXPIRE_MINUTES` | ważność tokenu |
 | `CORS_ORIGINS` | lista dozwolonych źródeł (GT-12) |
 | `S3_BUCKET` | kubełek na załączniki |
-| `S3_ENDPOINT_URL` | opcjonalny adres zgodnej z S3 usługi lokalnie i w CI (TODO: zweryfikować wybór w E04-02/E05, np. MinIO w `compose.yaml`) |
+| `S3_ENDPOINT_URL` | opcjonalny adres zgodnej z S3 usługi lokalnie i w CI: moto w `compose.yaml` ([ADR-0009](adr/0009-lokalna-usluga-s3-moto.md)); w AWS pusty |
 | `ATTACHMENT_CACHE_DIR` | katalog podręczny załączników (GT-05) |
 | `MAX_UPLOAD_BYTES`, `ALLOWED_CONTENT_TYPES` | limity uploadu (wartości: E04-02) |
 | `LOG_LEVEL` | poziom logowania |
@@ -175,12 +175,13 @@ W AWS aplikacja korzysta z S3 przez rolę IAM, bez kluczy dostępowych (zasada 4
 
 Wymagania:
 
-- **Hasła:** Argon2 (biblioteka: E04-02).
+- **Hasła:** Argon2, biblioteka argon2-cffi ([ADR-0010](adr/0010-biblioteka-argon2.md)).
 - **Nagłówki bezpieczeństwa:** middleware dodaje do każdej odpowiedzi `Content-Security-Policy` z `frame-ancestors 'none'` i `X-Frame-Options: DENY` (GT-13). Zestaw pozostałych nagłówków: E04-02.
 - **CORS:** `app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origins, allow_credentials=False, ...)`. Konfiguracja w konstruktorze `FastAPI(middleware=[...])` jest wykluczona, bo reguła Semgrep jej nie obejmuje (decyzja autora z 2026-10-20).
 - **Tryb debug:** `FastAPI()` bez argumentu `debug` i bez odczytu trybu z konfiguracji. Łatka GT-14 dopisuje dosłownie `debug=True` (decyzja autora z 2026-10-28).
 - **Logi:** na standardowe wyjście. Zdarzenia uwierzytelniania (nieudane logowanie) loguje bezpośrednio handler trasy, a nie funkcja pomocnicza, bo reguła własna GT-06 analizuje jedną funkcję (`semgrep-rules/README.md`).
-- **Zgodność z Pythonem 3.9:** kod działa na Pythonie 3.9 (warunek GT-08): bez `match` i bez unii `X | Y` w adnotacjach, które Pydantic i FastAPI wyliczają w czasie działania (`Optional[...]`, `Union[...]`). Czy wersje zależności z lockfile instalują się na 3.9 i działają z jinja2 3.1.2 (GT-07): TODO: zweryfikować w E04-02.
+- **Wersja Pythona:** 3.14 ([ADR-0007](adr/0007-wersja-pythona-aplikacji.md)). Wymóg zgodności z Pythonem 3.9 (warunek GT-08 w v0 specyfikacji) zniesiono 2026-10-30, bo aktualne zależności nie wspierają już 3.9, a lockfile dobrany pod 3.9 miałby znane podatności spoza katalogu. GT-08 przechodzi na zamiennik z katalogu (starszy digest obrazu wersji czystej); zmiana katalogu: E03-07. Zgodność jinja2 3.1.2 (GT-07) ze starlette 1.10 na Pythonie 3.14 sprawdzono testem dymnym.
+- **Zależności:** menedżer uv z `uv.lock` i eksportem `requirements.txt` dla pip-audit ([ADR-0008](adr/0008-menedzer-zaleznosci-uv.md)). Zależności wpisane jawnie, bez `fastapi[standard]`, które wymaga `jinja2>=3.1.5` i zablokowałoby łatkę GT-07.
 - **Testy:** pytest z `TestClient`, pokrycie co najmniej 70% (E04-03).
 
 ## 8. Miejsca pod pozycje katalogu
@@ -222,7 +223,6 @@ Braki te mogą dać prawdziwe zgłoszenia spoza katalogu (np. ZAP o braku token�
 
 ## 10. Otwarte kwestie
 
-- Usługa zgodna z S3 lokalnie i w CI (skan DAST na `compose.yaml`): E04-02/E05.
-- Zgodność zależności z Pythonem 3.9 i jinja2 3.1.2: E04-02. Wymóg 3.9 może wymusić starsze wersje zależności, a te mogą mieć znane podatności spoza katalogu.
+- Opis GT-08 w katalogu (zamiennik: starszy digest obrazu `python:3.14-slim`) przed zamrożeniem v1: E03-07 ([ADR-0007](adr/0007-wersja-pythona-aplikacji.md)).
 - Fałszywe alarmy reguły GT-06 na wersji czystej (aliasy zależności, pola liczbowe; `semgrep-rules/README.md`): sprawdzić po E04-03. Kodu nie dopasowujemy pod regułę.
 - Czy wersja czysta przechodzi bramki wariantu B (`docs/notes/owasp-devsecops.md`, stan bazowy): seria próbna.

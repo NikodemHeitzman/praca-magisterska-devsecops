@@ -22,3 +22,7 @@ ADR (*Architecture Decision Record*) to krótki zapis jednej decyzji technicznej
 | [0004](0004-publiczne-repozytorium.md) | Publiczne repozytorium | przyjęty | 2026-10-01 |
 | [0005](0005-baza-danych-postgresql.md) | Baza danych aplikacji: PostgreSQL | przyjęty | 2026-10-30 |
 | [0006](0006-przechowywanie-zalacznikow-s3.md) | Przechowywanie załączników: S3 z lokalnym katalogiem podręcznym | przyjęty | 2026-10-30 |
+| [0007](0007-wersja-pythona-aplikacji.md) | Wersja Pythona aplikacji: 3.14 | przyjęty | 2026-10-30 |
+| [0008](0008-menedzer-zaleznosci-uv.md) | Menedżer zależności Pythona: uv | przyjęty | 2026-10-30 |
+| [0009](0009-lokalna-usluga-s3-moto.md) | Usługa zgodna z S3 lokalnie i w CI: moto | przyjęty | 2026-10-30 |
+| [0010](0010-biblioteka-argon2.md) | Biblioteka do skrótów haseł: argon2-cffi | przyjęty | 2026-10-30 |
