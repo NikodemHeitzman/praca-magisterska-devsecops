@@ -31,6 +31,7 @@ Ten plik opisuje projekt dla asystentów AI (Claude Code, Copilot, Codex i innyc
 6. **Odtwarzalność:** wersje narzędzi i obrazów bazowych przypięte; wyniki eksperymentu zapisujemy jako surowe dane, nie tylko wykresy.
 7. **Nie wymyślaj** wyników pomiarów, numerów CVE, źródeł ani cytatów. Czego nie wiadomo, oznacz `TODO: zweryfikować`.
 8. **Dziennik badawczy:** na koniec każdej sesji pracy dopisz wpis do `docs/log/RRRR-MM-DD.md` według `docs/log/_szablon.md`: autor (nazwa narzędzia), czas, co zrobiono, decyzje, problemy, następne kroki. Czasu, którego nie znasz, nie szacuj, tylko wpisz `TODO: zweryfikować`.
+9. **Koszty AWS: środowisko efemeryczne.** Konto jest płatne (ADR-0018), więc zasoby istnieją tylko w czasie pracy (ADR-0019, zasady w `docs/aws-konto.md`). Po `terraform apply` i zakończeniu zadania albo sesji zawsze `terraform destroy` warstwy roboczej. Na koniec sesji sprawdź, że nic nie zostało. Jeśli nie możesz usunąć zasobów sam, napisz autorowi wprost, co zostało uruchomione. Warstwę stałą (stan Terraformu, OIDC, IAM, budżety, CloudTrail, rejestr obrazów) zostawiaj do E15-08.
 
 ## Powiązane miejsca
 

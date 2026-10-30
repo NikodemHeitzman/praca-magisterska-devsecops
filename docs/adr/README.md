@@ -32,4 +32,6 @@ ADR (*Architecture Decision Record*) to krótki zapis jednej decyzji technicznej
 | [0014](0014-linting-i-formatowanie-ruff.md) | Linting i formatowanie: ruff bez reguł bezpieczeństwa | przyjęty | 2026-10-30 |
 | [0015](0015-region-aws-eu-central-1.md) | Region AWS: eu-central-1 (Frankfurt) | przyjęty | 2026-10-30 |
 | [0016](0016-uwierzytelnianie-do-aws.md) | Uwierzytelnianie do AWS: OIDC w potoku, użytkownicy IAM lokalnie | przyjęty | 2026-10-30 |
-| [0017](0017-plan-konta-aws-darmowy.md) | Plan konta AWS: darmowy | przyjęty | 2026-10-30 |
+| [0017](0017-plan-konta-aws-darmowy.md) | Plan konta AWS: darmowy | zastąpiony przez 0018 | 2026-10-30 |
+| [0018](0018-istniejace-konto-aws-plan-platny.md) | Konto AWS: istniejące konto autora, plan płatny | przyjęty | 2026-10-30 |
+| [0019](0019-srodowisko-efemeryczne-aws.md) | Środowisko AWS efemeryczne: zasoby tylko w czasie pracy | przyjęty | 2026-10-30 |

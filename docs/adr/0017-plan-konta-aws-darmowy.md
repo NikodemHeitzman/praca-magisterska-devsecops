@@ -1,6 +1,6 @@
 # 0017. Plan konta AWS: darmowy (Free account plan)
 
-- **Status:** przyjęty
+- **Status:** zastąpiony przez [0018](0018-istniejace-konto-aws-plan-platny.md)
 - **Data:** 2026-10-30
 - **Decydujący:** autor pracy
 - **Powiązane:** [0003](0003-dostawca-chmury-aws.md), [0015](0015-region-aws-eu-central-1.md), zadania E01-07, E05, E09, E15-08, [`docs/aws-konto.md`](../aws-konto.md), harmonogram pracy (`docs/harmonogram.md` w vaulcie Obsidiana, poza repozytorium), [dziennik 2026-10-30](../log/2026-10-30.md)
