@@ -104,7 +104,7 @@ Wersja czysta odpowiada 404, a nie 403, na zgłoszenie innego użytkownika, żeb
 |---|---|---|---|
 | `POST /api/tickets/{id}/attachments` | właściciel albo `admin` | Upload `multipart/form-data`. Nazwa pliku oczyszczona (tylko nazwa bez katalogów, dozwolony zestaw znaków). Limit rozmiaru i lista typów w konfiguracji. Zapis do S3 pod `s3_key`. | |
 | `GET /api/tickets/{id}/attachments` | właściciel albo `admin` | Lista załączników zgłoszenia. | |
-| `GET /api/tickets/{id}/attachments/{filename}` | właściciel albo `admin` | Pobranie pliku. Ścieżka w katalogu podręcznym: `ATTACHMENT_CACHE_DIR/<id>/<filename>`. Wersja czysta normalizuje ścieżkę (`resolve()`) i sprawdza, czy leży w katalogu podręcznym; inaczej 404. Gdy pliku nie ma lokalnie, aplikacja pobiera obiekt z S3 do katalogu podręcznego, a potem zwraca go przez `FileResponse`. | GT-05 |
+| `GET /api/tickets/{id}/attachments/{filename:path}` | właściciel albo `admin` | Pobranie pliku. Ścieżka w katalogu podręcznym: `ATTACHMENT_CACHE_DIR/<id>/<filename>`. Wersja czysta normalizuje ścieżkę (`resolve()`) i sprawdza, czy leży w katalogu podręcznym; inaczej 404. Gdy pliku nie ma lokalnie, aplikacja pobiera obiekt z S3 do katalogu podręcznego, a potem zwraca go przez `FileResponse`. Konwerter `:path` przyjmuje ukośniki, więc zakodowane `../` trafia do handlera; przy zwykłym `{filename}` Starlette odrzuca je przed handlerem i łatka GT-05 nie dałaby się wykorzystać przez HTTP (sprawdzone 2026-10-30, starlette 1.10.0; decyzja autora z 2026-10-30). | GT-05 |
 
 ### 4.4. Administracja
 
@@ -194,7 +194,7 @@ Wymagania:
 | GT-02 | moduł konfiguracji | `jwt_secret` z `JWT_SECRET` przez klasę ustawień | stała `JWT_SECRET = "<fikcyjna wartość>"` w module konfiguracji |
 | GT-03 | rejestracja i logowanie | Argon2 | `hashlib.md5(...)` |
 | GT-04 | `GET /api/tickets`, parametr `sort` | nazwa pola z listy dozwolonych | wyrażenie z `sort` przekazane do `eval()` |
-| GT-05 | `GET /api/tickets/{id}/attachments/{filename}` | normalizacja i sprawdzenie katalogu podręcznego | ścieżka bez normalizacji i sprawdzenia |
+| GT-05 | `GET /api/tickets/{id}/attachments/{filename:path}` | normalizacja i sprawdzenie katalogu podręcznego | ścieżka bez normalizacji i sprawdzenia |
 | GT-06 | `POST /api/auth/login`, nieudane logowanie | nazwa użytkownika po `.replace()` znaków `\n` i `\r` | nazwa użytkownika bez neutralizacji |
 | GT-07 | lockfile (E04-02) | aktualna wersja `jinja2` | `jinja2==3.1.2` |
 | GT-08 | `Dockerfile`, `FROM` (E05-01) | aktualny obraz Pythona przypięty digestem | `python:3.9-slim-bullseye` przypięty digestem |

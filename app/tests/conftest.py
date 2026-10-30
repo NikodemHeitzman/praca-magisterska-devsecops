@@ -9,7 +9,6 @@ GT-13, GT-18...GT-20 and others): every patch must pass them (experiment/PROTOCO
 
 import os
 import secrets
-import tempfile
 from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -40,7 +39,6 @@ os.environ.update(
         "S3_BUCKET": TEST_BUCKET,
         # Empty: boto3 talks to "real" S3, which mock_aws intercepts.
         "S3_ENDPOINT_URL": "",
-        "ATTACHMENT_CACHE_DIR": tempfile.mkdtemp(prefix="ticketing-test-cache-"),
         # Fake credentials, so that nothing can reach a real AWS account.
         "AWS_ACCESS_KEY_ID": "testing",
         "AWS_SECRET_ACCESS_KEY": "testing",
@@ -104,13 +102,28 @@ def clean_tables() -> Iterator[None]:
 @pytest.fixture(autouse=True)
 def s3() -> Iterator[object]:
     """Empty in-process S3 with the attachments bucket, separate for every test."""
+    from ticketing.storage import get_s3_client
+
     with mock_aws():
+        # The app client is cached; it must be created inside this test's mock.
+        get_s3_client.cache_clear()
         client = boto3.client("s3", region_name=AWS_REGION)
         client.create_bucket(
             Bucket=TEST_BUCKET,
             CreateBucketConfiguration={"LocationConstraint": AWS_REGION},
         )
         yield client
+    get_s3_client.cache_clear()
+
+
+@pytest.fixture(autouse=True)
+def attachment_cache(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """Empty attachment cache per test: ticket ids restart after every TRUNCATE."""
+    from ticketing.config import get_settings
+
+    cache_dir = tmp_path / "attachment-cache"
+    monkeypatch.setattr(get_settings(), "attachment_cache_dir", cache_dir)
+    return cache_dir
 
 
 @pytest.fixture

@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import RequestResponseEndpoint
 
 from ticketing.config import get_settings
-from ticketing.routers import admin, auth, health, pages, tickets, users
+from ticketing.routers import admin, attachments, auth, health, pages, tickets, users
 
 settings = get_settings()
 
@@ -56,6 +56,7 @@ async def security_headers(request: Request, call_next: RequestResponseEndpoint)
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(tickets.router)
+app.include_router(attachments.router)
 app.include_router(admin.router)
 app.include_router(health.router)
 app.include_router(pages.router)

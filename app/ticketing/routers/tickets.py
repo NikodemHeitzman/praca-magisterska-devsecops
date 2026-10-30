@@ -1,11 +1,14 @@
 """Tickets (docs/app-spec.md, sections 4.2 and 5)."""
 
+import shutil
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy import Select, select, text
 from sqlalchemy.orm import Session
 
+from ticketing import storage
+from ticketing.config import get_settings
 from ticketing.db import get_db
 from ticketing.models import Role, Ticket, TicketStatus, User
 from ticketing.schemas import StatusUpdate, TicketCreate, TicketDetail, TicketRead, TicketUpdate
@@ -155,6 +158,10 @@ def delete_ticket(
     db: Annotated[Session, Depends(get_db)],
 ) -> Response:
     ticket = get_accessible_ticket(db, user, ticket_id)
+    keys = [attachment.s3_key for attachment in ticket.attachments]
     db.delete(ticket)
     db.commit()
+    # After the commit: a failed S3 call leaves orphaned objects, never records without files.
+    storage.delete(keys)
+    shutil.rmtree(get_settings().attachment_cache_dir / str(ticket_id), ignore_errors=True)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
