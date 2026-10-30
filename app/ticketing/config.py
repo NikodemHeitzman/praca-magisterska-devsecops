@@ -32,6 +32,12 @@ class Settings(BaseSettings):
 
     log_level: str = "INFO"
 
+    @field_validator("s3_endpoint_url", mode="before")
+    @classmethod
+    def empty_as_none(cls, value: object) -> object:
+        # S3_ENDPOINT_URL= (set but empty) means real S3, same as not set.
+        return value or None
+
     @field_validator("cors_origins", "allowed_content_types", mode="before")
     @classmethod
     def split_comma_separated(cls, value: object) -> object:

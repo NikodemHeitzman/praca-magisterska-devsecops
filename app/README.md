@@ -1,6 +1,6 @@
 # Aplikacja badawcza: system zgłoszeń
 
-Specyfikacja: [`docs/app-spec.md`](../docs/app-spec.md). Decyzje: ADR-0005…0010 w [`docs/adr/`](../docs/adr/).
+Specyfikacja: [`docs/app-spec.md`](../docs/app-spec.md). Decyzje: ADR-0005…0013 w [`docs/adr/`](../docs/adr/).
 
 ## Stos
 
@@ -22,6 +22,19 @@ Aplikacja działa pod http://localhost:8000. Dokumentacja API jest pod `/docs`, 
 
 `--env-file` jest potrzebne, bo boto3 czyta `AWS_*` ze zmiennych środowiskowych procesu, a nie z pliku `.env`.
 
+## Testy
+
+Wymagane: uruchomiona baza z compose (`docker compose up -d db`).
+
+```
+uv run pytest
+```
+
+- Testy działają na PostgreSQL ([ADR-0011](../docs/adr/0011-baza-danych-testow-postgresql.md)) w osobnej bazie: `TEST_DATABASE_URL` albo `DATABASE_URL` z `.env` z przyrostkiem `_test` w nazwie bazy. Baza jest usuwana i tworzona od nowa na początku każdego przebiegu, a schemat buduje migracja Alembic. Nazwa bazy musi kończyć się na `_test`.
+- S3 zastępuje moto w procesie (`mock_aws`), osobno dla każdego testu ([ADR-0012](../docs/adr/0012-s3-w-testach-moto-w-procesie.md)). Kontener `s3` z compose nie jest potrzebny.
+- Klient testowy to `TestClient` z httpx2 ([ADR-0013](../docs/adr/0013-klient-http-testow-httpx2.md)). Ostrzeżenia są traktowane jak błędy (`filterwarnings = ["error"]`).
+- Raport pokrycia wyświetla się po testach. Przebieg kończy się błędem, gdy pokrycie spadnie poniżej 70%.
+
 ## Zmiana zależności
 
 Po każdej zmianie w `pyproject.toml`:
@@ -41,4 +54,5 @@ Oba pliki trafiają do tego samego commita. Łatka GT-07 zmienia `jinja2` w `pyp
 - `ticketing/routers/`: endpointy (`health`, strony HTML; API: E04-03),
 - `ticketing/templates/`: szablony Jinja2,
 - `ticketing/static/`: arkusz stylów stron HTML, podawany pod `/static` (plik z tej samej domeny, więc zgodny z CSP `default-src 'self'`),
-- `migrations/`: migracje Alembic.
+- `migrations/`: migracje Alembic,
+- `tests/`: testy pytest i fixtures (`conftest.py`).
