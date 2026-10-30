@@ -4,7 +4,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
-from ticketing.models import Role
+from ticketing.models import Role, TicketPriority, TicketStatus
 
 
 class UserCreate(BaseModel):
@@ -47,3 +47,55 @@ class RoleUpdate(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+class TicketCreate(BaseModel):
+    title: str = Field(min_length=1, max_length=200)
+    description: str = Field(default="", max_length=10_000)
+    priority: TicketPriority = TicketPriority.MEDIUM
+
+
+class TicketUpdate(BaseModel):
+    title: str | None = Field(default=None, min_length=1, max_length=200)
+    description: str | None = Field(default=None, max_length=10_000)
+    priority: TicketPriority | None = None
+
+    @field_validator("title", "description", "priority")
+    @classmethod
+    def not_null(cls, value: object) -> object:
+        # Optional in the request, but the columns are NOT NULL.
+        if value is None:
+            raise ValueError("field cannot be null")
+        return value
+
+
+class StatusUpdate(BaseModel):
+    status: TicketStatus
+
+
+class AttachmentRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    filename: str
+    content_type: str
+    size: int
+    uploaded_by: int
+    created_at: datetime
+
+
+class TicketRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    title: str
+    description: str
+    status: TicketStatus
+    priority: TicketPriority
+    owner_id: int
+    created_at: datetime
+    updated_at: datetime
+
+
+class TicketDetail(TicketRead):
+    attachments: list[AttachmentRead]
