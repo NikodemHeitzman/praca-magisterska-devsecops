@@ -43,7 +43,7 @@ Wybrano **ruff z regułami `E`, `W`, `F`, `I`, `B`, `UP`, `SIM`, bez reguł `S`*
 - **Bez hooka pre-commit:** hooka nie da się traktować jak kontroli, bo programista pominie go opcją `--no-verify`, a autorytatywną warstwą jest CI ([`docs/notes/owasp-devsecops.md`](../notes/owasp-devsecops.md), p. 6). Do tego prostota: w projekcie jednoosobowym lint i tak działa w CI i ręcznie.
 - **Bez mypy:** przyjęte razem z rekomendacją agenta; autor nie podał osobnego powodu. Rekomendacja agenta: każda z 20 łatek musiałaby przechodzić też mypy, co dokłada bramkę mogącą zatrzymać pozycję w wariancie A z powodu typów, a definicja zadania traktuje mypy jako opcjonalne.
 
-Decyzje agenta w konfiguracji (do przeglądu przez autora):
+Decyzje agenta w konfiguracji, zaakceptowane przez autora 2026-10-30 bez osobnego powodu:
 
 - `line-length = 100`. Kod był pisany pod linie około 100 znaków. Przy 100 formatter zmienił 9 plików, a przy domyślnych 88 zmieniłby 18.
 - `target-version = "py313"`, mimo `requires-python = ">=3.14"`. Przy `py314` formatter ruff 0.17.3 zamienia `except (A, B):` na składnię z PEP 758 (`except A, B:`), a pyupgrade (UP037) usuwa cudzysłowy z odwołań w przód w modelach SQLAlchemy. Czy parsery skanerów SAST (Semgrep, Bandit) obsługują już składnię z PEP 758: TODO: zweryfikować. Niższy cel to środek ostrożności, który kosztuje tyle, że ruff nie proponuje składni dostępnej dopiero od 3.14.
