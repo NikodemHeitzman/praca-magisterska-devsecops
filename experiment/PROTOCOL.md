@@ -43,6 +43,7 @@ Po rozpoczęciu serii właściwej nie zmieniamy żadnego z tych elementów. Zmia
 - Dla każdej pozycji katalogu przygotowujemy łatkę, która wprowadza tylko tę pozycję. Pozycje dotyczące workflow (GT-15, GT-16, GT-17) mają osobną łatkę dla każdego wariantu, bo pliki workflow wariantów się różnią.
 - Skrypt nakłada każdą łatkę na obie gałęzie bazowe i tworzy 40 gałęzi prób. Szczegóły nazewnictwa i przygotowania gałęzi: E04-04.
 - Każda łatka zachowuje działanie aplikacji: testy funkcjonalne przechodzą. Inaczej potok A zatrzymałby pozycję z powodu testów, a nie braku filtrów. Sprawdza to pilotaż (P5) na wariancie A.
+- Każda łatka przechodzi też linting i formatowanie (`ruff check`, `ruff format --check` w `app/`), bo lint działa w obu wariantach. Ruff nie ma włączonych reguł bezpieczeństwa (`S`), więc sam nie wykrywa pozycji katalogu. Łatka nie może jednak zostawiać nieużywanych importów ani zmiennych (np. `require_admin` po GT-19) ani niesformatowanego kodu (decyzja autora z 2026-10-30, E04-05).
 
 ### P4. Zapis danych
 

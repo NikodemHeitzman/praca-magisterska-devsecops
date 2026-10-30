@@ -29,3 +29,4 @@ ADR (*Architecture Decision Record*) to krótki zapis jednej decyzji technicznej
 | [0011](0011-baza-danych-testow-postgresql.md) | Baza danych testów: PostgreSQL z compose | przyjęty | 2026-10-30 |
 | [0012](0012-s3-w-testach-moto-w-procesie.md) | S3 w testach: moto w procesie (`mock_aws`) | przyjęty | 2026-10-30 |
 | [0013](0013-klient-http-testow-httpx2.md) | Klient HTTP dla `TestClient`: httpx2 | przyjęty | 2026-10-30 |
+| [0014](0014-linting-i-formatowanie-ruff.md) | Linting i formatowanie: ruff bez reguł bezpieczeństwa | przyjęty | 2026-10-30 |
