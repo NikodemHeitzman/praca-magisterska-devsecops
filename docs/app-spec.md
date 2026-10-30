@@ -13,9 +13,9 @@ Wszystkie podjął autor 2026-10-30. Agent przedstawiał opcje.
 | Domena | system zgłoszeń (ticketów) zespołu | domena naturalnie mieści cały katalog: właściciel zasobu, role, wyszukiwanie, załączniki | notatki zespołu (rola administratora i sortowanie mniej naturalne); biblioteka dokumentów (pasuje głównie do GT-05) |
 | Baza danych | PostgreSQL, w `compose.yaml` jako osobny kontener | realizm wdrożenia: aplikacje webowe w chmurze zwykle korzystają z serwera bazy | SQLite (rzadko na produkcji); SQLite lokalnie i PostgreSQL w AWS (różne środowiska osłabiają kontrolę zmiennych) |
 | Załączniki | obiekty w S3, pobieranie przez lokalny katalog podręczny na dysku kontenera | S3 to typowy wzorzec chmurowy (kontener bezstanowy, pliki w usłudze zarządzanej); katalog lokalny zostawia GT-05 bez zmian w katalogu | sam S3 (path traversal w kluczu S3 to inna postać błędu, reguły SAST na ścieżkach plików by jej nie objęły); zmiana GT-05 przed zamrożeniem v1; dysk zamiast S3 |
-| Wyjątek dla GT-14 | naturalny błąd w logice zmiany statusu zgłoszenia (p. 5) | TODO: zweryfikować, powód do uzupełnienia przez autora | osobny endpoint diagnostyczny (sztuczny, a pająk ZAP mógłby na niego trafić) |
+| Wyjątek dla GT-14 | naturalny błąd w logice zmiany statusu zgłoszenia (p. 5) | realizm scenariusza: nieobsłużony wyjątek w logice biznesowej to typowa sytuacja, w której tryb debug ujawnia stack trace | osobny endpoint diagnostyczny (sztuczny, a pająk ZAP mógłby na niego trafić) |
 
-Kontener z bazą to rozdzielenie komponentów uruchomieniowych, a nie architektura mikroserwisowa (ADR-0002). Czy w AWS baza będzie kontenerem, czy usługą zarządzaną (RDS), rozstrzyga E05. TODO: ADR dla bazy danych i przechowywania załączników.
+Kontener z bazą to rozdzielenie komponentów uruchomieniowych, a nie architektura mikroserwisowa (ADR-0002). Czy w AWS baza będzie kontenerem, czy usługą zarządzaną (RDS), rozstrzyga E05. Decyzje o bazie i załącznikach opisują [ADR-0005](adr/0005-baza-danych-postgresql.md) i [ADR-0006](adr/0006-przechowywanie-zalacznikow-s3.md).
 
 ## 2. Domena i role
 
@@ -222,8 +222,6 @@ Braki te mogą dać prawdziwe zgłoszenia spoza katalogu (np. ZAP o braku token�
 
 ## 10. Otwarte kwestie
 
-- Powód wyboru naturalnego błędu dla GT-14: do uzupełnienia przez autora.
-- ADR dla bazy danych i przechowywania załączników.
 - Usługa zgodna z S3 lokalnie i w CI (skan DAST na `compose.yaml`): E04-02/E05.
 - Zgodność zależności z Pythonem 3.9 i jinja2 3.1.2: E04-02. Wymóg 3.9 może wymusić starsze wersje zależności, a te mogą mieć znane podatności spoza katalogu.
 - Fałszywe alarmy reguły GT-06 na wersji czystej (aliasy zależności, pola liczbowe; `semgrep-rules/README.md`): sprawdzić po E04-03. Kodu nie dopasowujemy pod regułę.

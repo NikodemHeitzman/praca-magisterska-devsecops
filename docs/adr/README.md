@@ -20,3 +20,5 @@ ADR (*Architecture Decision Record*) to krótki zapis jednej decyzji technicznej
 | [0002](0002-konteneryzacja-docker.md) | Konteneryzacja aplikacji: Docker | przyjęty | 2026-10-01 |
 | [0003](0003-dostawca-chmury-aws.md) | Dostawca chmury: AWS | przyjęty | 2026-10-01 |
 | [0004](0004-publiczne-repozytorium.md) | Publiczne repozytorium | przyjęty | 2026-10-01 |
+| [0005](0005-baza-danych-postgresql.md) | Baza danych aplikacji: PostgreSQL | przyjęty | 2026-10-30 |
+| [0006](0006-przechowywanie-zalacznikow-s3.md) | Przechowywanie załączników: S3 z lokalnym katalogiem podręcznym | przyjęty | 2026-10-30 |
