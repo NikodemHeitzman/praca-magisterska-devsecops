@@ -1,0 +1,25 @@
+[project]
+name = "ticketing"
+version = "0.1.0"
+description = "Research web application for the DevSecOps pipeline experiment (team ticket system)"
+requires-python = ">=3.14"
+dependencies = [
+    "alembic>=1.20.1",
+    "argon2-cffi>=25.1.0",
+    "boto3>=1.43.122",
+    "email-validator>=2.3.0",
+    "fastapi>=0.162.0",
+    "jinja2>=3.1.6",
+    "psycopg[binary]>=3.3.6",
+    "pydantic-settings>=2.16.2",
+    "pyjwt>=2.15.1",
+    "python-multipart>=0.0.32",
+    "sqlalchemy>=2.1.6",
+    "uvicorn>=0.54.0",
+]
+
+[tool.uv]
+# Application, not a library: no build backend, run from this directory.
+package = false
+# Same resolver everywhere (local, CI, Docker); see docs/adr/0008-menedzer-zaleznosci-uv.md.
+required-version = "==0.13.6"

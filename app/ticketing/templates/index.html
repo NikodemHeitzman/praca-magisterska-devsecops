@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Team ticket system</h1>
+  <p>Report and track problems in your team. Use the JSON API to create tickets and attach files.</p>
+  <ul>
+    <li><a href="{{ url_for('login_page') }}">Sign in</a></li>
+    <li><a href="/docs">API documentation</a></li>
+  </ul>
+{% endblock %}

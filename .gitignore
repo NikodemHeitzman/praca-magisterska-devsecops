@@ -43,3 +43,6 @@ reports/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Lokalny katalog podręczny załączników (app/.env.example)
+.attachment-cache/
