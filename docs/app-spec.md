@@ -197,7 +197,7 @@ Wymagania:
 | GT-05 | `GET /api/tickets/{id}/attachments/{filename:path}` | normalizacja i sprawdzenie katalogu podręcznego | ścieżka bez normalizacji i sprawdzenia |
 | GT-06 | `POST /api/auth/login`, nieudane logowanie | nazwa użytkownika po `.replace()` znaków `\n` i `\r` | nazwa użytkownika bez neutralizacji |
 | GT-07 | lockfile (E04-02) | aktualna wersja `jinja2` | `jinja2==3.1.2` |
-| GT-08 | `Dockerfile`, `FROM` (E05-01) | aktualny obraz Pythona przypięty digestem | `python:3.9-slim-bullseye` przypięty digestem |
+| GT-08 | `Dockerfile`, `FROM` (E05-01) | `python:3.14-slim` przypięty aktualnym digestem | starszy digest `python:3.14-slim` (katalog v1, ADR-0007) |
 | GT-09 | `Dockerfile` (E05-01) | `USER` z nieuprzywilejowanym użytkownikiem tylko w etapie końcowym | brak `USER` |
 | GT-10 | Terraform, grupa zabezpieczeń (E05) | brak reguły dla portu 22 | ingress tcp/22 z `0.0.0.0/0` |
 | GT-11 | Terraform, kubełek S3 na załączniki albo wolumen (E05) | szyfrowanie w spoczynku | szyfrowanie wyłączone (TODO: zweryfikować, czy dla S3 da się je wyłączyć; katalog dopuszcza EBS) |
@@ -223,6 +223,6 @@ Braki te mogą dać prawdziwe zgłoszenia spoza katalogu (np. ZAP o braku token�
 
 ## 10. Otwarte kwestie
 
-- Opis GT-08 w katalogu (zamiennik: starszy digest obrazu `python:3.14-slim`) przed zamrożeniem v1: E03-07 ([ADR-0007](adr/0007-wersja-pythona-aplikacji.md)).
+- Opis GT-08 w katalogu (zamiennik: starszy digest obrazu `python:3.14-slim`) zmieniony 2026-11-10 (E03-07, [ADR-0007](adr/0007-wersja-pythona-aplikacji.md)). Wybór obu digestów: E05-01.
 - Fałszywe alarmy reguły GT-06 na wersji czystej (aliasy zależności, pola liczbowe; `semgrep-rules/README.md`): sprawdzić po E04-03. Kodu nie dopasowujemy pod regułę.
 - Czy wersja czysta przechodzi bramki wariantu B (`docs/notes/owasp-devsecops.md`, stan bazowy): seria próbna.

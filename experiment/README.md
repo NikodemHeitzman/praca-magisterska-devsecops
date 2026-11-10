@@ -25,7 +25,7 @@ Wersja czysta aplikacji (gałąź `main`) nie zawiera żadnej pozycji z katalogu
 |---|---|
 | kod | GT-01 SQL injection, GT-02 zakodowany sekret JWT, GT-03 MD5 dla haseł, GT-04 `eval`, GT-05 path traversal, GT-06 log injection |
 | zależności | GT-07 Jinja2 3.1.2 (znane CVE) |
-| kontener | GT-08 nieutrzymywany obraz bazowy, GT-09 uruchamianie jako root |
+| kontener | GT-08 nieaktualny obraz bazowy (starszy digest), GT-09 uruchamianie jako root |
 | IaC | GT-10 port 22 otwarty dla 0.0.0.0/0, GT-11 nieszyfrowany magazyn danych |
 | konfiguracja web | GT-12 CORS `*`, GT-13 brak ochrony przed clickjackingiem, GT-14 debug ze stack trace |
 | workflow | GT-15 `permissions: write-all`, GT-16 akcja niepinowana do SHA, GT-17 wstrzyknięcie skryptu przez kontekst zdarzenia |
@@ -65,7 +65,7 @@ Oczekiwany detektor i etap to **hipotezy zapisane przed eksperymentem**. Wynik e
 ### Jak liczymy trafienia (dla M1–M3)
 
 - **Trafienie** to zgłoszenie narzędzia, które wskazuje lokalizację pozycji (plik, zasób, pakiet albo obraz) i dotyczy tej samej słabości. Zgodność oceniamy ręcznie według opisu pozycji, a nie tylko po numerze CWE, bo narzędzia przypisują CWE różnie.
-- Dla GT-07 trafieniem jest zgłoszenie dowolnej podatności z listy `referencje` dla `jinja2`. Dla GT-08: zgłoszenie systemu po końcu wsparcia albo podatności w pakietach systemowych obrazu bazowego.
+- Dla GT-07 trafieniem jest zgłoszenie dowolnej podatności z listy `referencje` dla `jinja2`. Dla GT-08: zgłoszenie podatności w pakietach systemowych obrazu bazowego, której Trivy nie zgłasza w digeście wersji czystej.
 - Zgłoszenia, które nie są trafieniem żadnej pozycji, klasyfikujemy jako prawdziwy problem spoza katalogu albo fałszywy alarm (H2b, M6). Dotyczy to też nowych CVE, które pojawią się w zależnościach wersji czystej w trakcie eksperymentu.
 - **M1 (wykrywalność)** = liczba pozycji z co najmniej jednym trafieniem / 20, ogółem i w każdej grupie.
 - **M2 (etap wykrycia)** = najwcześniejszy etap, na którym pojawiło się trafienie.

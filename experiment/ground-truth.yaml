@@ -168,7 +168,7 @@ pozycje:
 
   # ---------------------------------------------------------------- kontener
   - id: GT-08
-    tytul: Obraz bazowy z nieutrzymywanym systemem i interpreterem
+    tytul: Nieaktualny obraz bazowy (starszy digest)
     grupa: kontener
     cwe: CWE-1104
     owasp_top10_2025: A03
@@ -176,20 +176,25 @@ pozycje:
     asvs: v5.0.0-15.2.1
     lokalizacja: Dockerfile, instrukcja FROM
     wprowadzenie: >-
-      FROM python:3.9-slim-bullseye przypięty digestem zamiast aktualnego obrazu bazowego wersji czystej
+      instrukcja FROM wskazuje starszy digest tego samego obrazu, którego używa wersja czysta (python:3.14-slim,
+      ADR-0007), zamiast aktualnego digestu. Starszy digest ma pakiety systemowe sprzed poprawek bezpieczeństwa
+      obecnych w digeście wersji czystej. Zamiennik przewidziany w v0 (decyzja autora z 2026-10-30, E04-02):
+      Python 3.9 odpada, bo aktualne zależności wersji czystej go nie wspierają
     referencje:
-      # Docker Hub (hub.docker.com/v2), 2026-10-09: tag ostatnio aktualizowany 2025-07-23
-      - {obraz: "python:3.9-slim-bullseye", digest_indeksu: "sha256:b9e06687fbfc57f6fe563e94e4c8751e39513dde89afc120dc6f56afe5ffc761", digest_amd64: "sha256:2d9d670c924fc332b15d9565e24a2b76ba781e51ea3eb8305ccbf7c86f3f88be"}
+      # digest wersji czystej i starszy digest łatki: TODO, wybór w E05-01 (Dockerfile). Warunek wyboru: Trivy
+      # zgłasza w starszym digeście podatności pakietów systemowych, których nie zgłasza w digeście wersji czystej.
+      # Wcześniejsza postać v0 (python:3.9-slim-bullseye) usunięta 2026-11-10, E03-07.
+      - {obraz: "python:3.14-slim", digest_indeksu: null, digest_amd64: null}
     w_zasiegu_narzedzi: true
     pewnosc_detekcji: wysoka
     oczekiwany_detektor:
       - {klasa: skaner-obrazu, narzedzie: Trivy}
     najwczesniejszy_etap: PR
     uzasadnienie: >-
-      obraz nieaktualizowany od 2025-07; Python 3.9 i Debian 11 są po końcu wsparcia (TODO: zweryfikować daty EOL
-      przed cytowaniem). Trafienie = zgłoszenie systemu po końcu wsparcia albo podatności w pakietach systemowych
-      obrazu bazowego. Warunek: kod aplikacji działa na Pythonie 3.9 (TODO: zweryfikować w E04-02); jeśli nie,
-      zamiennik: starszy digest tego samego obrazu, z którego korzysta wersja czysta
+      obraz bazowy przypięty digestem i nieaktualizowany to typowa droga starych pakietów systemowych do produkcji.
+      Trafienie = zgłoszenie podatności w pakietach systemowych obrazu bazowego, których Trivy nie zgłasza
+      w digeście wersji czystej. Pozycja nie dotyczy już interpretera po końcu wsparcia (ADR-0007, konsekwencje).
+      Pewność wysoka pod warunkiem wyboru digestu w E05-01 według warunku z pola referencje
 
   - id: GT-09
     tytul: Kontener uruchamiany jako root
