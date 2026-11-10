@@ -33,5 +33,7 @@ ADR (*Architecture Decision Record*) to krótki zapis jednej decyzji technicznej
 | [0015](0015-region-aws-eu-central-1.md) | Region AWS: eu-central-1 (Frankfurt) | przyjęty | 2026-10-30 |
 | [0016](0016-uwierzytelnianie-do-aws.md) | Uwierzytelnianie do AWS: OIDC w potoku, użytkownicy IAM lokalnie | przyjęty | 2026-10-30 |
 | [0017](0017-plan-konta-aws-darmowy.md) | Plan konta AWS: darmowy | zastąpiony przez 0018 | 2026-10-30 |
-| [0018](0018-istniejace-konto-aws-plan-platny.md) | Konto AWS: istniejące konto autora, plan płatny | przyjęty | 2026-10-30 |
+| [0018](0018-istniejace-konto-aws-plan-platny.md) | Konto AWS: istniejące konto autora, plan płatny | zastąpiony przez 0020 | 2026-10-30 |
 | [0019](0019-srodowisko-efemeryczne-aws.md) | Środowisko AWS efemeryczne: zasoby tylko w czasie pracy | przyjęty | 2026-10-30 |
+| [0020](0020-nowe-konto-aws-plan-darmowy.md) | Konto AWS: nowe konto na planie darmowym | przyjęty | 2026-11-10 |
+| [0021](0021-dostep-do-konsoli-owner.md) | Dostęp autora do konsoli AWS: Owner z MFA | przyjęty | 2026-11-10 |

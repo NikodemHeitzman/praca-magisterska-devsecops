@@ -1,6 +1,6 @@
 # Konto AWS
 
-Konfiguracja konta AWS dla części praktycznej pracy (zadanie E01-07). Decyzje: [ADR-0015](adr/0015-region-aws-eu-central-1.md) (region), [ADR-0016](adr/0016-uwierzytelnianie-do-aws.md) (uwierzytelnianie), [ADR-0018](adr/0018-istniejace-konto-aws-plan-platny.md) (istniejące konto, plan płatny), [ADR-0019](adr/0019-srodowisko-efemeryczne-aws.md) (środowisko efemeryczne). [ADR-0017](adr/0017-plan-konta-aws-darmowy.md) (plan darmowy) jest zastąpiony.
+Konfiguracja konta AWS dla części praktycznej pracy (zadanie E01-07). Decyzje: [ADR-0015](adr/0015-region-aws-eu-central-1.md) (region), [ADR-0016](adr/0016-uwierzytelnianie-do-aws.md) (uwierzytelnianie), [ADR-0020](adr/0020-nowe-konto-aws-plan-darmowy.md) (nowe konto, plan darmowy), [ADR-0019](adr/0019-srodowisko-efemeryczne-aws.md) (środowisko efemeryczne). Zastąpione: [ADR-0017](adr/0017-plan-konta-aws-darmowy.md), [ADR-0018](adr/0018-istniejace-konto-aws-plan-platny.md).
 
 Repozytorium jest publiczne. Ten plik nie zawiera ID konta, adresów e-mail, nazw urządzeń MFA ani kluczy.
 
@@ -8,11 +8,14 @@ Repozytorium jest publiczne. Ten plik nie zawiera ID konta, adresów e-mail, naz
 
 | Pozycja | Stan |
 |---|---|
-| Konto | istniejące konto autora |
-| Plan | płatny (*pay-as-you-go*), bez kredytów Free Tier |
-| Przegląd pozostałości starego konta | TODO: wykonać (lista kroków niżej) |
-| Root z MFA, bez kluczy dostępu | TODO: potwierdzić |
-| Alerty budżetowe | TODO: ustawić i przetestować |
+| Konto | nowe konto autora, dane właściciela potwierdzone przez autora 2026-11-10 |
+| Plan | darmowy (Free account plan), 100 USD kredytów |
+| Wygaśnięcie planu | 2027-05-10 albo wcześniej, po wyczerpaniu kredytów (konsola Billing, 2026-11-10); plan B: przejście na plan płatny |
+| Przegląd konta (2026-11-10) | Cost Explorer bez danych (nowe konto), Resource Explorer: brak zasobów w `eu-north-1` (wyszukiwanie we wszystkich regionach jeszcze niewłączone), IAM: 0 użytkowników |
+| Stare konto autora | do zamknięcia (decyzja autora) |
+| Root bez kluczy dostępu | tak: `AccountAccessKeysPresent = 0` (`aws iam get-account-summary` w CloudShell, 2026-11-10) |
+| MFA | logowanie właściciela przez AWS Builder ID: MFA TOTP od 2026-11-10; klasyczny root: MFA dodane 2026-11-10 (potwierdzenie autora; wcześniej `AccountMFAEnabled = 0`), TODO: zapisać wynik `AccountMFAEnabled = 1` z CloudShell |
+| Alerty budżetowe | utworzone 2026-11-10 przez `aws budgets create-budget` w CloudShell: `devsecops-thesis-monthly` (10 USD) i `devsecops-thesis-daily` (0,50 USD), oba bez kredytów; subskrybent e-mail sprawdzony (`describe-subscribers-for-notification`); test doręczenia e-maila odłożony do pierwszego kosztu w E05 (decyzja autora 2026-11-10: na pustym koncie koszt wynosi 0, więc alert się nie wyzwoli) |
 
 ## Region
 
@@ -22,8 +25,8 @@ Repozytorium jest publiczne. Ten plik nie zawiera ID konta, adresów e-mail, naz
 
 | Tożsamość | Do czego | MFA | Klucz dostępu |
 |---|---|---|---|
-| root | tylko czynności awaryjne i wymagające roota | tak | brak (sprawdzić w IAM → Security credentials) |
-| użytkownik IAM administratora (autor) | praca w konsoli | tak | brak |
+| właściciel konta (Owner, AWS Builder ID) | codzienna praca w konsoli ([ADR-0021](adr/0021-dostep-do-konsoli-owner.md)) | tak (TOTP) | nie dotyczy |
+| klasyczny root | tylko czynności wymagające roota | tak | brak (`AccountAccessKeysPresent = 0`) |
 | użytkownik IAM `terraform` | lokalny Terraform, utworzenie roli OIDC (bootstrap E05) | nie dotyczy (dostęp programowy) | tak, tylko na komputerze autora, profil nazwany w `~/.aws/credentials` |
 | rola IAM potoku (OIDC) | wdrożenie z GitHub Actions | nie dotyczy | brak, poświadczenia krótkotrwałe |
 
@@ -49,7 +52,7 @@ Progi zaproponował agent, autor zażądał rygorystycznych alertów:
 
 Uzasadnienie progu dziennego: dzień pracy (około 8 h `t3.small` z IPv4 i EBS) kosztuje około 0,25 USD, a doba z zapomnianą instancją około 0,76 USD. Próg 0,50 USD nie reaguje na zwykły dzień pracy, a reaguje na zapomniane środowisko. Czy budżety dzienne obsługują alerty prognozowane: TODO: zweryfikować (dlatego tylko alert rzeczywisty).
 
-Adres alertów: główny e-mail autora (nie zapisujemy go tutaj). Budżety bez akcji są bezpłatne (cennik AWS Budgets, sprawdzone 2026-10-30). Dane kosztowe w Budgets odświeżają się z opóźnieniem (TODO: zweryfikować jak dużym), więc alert jest drugą linią obrony po `destroy` i sprzątaniu. Akcję budżetu zatrzymującą EC2 rozważa E05-08.
+Adres alertów: główny e-mail autora (nie zapisujemy go tutaj). Budżety bez akcji są bezpłatne (cennik AWS Budgets, sprawdzone 2026-10-30). Na planie darmowym koszty pokrywają kredyty, więc budżet ma liczyć koszt przed odjęciem kredytów (w opcjach budżetu odznaczyć kredyty), inaczej pokaże 0 USD i nie ostrzeże przed zużywaniem kredytów. Dane kosztowe w Budgets odświeżają się z opóźnieniem (TODO: zweryfikować jak dużym), więc alert jest drugą linią obrony po `destroy` i sprzątaniu. Akcję budżetu zatrzymującą EC2 rozważa E05-08.
 
 Test działania: TODO: po ustawieniu zapisać datę testowego e-maila albo pierwszego alertu.
 
@@ -85,9 +88,9 @@ Zasoby założone ręcznie (np. budżety, użytkownicy IAM) dostają te same tag
 
 ## Lista kroków przygotowania konta (autor)
 
-1. **Przegląd pozostałości.** W Billing → Bills sprawdzić, czy konto generuje koszty. W Resource Explorer albo w konsoli EC2, S3, RDS, Lambda i Elastic IP przejrzeć wszystkie regiony. Usunąć to, co niepotrzebne. Usunąć nieużywanych użytkowników IAM i ich klucze.
-2. **Root:** MFA, brak kluczy dostępu (IAM → Security credentials). Stare konta mogą mieć klucze roota, które trzeba usunąć.
-3. **Użytkownik IAM administratora** z MFA. Dalsza praca z niego, nie z roota.
+1. **Przegląd konta.** Wykonany 2026-11-10 (sekcja „Stan”). Opcjonalnie: włączyć w Resource Explorer wyszukiwanie we wszystkich regionach.
+2. **Root:** MFA, brak kluczy dostępu (menu konta → Security credentials).
+3. **Dostęp do konsoli:** praca jako Owner z MFA ([ADR-0021](adr/0021-dostep-do-konsoli-owner.md)). Użytkownik IAM `Admin-magister` (utworzony przed tą decyzją) do usunięcia.
 4. **Budżety i alerty** według sekcji wyżej, test e-maila.
 5. **Użytkownik IAM `terraform`** z kluczem dostępu, profil w `~/.aws/credentials`, test `aws sts get-caller-identity --profile <profil>`.
 6. Region w konsoli: `eu-central-1`.

@@ -1,6 +1,6 @@
 # 0018. Konto AWS: istniejące konto autora, plan płatny
 
-- **Status:** przyjęty
+- **Status:** zastąpiony przez [0020](0020-nowe-konto-aws-plan-darmowy.md)
 - **Data:** 2026-10-30
 - **Decydujący:** autor pracy
 - **Zastępuje:** [0017](0017-plan-konta-aws-darmowy.md)
