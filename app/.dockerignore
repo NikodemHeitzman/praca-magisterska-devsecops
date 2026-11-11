@@ -1,0 +1,10 @@
+# Allowlist: the build context holds only what the image needs, so .env, .venv,
+# caches and tests never reach the daemon or a layer (AGENTS.md, rule 4).
+*
+!pyproject.toml
+!uv.lock
+!alembic.ini
+!migrations/
+!ticketing/
+**/__pycache__/
+**/*.py[cod]

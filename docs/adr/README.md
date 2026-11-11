@@ -37,3 +37,4 @@ ADR (*Architecture Decision Record*) to krótki zapis jednej decyzji technicznej
 | [0019](0019-srodowisko-efemeryczne-aws.md) | Środowisko AWS efemeryczne: zasoby tylko w czasie pracy | przyjęty | 2026-10-30 |
 | [0020](0020-nowe-konto-aws-plan-darmowy.md) | Konto AWS: nowe konto na planie darmowym | przyjęty | 2026-11-10 |
 | [0021](0021-dostep-do-konsoli-owner.md) | Dostęp autora do konsoli AWS: Owner z MFA | przyjęty | 2026-11-10 |
+| [0022](0022-obraz-kontenera-aplikacji.md) | Obraz kontenera aplikacji: python:3.14-slim bez pip, uv w etapie budowania, migracje poza obrazem | przyjęty | 2026-11-11 |

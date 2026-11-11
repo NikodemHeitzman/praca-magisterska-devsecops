@@ -181,10 +181,17 @@ pozycje:
       obecnych w digeście wersji czystej. Zamiennik przewidziany w v0 (decyzja autora z 2026-10-30, E04-02):
       Python 3.9 odpada, bo aktualne zależności wersji czystej go nie wspierają
     referencje:
-      # digest wersji czystej i starszy digest łatki: TODO, wybór w E05-01 (Dockerfile). Warunek wyboru: Trivy
-      # zgłasza w starszym digeście podatności pakietów systemowych, których nie zgłasza w digeście wersji czystej.
+      # Wybór digestów: E05-01, decyzja autora z 2026-11-11 (ADR-0022). Warunek wyboru: Trivy zgłasza w starszym
+      # digeście podatności pakietów systemowych, których nie zgłasza w digeście wersji czystej. Sprawdzenie
+      # 2026-11-11, Trivy 0.76.0, baza podatności z tego dnia, obraz aplikacji na linux/amd64: wersja z łatką ma
+      # 62 identyfikatory CVE spoza wersji czystej (3 CRITICAL, 18 HIGH, 28 MEDIUM, 10 LOW, 3 UNKNOWN).
       # Wcześniejsza postać v0 (python:3.9-slim-bullseye) usunięta 2026-11-10, E03-07.
-      - {obraz: "python:3.14-slim", digest_indeksu: null, digest_amd64: null}
+      - {rola: wersja-czysta, obraz: "python:3.14-slim", wersja: "3.14.10, Debian 13.7", opublikowany: 2026-11-08,
+         digest_indeksu: "sha256:9aaa474097d094040649f2162a627c0049b408f52138d980916788d80f04802f",
+         digest_amd64: "sha256:ac25e5afbfdb4a94ff99cc24b0345719210133144481480bcba6085efa36a341"}
+      - {rola: latka, obraz: "python:3.14-slim", wersja: "3.14.6, Debian 13.6", opublikowany: 2026-08-05,
+         digest_indeksu: "sha256:7bec7ddcddeff7975d6ba9b4be7dd6f6b2f55e7491539145e2978f7f97ce9144",
+         digest_amd64: "sha256:b921fe7e7522f828d45197a47656ec465a9b15689b27fa8e1fba2864fca5b967"}
     w_zasiegu_narzedzi: true
     pewnosc_detekcji: wysoka
     oczekiwany_detektor:
@@ -194,7 +201,7 @@ pozycje:
       obraz bazowy przypięty digestem i nieaktualizowany to typowa droga starych pakietów systemowych do produkcji.
       Trafienie = zgłoszenie podatności w pakietach systemowych obrazu bazowego, których Trivy nie zgłasza
       w digeście wersji czystej. Pozycja nie dotyczy już interpretera po końcu wsparcia (ADR-0007, konsekwencje).
-      Pewność wysoka pod warunkiem wyboru digestu w E05-01 według warunku z pola referencje
+      Pewność wysoka: warunek z pola referencje spełniony 2026-11-11 (E05-01)
 
   - id: GT-09
     tytul: Kontener uruchamiany jako root

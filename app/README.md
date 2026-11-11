@@ -13,7 +13,7 @@ Specyfikacja: [`docs/app-spec.md`](../docs/app-spec.md). Decyzje: ADR-0005…001
 Wymagane: uv 0.13.6 i Docker. Polecenia uruchamiaj w katalogu `app/`.
 
 1. Skopiuj `.env.example` do `.env` i uzupełnij `POSTGRES_PASSWORD` (to samo hasło w `DATABASE_URL`), `JWT_SECRET` oraz hasła kont startowych `SEED_*_PASSWORD`.
-2. Uruchom bazę i atrapę S3: `docker compose up -d`.
+2. Uruchom bazę i atrapę S3: `docker compose up -d db s3`.
 3. Zainstaluj zależności: `uv sync --frozen`.
 4. Utwórz schemat bazy: `uv run --env-file .env alembic upgrade head`.
 5. Wgraj dane startowe (konta `alice`, `bob`, `admin`, zgłoszenia, załącznik; kubełek w moto): `uv run --env-file .env python -m ticketing.seed`. Skrypt można uruchamiać wielokrotnie; po restarcie kontenera `s3` trzeba go powtórzyć, bo moto trzyma dane w pamięci.
@@ -22,6 +22,17 @@ Wymagane: uv 0.13.6 i Docker. Polecenia uruchamiaj w katalogu `app/`.
 Aplikacja działa pod http://localhost:8000. Dokumentacja API jest pod `/docs`, a stan aplikacji i bazy pod `/health`.
 
 `--env-file` jest potrzebne, bo boto3 czyta `AWS_*` ze zmiennych środowiskowych procesu, a nie z pliku `.env`.
+
+## Uruchomienie w kontenerze
+
+Obraz budowany z [`Dockerfile`](Dockerfile) ([ADR-0022](../docs/adr/0022-obraz-kontenera-aplikacji.md)): `python:3.14-slim` przypięty digestem, zależności z `uv.lock`, bez pip w obrazie końcowym, użytkownik `app` (UID 10001), `HEALTHCHECK` na `/health`. Rozmiar (2026-11-11, linux/amd64): 342 MB po rozpakowaniu, 84,7 MB skompresowany. Kontekst budowania ogranicza [`.dockerignore`](.dockerignore) do kodu aplikacji i lockfile'a.
+
+1. `.env` jak w punkcie 1 wyżej. Adresy bazy, S3 i katalogu pamięci podręcznej dla kontenera ustawia `compose.yaml`.
+2. `docker compose up -d --build`
+3. `docker compose run --rm app alembic upgrade head`
+4. `docker compose run --rm app python -m ticketing.seed`
+
+Migracje i dane startowe to osobne polecenia, bo obraz uruchamia tylko aplikację. Kontener aplikacji i `uvicorn` na hoście zajmują ten sam port 8000, więc uruchamiaj jedno z nich.
 
 ## Testy
 

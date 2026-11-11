@@ -1,9 +1,27 @@
-# Local and CI runtime dependencies of the application.
-# The app service is added together with the Dockerfile (E05-01).
+# Local and CI runtime of the application: app (Dockerfile), PostgreSQL and moto.
 # Images pinned by digest (AGENTS.md, rule 6); values come from app/.env (see .env.example).
+# Development on the host (uv run uvicorn) needs only `docker compose up -d db s3`.
 name: ticketing
 
 services:
+  app:
+    build: .
+    image: ticketing:local
+    env_file: .env
+    # Container-side addresses override the host-side ones from .env.
+    environment:
+      DATABASE_URL: postgresql+psycopg://ticketing:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in app/.env}@db:5432/ticketing
+      S3_ENDPOINT_URL: http://s3:5000
+      # Source tree is read-only for the app user; the cache lives in /tmp.
+      ATTACHMENT_CACHE_DIR: /tmp/ticketing-attachments
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      s3:
+        condition: service_started
+
   db:
     image: postgres:18-alpine@sha256:10a5c69a83035ab5239f5620d708520e8b28f5aa1f2b20143e6024532edadfb5
     environment:

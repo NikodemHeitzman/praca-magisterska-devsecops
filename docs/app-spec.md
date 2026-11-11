@@ -223,6 +223,6 @@ Braki te mogą dać prawdziwe zgłoszenia spoza katalogu (np. ZAP o braku token�
 
 ## 10. Otwarte kwestie
 
-- Opis GT-08 w katalogu (zamiennik: starszy digest obrazu `python:3.14-slim`) zmieniony 2026-11-10 (E03-07, [ADR-0007](adr/0007-wersja-pythona-aplikacji.md)). Wybór obu digestów: E05-01.
+- Opis GT-08 w katalogu (zamiennik: starszy digest obrazu `python:3.14-slim`) zmieniony 2026-11-10 (E03-07, [ADR-0007](adr/0007-wersja-pythona-aplikacji.md)). Oba digesty wybrano 2026-11-11 w E05-01 (wersja czysta 3.14.10, łatka 3.14.6; `experiment/ground-truth.yaml`, [ADR-0022](adr/0022-obraz-kontenera-aplikacji.md)).
 - Fałszywe alarmy reguły GT-06 na wersji czystej (aliasy zależności, pola liczbowe; `semgrep-rules/README.md`): sprawdzić po E04-03. Kodu nie dopasowujemy pod regułę.
 - Czy wersja czysta przechodzi bramki wariantu B (`docs/notes/owasp-devsecops.md`, stan bazowy): seria próbna.
