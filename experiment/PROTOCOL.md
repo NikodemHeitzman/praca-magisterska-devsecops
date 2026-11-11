@@ -1,6 +1,6 @@
 # Protokół eksperymentu
 
-Wersja: szkic v0 (E03-05, w toku). Zamrożenie jako v1 razem z metodyką po akceptacji promotora (E03-07).
+Wersja: v1, zamrożona 2026-11-11 razem z metodyką po akceptacji promotora (E03-07, [notatka](../docs/meetings/2026-11-11-promotor.md), tag `methodology-v1`). Każdą późniejszą zmianę zapisujemy w dzienniku badawczym z uzasadnieniem.
 
 Protokół opisuje, jak porównujemy wariant A (CI/CD bez kontroli bezpieczeństwa) z wariantem B (potok DevSecOps). Pytania badawcze, hipotezy i metryki są w [`docs/metodyka.md`](../docs/metodyka.md), a katalog podatności referencyjnych w [`ground-truth.yaml`](ground-truth.yaml) i [`README.md`](README.md).
 

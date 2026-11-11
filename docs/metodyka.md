@@ -1,6 +1,6 @@
 # Metodyka badania
 
-> **Status:** szkic (v0). Wersja v1 powstanie po akceptacji promotora (kamień milowy M1, zadanie E03-07). Każdą późniejszą zmianę założeń zapisujemy w dzienniku badawczym (`docs/log/`) z uzasadnieniem.
+> **Status:** wersja v1, zamrożona 2026-11-11 po akceptacji promotora (kamień milowy M1, zadanie E03-07, [notatka](meetings/2026-11-11-promotor.md), tag `methodology-v1`). Każdą późniejszą zmianę założeń zapisujemy w dzienniku badawczym (`docs/log/`) z uzasadnieniem.
 
 Dokument definiuje eksperyment, zanim powstanie kod. Implementacja ma zbierać dokładnie te dane, których potrzebuje rozdział 5. Kolejne sekcje uzupełniają zadania E03-01…E03-06.
 
@@ -123,7 +123,7 @@ Sekcja podaje dla każdej metryki z p. 2.3 wzór, jednostkę, źródło danych i
 
 ### 3.1. Oznaczenia i zbiory danych
 
-- **K:** katalog podatności referencyjnych (`experiment/ground-truth.yaml`), |K| = 20 w wersji v0.
+- **K:** katalog podatności referencyjnych (`experiment/ground-truth.yaml`), |K| = 20 w wersji v1 (zamrożonej 2026-11-11).
   - **K_z ⊂ K:** pozycje w zasięgu narzędzi (`w_zasiegu_narzedzi: true`), |K_z| = 17.
   - **K_g:** pozycje grupy g. Grupy: kod, zależności, kontener, IaC, konfiguracja web, workflow.
 - **v ∈ {A, B}:** wariant potoku.

@@ -1,7 +1,7 @@
 # Katalog podatności referencyjnych (ground truth)
 #
 # Zadanie E03-03. Zasady, definicje pól i sposób liczenia metryk: experiment/README.md.
-# Wersja katalogu: v0 (2026-10-09). Po akceptacji metodyki (E03-07) katalog zostaje zamrożony jako v1;
+# Wersja katalogu: v1, zamrożona 2026-11-11 po akceptacji metodyki (E03-07, tag methodology-v1; v0: 2026-10-09);
 # każdą późniejszą zmianę zapisujemy w dzienniku badawczym (docs/log/) z uzasadnieniem.
 #
 # Źródła klasyfikacji:

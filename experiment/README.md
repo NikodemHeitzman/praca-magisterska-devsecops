@@ -17,7 +17,7 @@ Katalog to znana „prawda”: lista podatności celowo wprowadzonych do aplikac
 
 Wersja czysta aplikacji (gałąź `main`) nie zawiera żadnej pozycji z katalogu. Każda pozycja trafia do eksperymentu jako osobny pull request oznaczony identyfikatorem, np. `seed/GT-01` (E04-04).
 
-### Skład (v0, 2026-10-09)
+### Skład (v1, 2026-11-11; v0: 2026-10-09)
 
 20 pozycji w 6 grupach, w tym 3 celowo poza zasięgiem narzędzi. Pozycje obejmują wszystkie 10 kategorii OWASP Top 10:2025.
 
@@ -101,4 +101,4 @@ Skrypt sprawdza schemat pozycji i kryteria katalogu (min. 15 pozycji w min. 5 gr
 
 ### Wersjonowanie
 
-Katalog ma wersję `v0` do akceptacji metodyki przez promotora (E03-07). Potem zostaje zamrożony jako `v1`. Każdą późniejszą zmianę (zamiana pozycji, zmiana `w_zasiegu_narzedzi` po wyborze reguł w E02-10) zapisujemy w dzienniku badawczym z uzasadnieniem, przed uruchomieniem eksperymentu.
+Katalog ma wersję `v1`, zamrożoną 2026-11-11 po akceptacji metodyki przez promotora (E03-07, tag `methodology-v1`). Każdą późniejszą zmianę (zamiana pozycji, zmiana `w_zasiegu_narzedzi` po wyborze reguł w E02-10) zapisujemy w dzienniku badawczym z uzasadnieniem, przed uruchomieniem eksperymentu.
