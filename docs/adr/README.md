@@ -38,3 +38,4 @@ ADR (*Architecture Decision Record*) to krótki zapis jednej decyzji technicznej
 | [0020](0020-nowe-konto-aws-plan-darmowy.md) | Konto AWS: nowe konto na planie darmowym | przyjęty | 2026-11-10 |
 | [0021](0021-dostep-do-konsoli-owner.md) | Dostęp autora do konsoli AWS: Owner z MFA | przyjęty | 2026-11-10 |
 | [0022](0022-obraz-kontenera-aplikacji.md) | Obraz kontenera aplikacji: python:3.14-slim bez pip, uv w etapie budowania, migracje poza obrazem | przyjęty | 2026-11-11 |
+| [0023](0023-uruchamianie-stosu-docker-compose.md) | Uruchamianie aplikacji z zależnościami: Docker Compose z jednorazowymi usługami migrate i seed, `.env` w CI generowany przez workflow | przyjęty | 2026-11-11 |

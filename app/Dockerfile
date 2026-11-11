@@ -56,5 +56,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
     CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=4)"]
 
-# Migrations are not run here: `docker compose run --rm app alembic upgrade head` (ADR-0022).
+# Migrations are not run here (ADR-0022): the one-off migrate service in compose.yaml runs them (ADR-0023).
 CMD ["uvicorn", "ticketing.main:app", "--host", "0.0.0.0", "--port", "8000"]

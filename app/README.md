@@ -28,11 +28,11 @@ Aplikacja działa pod http://localhost:8000. Dokumentacja API jest pod `/docs`, 
 Obraz budowany z [`Dockerfile`](Dockerfile) ([ADR-0022](../docs/adr/0022-obraz-kontenera-aplikacji.md)): `python:3.14-slim` przypięty digestem, zależności z `uv.lock`, bez pip w obrazie końcowym, użytkownik `app` (UID 10001), `HEALTHCHECK` na `/health`. Rozmiar (2026-11-11, linux/amd64): 342 MB po rozpakowaniu, 84,7 MB skompresowany. Kontekst budowania ogranicza [`.dockerignore`](.dockerignore) do kodu aplikacji i lockfile'a.
 
 1. `.env` jak w punkcie 1 wyżej. Adresy bazy, S3 i katalogu pamięci podręcznej dla kontenera ustawia `compose.yaml`.
-2. `docker compose up -d --build`
-3. `docker compose run --rm app alembic upgrade head`
-4. `docker compose run --rm app python -m ticketing.seed`
+2. `docker compose up -d --build` (z `--wait` polecenie kończy się dopiero, gdy aplikacja jest zdrowa).
 
-Migracje i dane startowe to osobne polecenia, bo obraz uruchamia tylko aplikację. Kontener aplikacji i `uvicorn` na hoście zajmują ten sam port 8000, więc uruchamiaj jedno z nich.
+Compose uruchamia całość po kolei ([ADR-0023](../docs/adr/0023-uruchamianie-stosu-docker-compose.md)): `db` i `s3`, potem jednorazowe usługi `migrate` (`alembic upgrade head`) i `seed` (dane startowe), a na końcu `app`. Obraz nadal uruchamia tylko aplikację (ADR-0022). Zakończone kontenery `migrate` i `seed` w `docker compose ps -a` to stan oczekiwany. `seed` działa przy każdym `up`, więc po restarcie `s3` wystarczy `docker compose up -d`. Kontener aplikacji i `uvicorn` na hoście zajmują ten sam port 8000, więc uruchamiaj jedno z nich.
+
+W CI nie ma `app/.env`. Tworzy go `sh scripts/ci-env.sh` z `.env.example` z losowymi hasłami i kluczem JWT (maskowanymi w logu GitHub Actions). Skrypt nie nadpisuje istniejącego `.env`.
 
 ## Testy
 
