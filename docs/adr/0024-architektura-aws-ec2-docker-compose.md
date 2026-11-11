@@ -1,6 +1,6 @@
 # 0024. Architektura w AWS: EC2 z Docker Compose, PostgreSQL w kontenerze, dostęp przez SSM
 
-- **Status:** przyjęty
+- **Status:** przyjęty; region zmieniony przez [0030](0030-region-aws-eu-north-1.md) (ceny `eu-north-1` w ADR-0030)
 - **Data:** 2026-11-11
 - **Decydujący:** autor pracy
 - **Powiązane:** [0003](0003-dostawca-chmury-aws.md), [0005](0005-baza-danych-postgresql.md), [0006](0006-przechowywanie-zalacznikow-s3.md), [0015](0015-region-aws-eu-central-1.md), [0016](0016-uwierzytelnianie-do-aws.md), [0019](0019-srodowisko-efemeryczne-aws.md), [0020](0020-nowe-konto-aws-plan-darmowy.md), [0023](0023-uruchamianie-stosu-docker-compose.md), zadania E05-03, E05-04, E05-05, E05-07, E05-08, E06-03, [`docs/aws-konto.md`](../aws-konto.md), [dziennik 2026-11-11](../log/2026-11-11.md)

@@ -1,6 +1,6 @@
 # Konto AWS
 
-Konfiguracja konta AWS dla części praktycznej pracy (zadanie E01-07). Decyzje: [ADR-0015](adr/0015-region-aws-eu-central-1.md) (region), [ADR-0016](adr/0016-uwierzytelnianie-do-aws.md) (uwierzytelnianie), [ADR-0020](adr/0020-nowe-konto-aws-plan-darmowy.md) (nowe konto, plan darmowy), [ADR-0019](adr/0019-srodowisko-efemeryczne-aws.md) (środowisko efemeryczne). Zastąpione: [ADR-0017](adr/0017-plan-konta-aws-darmowy.md), [ADR-0018](adr/0018-istniejace-konto-aws-plan-platny.md).
+Konfiguracja konta AWS dla części praktycznej pracy (zadanie E01-07). Decyzje: [ADR-0030](adr/0030-region-aws-eu-north-1.md) (region; zastąpił [ADR-0015](adr/0015-region-aws-eu-central-1.md)), [ADR-0016](adr/0016-uwierzytelnianie-do-aws.md) (uwierzytelnianie), [ADR-0020](adr/0020-nowe-konto-aws-plan-darmowy.md) (nowe konto, plan darmowy), [ADR-0019](adr/0019-srodowisko-efemeryczne-aws.md) (środowisko efemeryczne). Zastąpione: [ADR-0017](adr/0017-plan-konta-aws-darmowy.md), [ADR-0018](adr/0018-istniejace-konto-aws-plan-platny.md).
 
 Repozytorium jest publiczne. Ten plik nie zawiera ID konta, adresów e-mail, nazw urządzeń MFA ani kluczy.
 
@@ -19,7 +19,7 @@ Repozytorium jest publiczne. Ten plik nie zawiera ID konta, adresów e-mail, naz
 
 ## Region
 
-`eu-central-1` (Frankfurt) dla całej infrastruktury. Uzasadnienie w [ADR-0015](adr/0015-region-aws-eu-central-1.md).
+`eu-north-1` (Sztokholm) dla całej infrastruktury, od 2026-11-11. Konto-projekt z nowego typu rejestracji ma region przypisany według kraju, a SCP `RegionFloor` zarządzana przez AWS odrzuca żądania w innych regionach (poza `us-east-1` i `us-west-2`). Uzasadnienie w [ADR-0030](adr/0030-region-aws-eu-north-1.md); wcześniej `eu-central-1` według [ADR-0015](adr/0015-region-aws-eu-central-1.md).
 
 ## Tożsamości
 
@@ -58,7 +58,7 @@ Test działania: TODO: po ustawieniu zapisać datę testowego e-maila albo pierw
 
 ## Szacunek kosztu
 
-Ceny `eu-central-1` z AWS Price List API (publikacja z października 2026, sprawdzone 2026-10-30), bez VAT. Architektura według [ADR-0024](adr/0024-architektura-aws-ec2-docker-compose.md): EC2 z docker compose (aplikacja i PostgreSQL w kontenerach), dostęp przez SSM, bez load balancera i bramy NAT. Rzeczywiste koszty zapisuje E05-08 w `docs/koszty.md`.
+Ceny `eu-central-1` z AWS Price List API (publikacja z października 2026, sprawdzone 2026-10-30), bez VAT. Po zmianie regionu (ADR-0030) EC2 i EBS są w `eu-north-1` tańsze: około 21 USD miesięcznie przy 24/7 zamiast 23 USD (tabela w ADR-0030). Architektura według [ADR-0024](adr/0024-architektura-aws-ec2-docker-compose.md): EC2 z docker compose (aplikacja i PostgreSQL w kontenerach), dostęp przez SSM, bez load balancera i bramy NAT. Rzeczywiste koszty zapisuje E05-08 w `docs/koszty.md`.
 
 | Pozycja | Cena | Za miesiąc 24/7 |
 |---|---|---|
@@ -93,7 +93,7 @@ Zasoby założone ręcznie (np. budżety, użytkownicy IAM) dostają te same tag
 3. **Dostęp do konsoli:** praca jako Owner z MFA ([ADR-0021](adr/0021-dostep-do-konsoli-owner.md)). Użytkownik IAM `Admin-magister` (utworzony przed tą decyzją) do usunięcia.
 4. **Budżety i alerty** według sekcji wyżej, test e-maila.
 5. **Użytkownik IAM `terraform`** z kluczem dostępu, profil w `~/.aws/credentials`, test `aws sts get-caller-identity --profile <profil>`.
-6. Region w konsoli: `eu-central-1`.
+6. Region: `eu-north-1`, narzucony przez konto (ADR-0030); w konsoli nie da się go zmienić.
 7. Uzupełnienie sekcji „Stan” i daty testu alertu w tym pliku.
 
 Rola OIDC dla potoku powstaje w E05 z Terraformu.

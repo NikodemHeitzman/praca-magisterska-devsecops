@@ -1,6 +1,6 @@
 # 0015. Region AWS: eu-central-1 (Frankfurt)
 
-- **Status:** przyjęty
+- **Status:** zastąpiony przez [0030](0030-region-aws-eu-north-1.md)
 - **Data:** 2026-10-30
 - **Decydujący:** autor pracy
 - **Powiązane:** [0003](0003-dostawca-chmury-aws.md), zadanie E01-07, [`docs/aws-konto.md`](../aws-konto.md), [dziennik 2026-10-30](../log/2026-10-30.md)
