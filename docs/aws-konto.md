@@ -58,7 +58,7 @@ Test działania: TODO: po ustawieniu zapisać datę testowego e-maila albo pierw
 
 ## Szacunek kosztu
 
-Ceny `eu-central-1` z AWS Price List API (publikacja z października 2026, sprawdzone 2026-10-30), bez VAT. Architektura z rekomendacji E05-03: EC2 z docker compose (aplikacja i PostgreSQL w kontenerach), dostęp przez SSM, bez load balancera i bramy NAT. Rzeczywiste koszty zapisuje E05-08 w `docs/koszty.md`.
+Ceny `eu-central-1` z AWS Price List API (publikacja z października 2026, sprawdzone 2026-10-30), bez VAT. Architektura według [ADR-0024](adr/0024-architektura-aws-ec2-docker-compose.md): EC2 z docker compose (aplikacja i PostgreSQL w kontenerach), dostęp przez SSM, bez load balancera i bramy NAT. Rzeczywiste koszty zapisuje E05-08 w `docs/koszty.md`.
 
 | Pozycja | Cena | Za miesiąc 24/7 |
 |---|---|---|
@@ -71,7 +71,7 @@ Ceny `eu-central-1` z AWS Price List API (publikacja z października 2026, spraw
 | CloudWatch: logi około 1 GB, 1–2 alarmy | 0,63 USD/GB, 0,10 USD/alarm | ~0,80 USD |
 | **Razem** | | **~24 USD** |
 
-Wariant oszczędny z [ADR-0019](adr/0019-srodowisko-efemeryczne-aws.md) (około 100 h działania w miesiącu, przez 4 miesiące): około 15–20 USD za cały projekt. Alternatywy do E05-03: `t4g.small` 0,0192 USD/h, `t3.micro` 0,012 USD/h (1 GiB, ryzyko braku pamięci), RDS `db.t4g.micro` PostgreSQL 0,019 USD/h + 0,137 USD/GB-mies., Fargate 0,04656 USD za vCPU-h + 0,00511 USD za GB-h.
+Wariant oszczędny z [ADR-0019](adr/0019-srodowisko-efemeryczne-aws.md) (około 100 h działania w miesiącu, przez 4 miesiące): około 15–20 USD za cały projekt. Porównanie z alternatywami (`t4g.small`, `t3.micro`, RDS, ECS Fargate, ECS Express Mode, App Runner) na cenach z 2026-11-11 jest w [ADR-0024](adr/0024-architektura-aws-ec2-docker-compose.md).
 
 ## Konwencja tagów
 
