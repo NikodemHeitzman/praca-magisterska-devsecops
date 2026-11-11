@@ -1,5 +1,5 @@
 # Permanent layer (docs/adr/0026-stan-terraform-i-warstwy.md): Terraform state bucket.
-# Later: GitHub OIDC provider and pipeline role (E05-06), CloudTrail (E08-01).
+# Later: CloudTrail (E08-01). No GitHub OIDC provider: blocked by the account SCP (docs/adr/0032-potok-bez-poswiadczen-aws-wdrozenie-pull.md).
 # Versions pinned exactly (AGENTS.md rule 6, docs/adr/0025-narzedzie-iac-terraform.md).
 terraform {
   required_version = "1.17.1"

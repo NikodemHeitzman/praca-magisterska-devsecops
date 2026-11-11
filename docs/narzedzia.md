@@ -50,7 +50,7 @@ Akcje przypinamy do pełnego SHA commita (`AGENTS.md`, konwencja 5). Tabela poda
 | `docker/setup-buildx-action` | v4.4.1 | `f87e5991a6d7451dcb8d9637bfbc97413f497069` | 2026-09-16 | builder obrazu |
 | `docker/build-push-action` | v7.4.0 | `c3c9e263c25d99ce0380d002d59b67737d91b0dc` | 2026-09-15 | build i push obrazu |
 | `docker/login-action` | v4.6.0 | `dbcb813823bdd20940b903addbd779551569679f` | 2026-07-29 | logowanie do rejestru |
-| `aws-actions/configure-aws-credentials` | v6.3.0 | `e1253824e5c10ff9df46874f81ed3ec929e19cfd` | 2026-09-15 | OIDC do AWS, bez długoterminowych kluczy |
+| `aws-actions/configure-aws-credentials` | v6.3.0 | `e1253824e5c10ff9df46874f81ed3ec929e19cfd` | 2026-09-15 | OIDC do AWS; nieużywana, bo SCP konta blokuje dostawcę OIDC (ADR-0032) |
 | `aws-actions/amazon-ecr-login` | v2.1.7 | `03f1aad4c6c7ffd436567f42f9384779290529bd` | 2026-08-19 | logowanie do ECR (jeśli rejestrem będzie ECR) |
 | `github/codeql-action` (`upload-sarif`) | v4.39.0 | `6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee` | TODO: zweryfikować | wyniki SARIF w zakładce Security |
 | `actions/dependency-review-action` | v5.0.0 | `a1d282b36b6f3519aa1f3fc636f609c47dddb294` | 2026-05-08 | DEPLOY-REQ-2 |

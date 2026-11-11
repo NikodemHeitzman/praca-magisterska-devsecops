@@ -26,7 +26,7 @@ Ten plik opisuje projekt dla asystentów AI (Claude Code, Copilot, Codex i innyc
 1. **Język:** dokumentacja i ADR po polsku; kod, identyfikatory, nazwy jobów i komunikaty commitów po angielsku.
 2. **Commity:** Conventional Commits (`feat:`, `fix:`, `ci:`, `infra:`, `docs:`, `exp:`, `chore:`).
 3. **Decyzje:** każdy wybór techniczny (narzędzie, usługa AWS, sposób wdrożenia) dostaje ADR w `docs/adr/`: kontekst, rozważane opcje, decyzja, konsekwencje. Zasady i szablon są w `docs/adr/README.md`. **Zanim napiszesz ADR, zapytaj autora pracy, dlaczego wybrał to rozwiązanie i jakie alternatywy rozważał.** Zadawaj pytania tak, jak zadałby je recenzent na obronie („czemu X, a nie Y?”). Spisuj jego powody, nie dopisuj własnych. Twierdzenia o faktach (ceny, limity, udział w rynku) oznaczaj `TODO: zweryfikować`, dopóki nie mają źródła.
-4. **Sekrety:** nigdy w repozytorium. Sekrety trzymamy w GitHub Secrets, a do AWS uwierzytelniamy się przez OIDC, bez długoterminowych kluczy. Repozytorium jest publiczne.
+4. **Sekrety:** nigdy w repozytorium. Sekrety trzymamy w GitHub Secrets. Potok nie ma żadnych poświadczeń AWS: instancja sama pobiera obraz do wdrożenia (model pull, ADR-0032), bo SCP konta blokuje dostawcę OIDC. Repozytorium jest publiczne.
 5. **Akcje GitHub** przypinamy do pełnego SHA commita (wymóg łańcucha dostaw, NIST SP 800-204D).
 6. **Odtwarzalność:** wersje narzędzi i obrazów bazowych przypięte; wyniki eksperymentu zapisujemy jako surowe dane, nie tylko wykresy.
 7. **Nie wymyślaj** wyników pomiarów, numerów CVE, źródeł ani cytatów. Czego nie wiadomo, oznacz `TODO: zweryfikować`.

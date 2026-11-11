@@ -31,7 +31,7 @@ ADR (*Architecture Decision Record*) to krótki zapis jednej decyzji technicznej
 | [0013](0013-klient-http-testow-httpx2.md) | Klient HTTP dla `TestClient`: httpx2 | przyjęty | 2026-10-30 |
 | [0014](0014-linting-i-formatowanie-ruff.md) | Linting i formatowanie: ruff bez reguł bezpieczeństwa | przyjęty | 2026-10-30 |
 | [0015](0015-region-aws-eu-central-1.md) | Region AWS: eu-central-1 (Frankfurt) | zastąpiony przez 0030 | 2026-10-30 |
-| [0016](0016-uwierzytelnianie-do-aws.md) | Uwierzytelnianie do AWS: OIDC w potoku, użytkownicy IAM lokalnie | przyjęty | 2026-10-30 |
+| [0016](0016-uwierzytelnianie-do-aws.md) | Uwierzytelnianie do AWS: OIDC w potoku, użytkownicy IAM lokalnie | przyjęty; potok zastąpiony przez 0032 | 2026-10-30 |
 | [0017](0017-plan-konta-aws-darmowy.md) | Plan konta AWS: darmowy | zastąpiony przez 0018 | 2026-10-30 |
 | [0018](0018-istniejace-konto-aws-plan-platny.md) | Konto AWS: istniejące konto autora, plan płatny | zastąpiony przez 0020 | 2026-10-30 |
 | [0019](0019-srodowisko-efemeryczne-aws.md) | Środowisko AWS efemeryczne: zasoby tylko w czasie pracy | przyjęty | 2026-10-30 |
@@ -39,7 +39,7 @@ ADR (*Architecture Decision Record*) to krótki zapis jednej decyzji technicznej
 | [0021](0021-dostep-do-konsoli-owner.md) | Dostęp autora do konsoli AWS: Owner z MFA | przyjęty | 2026-11-10 |
 | [0022](0022-obraz-kontenera-aplikacji.md) | Obraz kontenera aplikacji: python:3.14-slim bez pip, uv w etapie budowania, migracje poza obrazem | przyjęty | 2026-11-11 |
 | [0023](0023-uruchamianie-stosu-docker-compose.md) | Uruchamianie aplikacji z zależnościami: Docker Compose z jednorazowymi usługami migrate i seed, `.env` w CI generowany przez workflow | przyjęty | 2026-11-11 |
-| [0024](0024-architektura-aws-ec2-docker-compose.md) | Architektura w AWS: EC2 z Docker Compose, PostgreSQL w kontenerze, dostęp przez SSM | przyjęty | 2026-11-11 |
+| [0024](0024-architektura-aws-ec2-docker-compose.md) | Architektura w AWS: EC2 z Docker Compose, PostgreSQL w kontenerze, dostęp przez SSM | przyjęty; wdrożenie zastąpione przez 0032 | 2026-11-11 |
 | [0025](0025-narzedzie-iac-terraform.md) | Narzędzie IaC: Terraform z przypiętymi wersjami | przyjęty | 2026-11-11 |
 | [0026](0026-stan-terraform-i-warstwy.md) | Stan Terraformu w S3 i podział na warstwę stałą (`shared/`) i roboczą (`work/`) | przyjęty | 2026-11-11 |
 | [0027](0027-rejestr-obrazow-ghcr.md) | Rejestr obrazów: GitHub Container Registry | przyjęty | 2026-11-11 |
@@ -47,3 +47,4 @@ ADR (*Architecture Decision Record*) to krótki zapis jednej decyzji technicznej
 | [0029](0029-uprawnienia-uzytkownika-terraform.md) | Uprawnienia użytkownika IAM `terraform`: własna polityka w repozytorium | przyjęty | 2026-11-11 |
 | [0030](0030-region-aws-eu-north-1.md) | Region AWS: eu-north-1 (Sztokholm), region przypisany kontu | przyjęty | 2026-11-11 |
 | [0031](0031-konfiguracja-hosta-user-data.md) | Konfiguracja i utwardzenie instancji: skrypt user-data zamiast Ansible | przyjęty | 2026-11-11 |
+| [0032](0032-potok-bez-poswiadczen-aws-wdrozenie-pull.md) | Potok bez poświadczeń AWS: wdrożenie w modelu pull zamiast OIDC (SCP konta blokuje dostawców tożsamości) | przyjęty | 2026-11-11 |

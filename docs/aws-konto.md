@@ -27,10 +27,10 @@ Repozytorium jest publiczne. Ten plik nie zawiera ID konta, adresów e-mail, naz
 |---|---|---|---|
 | właściciel konta (Owner, AWS Builder ID) | codzienna praca w konsoli ([ADR-0021](adr/0021-dostep-do-konsoli-owner.md)) | tak (TOTP) | nie dotyczy |
 | klasyczny root | tylko czynności wymagające roota | tak | brak (`AccountAccessKeysPresent = 0`) |
-| użytkownik IAM `terraform` | lokalny Terraform, utworzenie roli OIDC (bootstrap E05) | nie dotyczy (dostęp programowy) | tak, tylko na komputerze autora, profil nazwany w `~/.aws/credentials` |
-| rola IAM potoku (OIDC) | wdrożenie z GitHub Actions | nie dotyczy | brak, poświadczenia krótkotrwałe |
+| użytkownik IAM `terraform` | lokalny Terraform (warstwy `shared/` i `work/`) | nie dotyczy (dostęp programowy) | tak, tylko na komputerze autora, profil nazwany w `~/.aws/credentials` |
+| rola instancji EC2 | pobranie i uruchomienie wdrażanego obrazu (model pull, [ADR-0032](adr/0032-potok-bez-poswiadczen-aws-wdrozenie-pull.md)), SSM, kubełek załączników | nie dotyczy | brak, poświadczenia krótkotrwałe z IMDSv2 |
 
-Odstępstwo dla klucza `terraform` opisuje [ADR-0016](adr/0016-uwierzytelnianie-do-aws.md). Kluczy AWS nie zapisujemy w repozytorium ani w GitHub Secrets.
+Odstępstwo dla klucza `terraform` opisuje [ADR-0016](adr/0016-uwierzytelnianie-do-aws.md). Kluczy AWS nie zapisujemy w repozytorium ani w GitHub Secrets. Potok GitHub Actions nie ma tożsamości w AWS: SCP konta-projektu odrzuca tworzenie dostawców tożsamości (`iam:*Provider*`), więc OIDC z ADR-0016 jest niewykonalne ([ADR-0032](adr/0032-potok-bez-poswiadczen-aws-wdrozenie-pull.md)).
 
 ## Zasady kosztowe (wymóg projektu)
 
@@ -38,7 +38,7 @@ Według [ADR-0019](adr/0019-srodowisko-efemeryczne-aws.md):
 
 1. **Środowisko istnieje tylko w czasie pracy.** Po `terraform apply` i zakończeniu zadania (albo sesji) zawsze `terraform destroy` warstwy roboczej. Dotyczy autora i agentów AI.
 2. **Codzienne sprzątanie wieczorem.** Mechanizm automatyczny usuwa warstwę roboczą, jeśli została. Mechanizm i godzinę ustala E05-08. Do czasu jego wdrożenia sprzątanie jest ręczne, na koniec każdego dnia pracy.
-3. **Warstwa stała** (stan Terraformu, OIDC i rola potoku, użytkownicy IAM, budżety, CloudTrail z kubełkiem logów, rejestr obrazów) zostaje do sprzątania po obronie (E15-08).
+3. **Warstwa stała** (stan Terraformu, użytkownicy IAM, budżety, CloudTrail z kubełkiem logów, rejestr obrazów) zostaje do sprzątania po obronie (E15-08).
 4. **Przed zakończeniem sesji** sprawdzenie, że nic nie zostało: `terraform state list` dla warstwy roboczej jest pusty, a w Cost Explorer lub Resource Explorer nie ma zasobów z `Project=devsecops-thesis` poza warstwą stałą.
 
 ## Budżety i alerty
@@ -80,7 +80,7 @@ Każdy zasób tworzony przez Terraform dostaje tagi przez `default_tags` w provi
 | Tag | Wartości | Znaczenie |
 |---|---|---|
 | `Project` | `devsecops-thesis` | wszystkie zasoby pracy; filtr w Cost Explorer i przy sprzątaniu |
-| `Variant` | `a`, `b`, `shared` | wariant potoku, który wdrożył zasób; `shared` dla wspólnych (np. rola OIDC, sieć) |
+| `Variant` | `a`, `b`, `shared` | wariant potoku, który wdrożył zasób; `shared` dla wspólnych (np. kubełek stanu) |
 | `ManagedBy` | `terraform`, `manual` | czy zasób jest w stanie Terraformu |
 | `Owner` | `NikodemHeitzman` | login GitHub autora |
 
@@ -96,4 +96,4 @@ Zasoby założone ręcznie (np. budżety, użytkownicy IAM) dostają te same tag
 6. Region: `eu-north-1`, narzucony przez konto (ADR-0030); w konsoli nie da się go zmienić.
 7. Uzupełnienie sekcji „Stan” i daty testu alertu w tym pliku.
 
-Rola OIDC dla potoku powstaje w E05 z Terraformu.
+Roli dla potoku nie ma: SCP konta blokuje dostawcę OIDC, a wdrożenie działa w modelu pull ([ADR-0032](adr/0032-potok-bez-poswiadczen-aws-wdrozenie-pull.md)).

@@ -4,7 +4,7 @@ Infrastruktura z [ADR-0024](../../docs/adr/0024-architektura-aws-ec2-docker-comp
 
 | Katalog | Warstwa | Zasoby | Cykl życia |
 |---|---|---|---|
-| [`shared/`](shared/) | stała | kubełek stanu Terraformu (później: OIDC z E05-06, CloudTrail z E08-01) | zostaje do E15-08 |
+| [`shared/`](shared/) | stała | kubełek stanu Terraformu (później: CloudTrail z E08-01; OIDC z E05-06 zablokowane przez SCP konta, ADR-0032) | zostaje do E15-08 |
 | [`work/`](work/) | robocza | VPC, podsieć publiczna, brama internetowa, grupa bezpieczeństwa (wejście tylko 80), EC2 `t3.small` z IMDSv2 i szyfrowanym EBS, rola i profil instancji (SSM, kubełek załączników), kubełek załączników | `apply` na początku sesji, `destroy` na końcu ([ADR-0019](../../docs/adr/0019-srodowisko-efemeryczne-aws.md)) |
 
 Wersje: Terraform `1.17.1`, provider `hashicorp/aws` `6.72.0`, przypięte dokładnie, sumy kontrolne w `.terraform.lock.hcl` ([ADR-0025](../../docs/adr/0025-narzedzie-iac-terraform.md)). System instancji: przypięte AMI Ubuntu 24.04 LTS ([ADR-0028](../../docs/adr/0028-system-instancji-ubuntu-przypiete-ami.md)).

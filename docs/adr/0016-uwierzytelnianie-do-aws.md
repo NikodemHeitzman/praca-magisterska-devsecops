@@ -1,6 +1,6 @@
 # 0016. Uwierzytelnianie do AWS: OIDC w potoku, użytkownicy IAM lokalnie
 
-- **Status:** przyjęty; dostęp autora do konsoli zastąpiony przez [0021](0021-dostep-do-konsoli-owner.md)
+- **Status:** przyjęty; dostęp autora do konsoli zastąpiony przez [0021](0021-dostep-do-konsoli-owner.md), uwierzytelnianie potoku (OIDC) zastąpione przez [0032](0032-potok-bez-poswiadczen-aws-wdrozenie-pull.md)
 - **Data:** 2026-10-30
 - **Decydujący:** autor pracy
 - **Powiązane:** [0003](0003-dostawca-chmury-aws.md), [0004](0004-publiczne-repozytorium.md), zadania E01-07, E05, [`docs/aws-konto.md`](../aws-konto.md), [dziennik 2026-10-30](../log/2026-10-30.md)
