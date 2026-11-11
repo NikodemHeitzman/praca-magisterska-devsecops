@@ -36,7 +36,10 @@ resource "aws_instance" "app" {
     delete_on_termination = true
   }
 
-  # Docker, updates and hardening: E05-05 (Ansible or user data).
+  # Docker, security updates and hardening on first boot (ADR-0031). A changed script
+  # replaces the instance, so every apply starts from the same configuration.
+  user_data                   = file("${path.module}/user-data.sh")
+  user_data_replace_on_change = true
 
   # The deploy job finds the instance by its tags (E05-07).
   tags = {

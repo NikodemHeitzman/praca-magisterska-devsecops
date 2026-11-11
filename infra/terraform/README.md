@@ -58,7 +58,39 @@ Pierwszy przebieg (2026-11-11, `eu-north-1`, Terraform 1.17.1, łącze domowe au
 
 Po `apply` agent SSM zgłosił się jako `Online` (agent 3.3.4793.0, sprawdzone w CloudShell). Pojedynczy pomiar, bez powtórzeń.
 
-Instancja nie ma klucza SSH ani otwartego portu 22. Dostęp: AWS Systems Manager, Session Manager (konsola albo `aws ssm start-session --target <instance_id>`). Docker i utwardzanie systemu: E05-05. Wdrożenie aplikacji: E05-07.
+Instancja nie ma klucza SSH ani otwartego portu 22. Dostęp: AWS Systems Manager, Session Manager (konsola albo `aws ssm start-session --target <instance_id>`). Wdrożenie aplikacji: E05-07.
+
+## Konfiguracja hosta (user-data)
+
+Przy pierwszym starcie cloud-init uruchamia jako root [`work/user-data.sh`](work/user-data.sh) ([ADR-0031](../../docs/adr/0031-konfiguracja-hosta-user-data.md)):
+
+1. Docker i wtyczka compose z archiwum Ubuntu (`docker.io`, `docker-compose-v2`),
+2. `/etc/docker/daemon.json`: rotacja logów kontenerów i `no-new-privileges`,
+3. użytkownik systemowy `app` bez powłoki logowania, w grupie `docker`, z katalogiem `/opt/app` (750),
+4. `ssh.socket` i `ssh.service` zatrzymane i zamaskowane,
+5. `unattended-upgrades`: łatki bezpieczeństwa według domyślnych źródeł Ubuntu, bez automatycznego restartu,
+6. ufw wyłączony; jedyną zaporą jest grupa bezpieczeństwa (Docker omija ufw).
+
+Każdy krok sprawdza stan przed zmianą, więc ponowne uruchomienie niczego nie zmienia i wypisuje `harden: done, 0 change(s)`. Zmiana skryptu tworzy przy `apply` nową instancję (`user_data_replace_on_change`).
+
+Kontrola hosta po `apply`: [`check-host.sh`](check-host.sh) wywołuje przez SSM Run Command status cloud-init, drugie przebiegnięcie skryptu (test idempotencji), wersje pakietów i stan usług. Użytkownik `terraform` nie ma uprawnień SSM, więc skrypt uruchamia się w AWS CloudShell (`eu-north-1`) jako Owner:
+
+```bash
+bash check-host.sh
+```
+
+Test 2026-11-11 (pojedynczy pomiar, szczegóły w ADR-0031, sekcja „Weryfikacja”):
+
+| Pomiar | Wynik |
+|---|---|
+| `work/` `apply` ze skryptem user-data | 20 zasobów w 25 s (instancja 13 s) |
+| user-data przy pierwszym starcie | 7 zmian, 25,3 s (cały cloud-init 28,7 s) |
+| drugie przebiegnięcie przez SSM | 0 zmian, poniżej 1 s |
+| Docker / Compose z archiwum Ubuntu | 29.1.3 / 2.40.3 |
+| port 22 | nic nie nasłuchuje (`ssh.socket` i `ssh.service` zamaskowane) |
+| `work/` `destroy` | 20 zasobów w 29 s, `state list` pusty |
+
+Uwaga dla Windows PowerShell 5.1: argument `-out=work.tfplan` trzeba wziąć w cudzysłów (`terraform plan "-out=work.tfplan"`), bo PowerShell rozbija go na kropce.
 
 ## Kontrola przed commitem
 

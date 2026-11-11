@@ -21,8 +21,7 @@ Repozytorium jest publiczne celowo, ponieważ zapewnia bezpłatne GitHub code sc
 | Katalog | Zawartość |
 |---|---|
 | `app/` | Aplikacja webowa (obiekt badania) i jej `Dockerfile` |
-| `infra/terraform/` | Infrastruktura AWS jako kod |
-| `infra/ansible/` | Konfiguracja hostów i wdrożenie |
+| `infra/terraform/` | Infrastruktura AWS jako kod, z konfiguracją hosta w skrypcie user-data (ADR-0031) |
 | `.github/workflows/` | Potoki CI/CD: bazowy i DevSecOps |
 | `experiment/` | Skrypty pomiarowe, surowe wyniki, analiza |
 | `docs/adr/` | Rejestr decyzji architektonicznych (ADR) |

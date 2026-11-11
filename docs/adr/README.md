@@ -46,3 +46,4 @@ ADR (*Architecture Decision Record*) to krótki zapis jednej decyzji technicznej
 | [0028](0028-system-instancji-ubuntu-przypiete-ami.md) | System instancji EC2: Ubuntu Server 24.04 LTS z przypiętym ID AMI | przyjęty | 2026-11-11 |
 | [0029](0029-uprawnienia-uzytkownika-terraform.md) | Uprawnienia użytkownika IAM `terraform`: własna polityka w repozytorium | przyjęty | 2026-11-11 |
 | [0030](0030-region-aws-eu-north-1.md) | Region AWS: eu-north-1 (Sztokholm), region przypisany kontu | przyjęty | 2026-11-11 |
+| [0031](0031-konfiguracja-hosta-user-data.md) | Konfiguracja i utwardzenie instancji: skrypt user-data zamiast Ansible | przyjęty | 2026-11-11 |
