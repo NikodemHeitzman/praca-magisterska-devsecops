@@ -2,7 +2,7 @@
 
 - **Status:** przyjęty
 - **Data:** 2026-11-11
-- **Decydujący:** autor pracy
+- **Decydujący:** autor pracy; zmianę protokołu v1 zaakceptował promotor 2026-11-13 ([notatka](../meetings/2026-11-13-promotor.md))
 - **Powiązane:** zastępuje część „potok przez OIDC” w [0016](0016-uwierzytelnianie-do-aws.md) i mechanizm wdrożenia z potoku przez SSM Run Command w [0024](0024-architektura-aws-ec2-docker-compose.md); [0004](0004-publiczne-repozytorium.md), [0019](0019-srodowisko-efemeryczne-aws.md), [0020](0020-nowe-konto-aws-plan-darmowy.md), [0026](0026-stan-terraform-i-warstwy.md), [0027](0027-rejestr-obrazow-ghcr.md), [0029](0029-uprawnienia-uzytkownika-terraform.md), [0030](0030-region-aws-eu-north-1.md), zadania E05-06, E05-07, E05-08, E08-01, [`docs/aws-konto.md`](../aws-konto.md), [dziennik 2026-11-11](../log/2026-11-11.md)
 
 ## Kontekst
