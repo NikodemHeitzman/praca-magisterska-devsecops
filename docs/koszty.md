@@ -44,9 +44,11 @@ Koszt przed odjęciem kredytów, bez VAT, w USD.
 
 | Miesiąc | Koszt (Usage) | Kredyty wykorzystane | Kredyty pozostałe | Godziny instancji | Data odczytu | Uwagi |
 |---|---|---|---|---|---|---|
-| 2026-11 | TODO | TODO | TODO | TODO | TODO | pierwszy miesiąc: sesje E05-04, E05-05, E05-07, E05-08 |
+| 2026-11 (wstępnie, 1–13 XI) | 0,0059 | 0,0059 | TODO | 0,18 (niepełne) | 2026-11-13 | odczyt wstępny, dane szacunkowe (`Estimated: True`) i opóźnione; powtórzyć po zamknięciu miesiąca |
 
 „Godziny instancji” pochodzą z Cost Explorer (Usage type `BoxUsage:t3.small`, jednostka Hrs) albo z sumy czasów sesji w dzienniku badawczym.
+
+**Odczyt z 2026-11-13 jest niepełny.** Cost Explorer pokazał 0,18 h `t3.small` (około 11 minut), a tego samego dnia instancje działały łącznie ponad 50 minut (test ADR-0034, przy czym wcześniejsze sesje E05-04, E05-05 i E05-07 też trwały dłużej). Dane w Cost Explorer dochodzą z opóźnieniem i są oznaczone jako szacunkowe, więc ostateczne wartości za listopad trzeba odczytać po zamknięciu miesiąca (TODO: początek grudnia 2026).
 
 ### Pozycje według usług
 
@@ -54,11 +56,54 @@ Wypełniać dla każdego miesiąca z tabeli wyżej.
 
 | Miesiąc | Usługa | Koszt (USD) | Uwagi |
 |---|---|---|---|
-| 2026-11 | Amazon EC2 (instancja) | TODO | |
-| 2026-11 | Amazon VPC (publiczny IPv4) | TODO | |
-| 2026-11 | EC2 – Other (EBS) | TODO | |
-| 2026-11 | Amazon S3 (stan, załączniki) | TODO | |
-| 2026-11 | pozostałe | TODO | |
+| 2026-11 (wstępnie) | Amazon Elastic Compute Cloud – Compute | 0,0038820 | `t3.small`, 0,18 h |
+| 2026-11 (wstępnie) | Amazon Virtual Private Cloud | 0,0009597 | publiczny IPv4, 0,19 h |
+| 2026-11 (wstępnie) | Amazon Simple Storage Service | 0,0005682 | żądania do kubełków stanu i załączników |
+| 2026-11 (wstępnie) | EC2 – Other | 0,0004509 | wolumen EBS gp3 i transfer danych |
+| 2026-11 (wstępnie) | AWS Secrets Manager | 0,0000100 | 2 żądania API; projekt nie używa tej usługi (TODO: zweryfikować pochodzenie w CloudTrail) |
+| 2026-11 (wstępnie) | AWS CloudShell | 0,0000010 | |
+| 2026-11 (wstępnie) | AWS Glue, AWS KMS, Amazon SNS, Amazon SQS | 0 | w darmowym limicie |
+| 2026-11 (wstępnie) | **razem** | **0,0058718** | równe wykorzystanym kredytom |
+
+### Surowe dane: typy użycia
+
+Odczyt 2026-11-13 (CloudShell, `aws ce get-cost-and-usage`, okres 2026-11-01 do 2026-11-14 bez dnia końcowego, `RECORD_TYPE = Usage`, grupowanie `USAGE_TYPE`, metryki `UnblendedCost` i `UsageQuantity`). Wartości jak w odpowiedzi API.
+
+| Typ użycia | Koszt (USD) | Ilość | Jednostka |
+|---|---|---|---|
+| EUC1-DataTransfer-In-Bytes | 0 | 0.00000036 | GB |
+| EUC1-DataTransfer-Out-Bytes | 0 | 0.0000005076 | GB |
+| EUC1-Requests-Tier1 | 0.0000054 | 1 | Requests |
+| EUN1-AWSSecretsManagerAPIRequest | 0.00001 | 2 | API Requests |
+| EUN1-BoxUsage:t3.small | 0.0038819952 | 0.179722 | Hrs |
+| EUN1-Catalog-Request | 0 | 7 | Requests |
+| EUN1-DataTransfer-In-Bytes | 0 | 0.0054128403 | GB |
+| EUN1-DataTransfer-Out-Bytes | 0 | 0.0004748804 | GB |
+| EUN1-DataTransfer-Regional-Bytes | 0 | 0.1167659155 | GB |
+| EUN1-DataTransfer-xAZ-In-Bytes | 0 | 0.00185614 | GB |
+| EUN1-DataTransfer-xAZ-Out-Bytes | 0 | 0.0108927945 | GB |
+| EUN1-EBS:VolumeUsage.gp3 | 0.0004508982 | 0.0053935186 | GB-Month |
+| EUN1-EBSOptimized:t3.small | 0 | 0.179722 | Hrs |
+| EUN1-EU-AWS-In-Bytes | 0 | 0.00000863 | GB |
+| EUN1-EU-AWS-Out-Bytes | 0.0000000236 | 0.0000011791 | GB |
+| EUN1-EUW2-AWS-In-Bytes | 0 | 0.0000060871 | GB |
+| EUN1-EUW2-AWS-Out-Bytes | 0.0000001217 | 0.0000060871 | GB |
+| EUN1-PublicIPv4:InUseAddress | 0.00095972 | 0.191944 | Hrs |
+| EUN1-Requests-Tier1 | 0.000435 | 91 | Requests |
+| EUN1-Requests-Tier2 | 0.0001276 | 319 | Requests |
+| EUN1-TimedStorage-ByteHrs | 0.0000001978 | 0.0000086 | GB-Month |
+| EUN1-USE1-AWS-In-Bytes | 0 | 0.00005507 | GB |
+| EUN1-USE1-AWS-Out-Bytes | 0.000000877 | 0.00004385 | GB |
+| Global-Bucket-Hrs-FreeTier | 0 | 0.0027777778 | Bucket-Mo |
+| eu-north-1-KMS-Requests | 0 | 10 | Requests |
+
+Kredyty w tym samym okresie (`RECORD_TYPE = Credit`): −0,0058718337 USD.
+
+Obserwacje:
+
+- **Pozycje `EUC1-…` (Frankfurt)** pochodzą z pierwszej próby `apply` w `eu-central-1`, którą odrzuciła SCP konta (E05-04, ADR-0030).
+- **Żądania KMS** wynikają najpewniej z szyfrowania wolumenu EBS kluczem zarządzanym przez AWS (`aws/ebs`) i mieszczą się w darmowym limicie (TODO: zweryfikować).
+- **Odczyt przez API kosztuje więcej niż infrastruktura.** Pięć zapytań `ce` z 2026-11-13 to 0,05 USD, czyli około ośmiokrotność kosztu całej infrastruktury w tym okresie. Kolejne odczyty lepiej robić w konsoli albo ograniczyć do jednego zapytania zbiorczego na miesiąc.
 
 ## Warstwa stała
 
