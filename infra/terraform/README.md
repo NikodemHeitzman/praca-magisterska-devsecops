@@ -118,7 +118,17 @@ SHOW_SEED_PASSWORDS=1 bash check-deploy.sh  # dodatkowo hasła kont z seed (np. 
 
 Wynik `send-command` z hasłami zostaje w historii poleceń SSM. Hasła są fikcyjne i giną z instancją, ale nie uruchamiaj tej opcji bez potrzeby.
 
-Pakiet GHCR po pierwszej publikacji jest prywatny i trzeba go raz ustawić jako publiczny (Package settings, Change visibility). Bez tego instancja dostaje `401` (TODO: zweryfikować kod odpowiedzi w teście E05-07).
+Według dokumentacji GitHub nowy pakiet GHCR jest prywatny. W teście E05-07 pakiet opublikowany przez workflow tego publicznego repozytorium był od razu dostępny anonimowo. Jeśli instancja dostaje błąd przy zapytaniu o manifest, sprawdź widoczność pakietu (Package settings, Change visibility).
+
+Test 2026-11-13 (pojedynczy przebieg, szczegóły w ADR-0033, sekcja „Weryfikacja”):
+
+| Krok | Wynik |
+|---|---|
+| pierwsze wdrożenie po `apply` | `/version` i `/health` potwierdzone z zewnątrz |
+| nowy digest pod tagiem | wdrożony 39 s po wypchnięciu tagu, bez kroku ręcznego |
+| rollback (`rollback.yml`) | workflow 8 s, ten sam digest wdrożony 63 s później (samo wdrożenie 14 s) |
+| user-data | 13 zmian w 30,0 s, drugie przebiegnięcie 0 zmian |
+| `work/` `destroy` | 20 zasobów, instancja 20 s, `state list` pusty |
 
 ## Kontrola przed commitem
 

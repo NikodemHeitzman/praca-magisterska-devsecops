@@ -118,17 +118,34 @@ Obraz ma etykietę OCI `org.opencontainers.image.revision` z SHA commita. Po pob
 - (+) Wdrożenie i rollback nie wymagają poświadczeń AWS w potoku ani tokenu GitHub na instancji. Instancja czyta tylko publiczne zasoby: pakiet GHCR i pliki repozytorium.
 - (+) Wdrażany jest zawsze konkretny digest, zapisany w dzienniku instancji i widoczny w `/version`. Audyt po wdrożeniu (protokół, sekcja 4) może pobrać ten sam obraz po digeście.
 - (+) Rola instancji się nie zmienia: SSM do kontroli i kubełek S3 na załączniki (E05-04).
-- (−) **Pakiet GHCR trzeba raz ustawić jako publiczny.** Pierwsza publikacja tworzy pakiet prywatny, a zmiany na publiczny nie da się cofnąć (GitHub Docs, sprawdzone 2026-11-13). To zamyka TODO z ADR-0027.
+- (−) **Widoczność pakietu GHCR.** Według dokumentacji pierwsza publikacja tworzy pakiet prywatny, a zmiany na publiczny nie da się cofnąć (GitHub Docs, sprawdzone 2026-11-13). W teście pakiet opublikowany przez workflow tego publicznego repozytorium był dostępny anonimowo od pierwszej publikacji (HTTP 200 na zapytanie o manifest), bez ręcznej zmiany. Ustawienie widoczności w interfejsie GitHub: TODO: zweryfikować. Dotyczy TODO z ADR-0027.
 - (−) **Tag w GHCR jest zmienny.** Kto ma `packages: write` w tym repozytorium, ten wskazuje, co wdroży instancja. Ochroną są gałęzie bazowe wariantów, uprawnienie `packages: write` tylko w workflow i przypięcie po digeście. Podpis obrazu jest odroczony (wyżej). Materiał do 2.3 i 5.3.
 - (−) **Potok kończy się na publikacji.** Czas i wynik wdrożenia nie są widoczne w potoku. Pomiaru to nie zmienia: H2 mierzy workflow PR, a protokół opisuje pełny potok z wdrożeniem opisowo. Uwaga agenta: E06-03 („Merge do main = nowa wersja na AWS”, OIDC, środowisko `production`) trzeba odczytać przez ten ADR.
 - (−) **Opóźnienie wdrożenia do około minuty** plus czas pobrania obrazu. Limity anonimowych zapytań do GHCR nie są opisane w dokumentacji (TODO: zweryfikować); timer robi około 60 zapytań o manifest na godzinę.
 - (−) **Sekrety, w tym hasła kont z `seed`, są różne na każdej instancji.** Skrypt audytu po wdrożeniu (protokół, sekcja 4) musi najpierw odczytać hasła przez SSM z CloudShell. Komentarz w `app/.env.example` (hasła w AWS z GitHub Secrets) poprawiono w E05-07.
-- (−) `CORS_ORIGINS` musi zawierać publiczny adres instancji. Instancja może go odczytać z IMDSv2 przy starcie (TODO: zweryfikować przy implementacji).
+- (−) `CORS_ORIGINS` musi zawierać publiczny adres instancji. `user-data.sh` odczytuje publiczny adres IPv4 i nazwę DNS z IMDSv2 przy pierwszym starcie. Zawartości `.env` w teście nie wypisywano (TODO: zweryfikować wartość przy audycie).
 - (−) Zmienna `deploy_branch` w Terraformie: zmiana wariantu w sesji to `apply` z inną wartością. Czy wymusza nową instancję, zależy od tego, czy trafia do user-data (`user_data_replace_on_change`); ustalane przy implementacji.
-- Do zrobienia w E05-07: skrypt wdrożenia i jednostki systemd w user-data, nakładka compose dla AWS (bez `s3`, z kubełkiem z Terraformu), endpoint `/version`, zmienna `deploy_branch`, workflow retagu, test end-to-end z rollbackiem. Komentarz w `infra/terraform/work/ec2.tf` o szukaniu instancji po tagach jest nieaktualny.
-- Test end-to-end przed E06-02: tymczasowy workflow `e2e-publish.yml` publikuje obraz z tagiem gałęzi i jest usuwany po teście. To decyzja agenta na wzór workflow testowego z E05-06 (dowód zostaje w historii git, skanery E07 nie widzą pliku spoza porównywanych potoków).
+- Realizacja w E05-07: [`deploy-agent.sh`](../../infra/terraform/work/deploy-agent.sh) i jednostki systemd w [`user-data.sh`](../../infra/terraform/work/user-data.sh), nakładka [`app/compose.aws.yaml`](../../app/compose.aws.yaml), endpoint `/version`, zmienna `deploy_branch`, workflow [`rollback.yml`](../../.github/workflows/rollback.yml), [`check-deploy.sh`](../../infra/terraform/check-deploy.sh). Rollback kopiuje manifest bajt w bajt (GET po digeście, PUT pod tag) zamiast `docker buildx imagetools create`, które mogłoby opakować obraz w nowy indeks i zmienić digest (decyzja agenta).
+- Test end-to-end przed E06-02: tymczasowy workflow `e2e-publish.yml` (commit `2de43b7`) publikował obraz z tagiem gałęzi i został usunięty po teście. To decyzja agenta na wzór workflow testowego z E05-06 (dowód zostaje w historii git, skanery E07 nie widzą pliku spoza porównywanych potoków).
 - Do E06-02: publikacja z tagiem SHA i tagiem gałęzi oraz etykietami OCI (`org.opencontainers.image.source`, `org.opencontainers.image.revision`).
 - Do E05-05 i E09: skrypt wdrożenia zapisuje wersje Dockera i Compose przy każdym wdrożeniu.
+
+## Weryfikacja
+
+Test end-to-end 2026-11-13 w `eu-north-1`, pojedynczy przebieg. Środowisko postawił autor (`terraform apply`, 20 zasobów, instancja w 15 s). Obrazy opublikował tymczasowy workflow `e2e-publish.yml` z tego samego commita `2de43b7`; różniły się tylko etykietą (marker 1 i 2). Czasy wdrożeń pochodzą z `/opt/app/state/deployments.log` i dziennika `ticketing-deploy` (`check-deploy.sh`), czasy workflow z GitHub Actions.
+
+| Krok | Digest pod `exp-variant-a` | Wynik |
+|---|---|---|
+| pierwsze wdrożenie po starcie instancji | `sha256:8993cd1d…f582` | `deployed` 11:20:41 UTC; `/version` i `/health` (`ok`) potwierdzone z zewnątrz |
+| druga publikacja (push tagu 11:21:21 UTC) | `sha256:e7534a01…9de5` | `deployed` 11:22:00 UTC, 39 s po wypchnięciu tagu, bez kroku ręcznego |
+| rollback (`rollback.yml`, 8 s, koniec 11:22:16 UTC) | `sha256:8993cd1d…f582` | `deployed` 11:23:19 UTC, ten sam digest co pierwsze wdrożenie; samo wdrożenie 14 s (z ponownym pobraniem obrazu) |
+
+- Timer uruchamia agenta co około 61 s. Przebieg bez zmiany digestu nic nie wypisuje i kończy się powodzeniem.
+- Każde wdrożenie odtwarza `migrate` i `seed` (oba z kodem 0), `db` działa bez przerwy. Kontenery `app` i `db` mają stan `healthy`.
+- Wersje zapisane przy każdym wdrożeniu: Docker 29.1.3, Compose 2.40.3.
+- User-data przy pierwszym starcie: 13 zmian w 30,0 s (`config-scripts_user`, cały cloud-init 34,8 s). Drugie przebiegnięcie przez SSM (`check-host.sh`): `0 change(s)`, więc nowe kroki 7 i 8 są idempotentne.
+- Na hoście nasłuchuje tylko `docker-proxy` na porcie 80 oraz lokalny resolver DNS i `containerd` na 127.0.0.x. Na porcie 22 nic.
+- Wymiana `GITHUB_TOKEN` na token GHCR z prawem `push` (`ghcr.io/token`, uwierzytelnienie Basic) działa w workflow rollbacku.
 
 ## Źródła
 
@@ -137,4 +154,3 @@ Obraz ma etykietę OCI `org.opencontainers.image.revision` z SHA commita. Po pob
 - GitHub Docs, *Working with the Container registry* (anonimowy dostęp do publicznych obrazów, `GITHUB_TOKEN`, etykieta `org.opencontainers.image.source`): https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry (sprawdzone 2026-11-13)
 - GitHub Docs, *Configuring a package's access control and visibility* (domyślnie prywatny, publicznego nie da się cofnąć): https://docs.github.com/en/packages/learn-github-packages/configuring-a-packages-access-control-and-visibility (sprawdzone 2026-11-13)
 - Test 2026-11-13: anonimowe zapytanie `HEAD /v2/<obraz>/manifests/<tag>` do `ghcr.io` z tokenem z `ghcr.io/token` zwraca `200` i nagłówek `docker-content-digest` (na publicznym obrazie `zaproxy/zaproxy:stable`).
-- Retag bez pobierania obrazu (`docker buildx imagetools create`): TODO: zweryfikować w dokumentacji Dockera przy implementacji.
