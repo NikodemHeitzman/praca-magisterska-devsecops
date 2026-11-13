@@ -1,0 +1,48 @@
+# AWS overlay for compose.yaml (docs/adr/0033-mechanizm-wdrozenia-pull.md). The deploy agent on
+# the instance downloads both files from the commit the image was built from and runs:
+#   docker compose -f compose.yaml -f compose.aws.yaml up -d
+# APP_IMAGE (image pinned by digest) and APP_REVISION (commit SHA) come from the agent; .env with
+# the secrets is generated on the instance at first boot (infra/terraform/work/user-data.sh).
+#
+# Differences from the local stack:
+# - the app image is pulled by digest from GHCR, never built on the host,
+# - attachments go to the real S3 bucket through the instance role, so moto does not run,
+# - the app listens on port 80 of the host; PostgreSQL is not published at all.
+
+x-deployed: &deployed
+  build: !reset null
+  image: ${APP_IMAGE:?set by the deploy agent}
+  pull_policy: missing
+
+services:
+  app:
+    <<: *deployed
+    environment:
+      # Set but empty: real S3 (ticketing/config.py).
+      S3_ENDPOINT_URL: ""
+      APP_IMAGE: ${APP_IMAGE:?set by the deploy agent}
+      APP_REVISION: ${APP_REVISION:?set by the deploy agent}
+    ports: !override
+      - "80:8000"
+    restart: unless-stopped
+
+  migrate:
+    <<: *deployed
+    environment:
+      S3_ENDPOINT_URL: ""
+
+  seed:
+    <<: *deployed
+    environment:
+      S3_ENDPOINT_URL: ""
+    depends_on: !override
+      migrate:
+        condition: service_completed_successfully
+
+  db:
+    ports: !reset []
+    restart: unless-stopped
+
+  # Local S3 stand-in only; never started in AWS.
+  s3:
+    profiles: ["local"]

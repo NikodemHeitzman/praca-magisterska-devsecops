@@ -8,6 +8,25 @@ data "aws_ami" "ubuntu" {
   }
 }
 
+# The deployment settings are prepended as shell assignments instead of using templatefile(),
+# so user-data.sh stays a plain bash file that ShellCheck can lint (its own shebang then
+# reads as a comment). GHCR tags cannot contain "/", hence exp/variant-a -> exp-variant-a.
+locals {
+  deploy_tag = replace(var.deploy_branch, "/", "-")
+
+  user_data = join("\n", [
+    "#!/bin/bash",
+    "# Deployment settings rendered by Terraform (infra/terraform/work/ec2.tf, ADR-0033).",
+    "IMAGE_REPOSITORY='${var.image_repository}'",
+    "DEPLOY_TAG='${local.deploy_tag}'",
+    "SOURCE_REPOSITORY='${var.source_repository}'",
+    "S3_BUCKET='${aws_s3_bucket.attachments.id}'",
+    "AWS_REGION='${var.region}'",
+    "DEPLOY_AGENT_GZ_B64='${base64gzip(file("${path.module}/deploy-agent.sh"))}'",
+    file("${path.module}/user-data.sh"),
+  ])
+}
+
 resource "aws_instance" "app" {
   ami                         = data.aws_ami.ubuntu.id
   instance_type               = var.instance_type
@@ -36,12 +55,13 @@ resource "aws_instance" "app" {
     delete_on_termination = true
   }
 
-  # Docker, security updates and hardening on first boot (ADR-0031). A changed script
-  # replaces the instance, so every apply starts from the same configuration.
-  user_data                   = file("${path.module}/user-data.sh")
+  # Docker, security updates and hardening on first boot (ADR-0031), then the deploy agent
+  # (ADR-0033). A changed script or deploy setting (e.g. deploy_branch) replaces the
+  # instance, so every apply starts from the same configuration.
+  user_data                   = local.user_data
   user_data_replace_on_change = true
 
-  # The deploy job finds the instance by its tags (E05-07).
+  # check-host.sh and check-deploy.sh find the instance by its Name tag.
   tags = {
     Name = "${var.name_prefix}-app"
   }

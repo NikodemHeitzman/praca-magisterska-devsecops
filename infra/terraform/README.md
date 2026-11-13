@@ -58,7 +58,9 @@ Pierwszy przebieg (2026-11-11, `eu-north-1`, Terraform 1.17.1, łącze domowe au
 
 Po `apply` agent SSM zgłosił się jako `Online` (agent 3.3.4793.0, sprawdzone w CloudShell). Pojedynczy pomiar, bez powtórzeń.
 
-Instancja nie ma klucza SSH ani otwartego portu 22. Dostęp: AWS Systems Manager, Session Manager (konsola albo `aws ssm start-session --target <instance_id>`). Wdrożenie aplikacji: E05-07.
+Instancja nie ma klucza SSH ani otwartego portu 22. Dostęp: AWS Systems Manager, Session Manager (konsola albo `aws ssm start-session --target <instance_id>`). Wdrożenie aplikacji: sekcja „Wdrożenie (model pull)”.
+
+Wariant wdrażany w sesji wybiera zmienna `deploy_branch` (domyślnie `exp/variant-a`), np. `terraform plan "-var=deploy_branch=exp/variant-b" "-out=work.tfplan"`. Zmiana wariantu tworzy nową instancję, bo zmienia user-data.
 
 ## Konfiguracja hosta (user-data)
 
@@ -69,7 +71,11 @@ Przy pierwszym starcie cloud-init uruchamia jako root [`work/user-data.sh`](work
 3. użytkownik systemowy `app` bez powłoki logowania, w grupie `docker`, z katalogiem `/opt/app` (750),
 4. `ssh.socket` i `ssh.service` zatrzymane i zamaskowane,
 5. `unattended-upgrades`: łatki bezpieczeństwa według domyślnych źródeł Ubuntu, bez automatycznego restartu,
-6. ufw wyłączony; jedyną zaporą jest grupa bezpieczeństwa (Docker omija ufw).
+6. ufw wyłączony; jedyną zaporą jest grupa bezpieczeństwa (Docker omija ufw),
+7. `/opt/app/.env` z sekretami losowanymi na instancji (hasło PostgreSQL, klucz JWT, hasła kont z `seed`) i z publicznym adresem z IMDSv2 jako jedynym originem CORS ([ADR-0033](../../docs/adr/0033-mechanizm-wdrozenia-pull.md)),
+8. agent wdrożenia: `/etc/ticketing/deploy.conf`, `/usr/local/bin/ticketing-deploy` (z [`work/deploy-agent.sh`](work/deploy-agent.sh)) i timer systemd `ticketing-deploy.timer`.
+
+`ec2.tf` dopisuje na początku skryptu ustawienia wdrożenia (repozytorium obrazu, tag, kubełek, region) i spakowany agent. Dzięki temu `user-data.sh` zostaje zwykłym plikiem bash, który sprawdza ShellCheck, bez składni `templatefile()`.
 
 Każdy krok sprawdza stan przed zmianą, więc ponowne uruchomienie niczego nie zmienia i wypisuje `harden: done, 0 change(s)`. Zmiana skryptu tworzy przy `apply` nową instancję (`user_data_replace_on_change`).
 
@@ -91,6 +97,28 @@ Test 2026-11-11 (pojedynczy pomiar, szczegóły w ADR-0031, sekcja „Weryfikacj
 | `work/` `destroy` | 20 zasobów w 29 s, `state list` pusty |
 
 Uwaga dla Windows PowerShell 5.1: argument `-out=work.tfplan` trzeba wziąć w cudzysłów (`terraform plan "-out=work.tfplan"`), bo PowerShell rozbija go na kropce.
+
+## Wdrożenie (model pull)
+
+Potok nie ma poświadczeń AWS ([ADR-0032](../../docs/adr/0032-potok-bez-poswiadczen-aws-wdrozenie-pull.md)). Wdrożenie działa tak ([ADR-0033](../../docs/adr/0033-mechanizm-wdrozenia-pull.md)):
+
+1. Potok publikuje obraz w GHCR z tagiem SHA commita i z tagiem gałęzi wariantu (`exp-variant-a`, `exp-variant-b`) oraz z etykietą `org.opencontainers.image.revision`.
+2. `ticketing-deploy.timer` mniej więcej co minutę uruchamia agenta jako użytkownik `app`. Agent pyta GHCR anonimowo, na który digest wskazuje tag. Gdy digest jest nowy, pobiera obraz po digeście, z etykiety bierze SHA commita i pobiera `app/compose.yaml` oraz [`app/compose.aws.yaml`](../../app/compose.aws.yaml) z tego commita.
+3. `docker compose up` (`migrate`, `seed`, `app` na porcie 80, bez moto). Agent czeka, aż `/version` pokaże nowy obraz, a `/health` odpowie `200`.
+4. Wynik trafia do `journalctl -u ticketing-deploy` i do `/opt/app/state/deployments.log` (czas, tag, obraz, commit, wynik, wersje Dockera i Compose). Digest, którego wdrożenie się nie udało, nie jest ponawiany do następnej zmiany tagu.
+
+Rollback: workflow [`rollback`](../../.github/workflows/rollback.yml) (`workflow_dispatch`, gałąź i digest) przesuwa tag na wcześniej opublikowany obraz, kopiując manifest bez zmian, więc digest jest ten sam. Instancja wdraża go jak każdą wersję.
+
+Potwierdzenie: `curl http://<public DNS>/version` (wyjście `version_url`) albo w CloudShell:
+
+```bash
+bash check-deploy.sh                        # historia wdrożeń, log agenta, kontenery
+SHOW_SEED_PASSWORDS=1 bash check-deploy.sh  # dodatkowo hasła kont z seed (np. do audytu)
+```
+
+Wynik `send-command` z hasłami zostaje w historii poleceń SSM. Hasła są fikcyjne i giną z instancją, ale nie uruchamiaj tej opcji bez potrzeby.
+
+Pakiet GHCR po pierwszej publikacji jest prywatny i trzeba go raz ustawić jako publiczny (Package settings, Change visibility). Bez tego instancja dostaje `401` (TODO: zweryfikować kod odpowiedzi w teście E05-07).
 
 ## Kontrola przed commitem
 

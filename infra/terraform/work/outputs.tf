@@ -17,3 +17,13 @@ output "attachments_bucket" {
   description = "Value of S3_BUCKET in the app .env on the instance."
   value       = aws_s3_bucket.attachments.id
 }
+
+output "deploy_tag" {
+  description = "GHCR tag the deploy agent follows (ADR-0033)."
+  value       = "${var.image_repository}:${local.deploy_tag}"
+}
+
+output "version_url" {
+  description = "Deployed image digest and commit, to confirm a deployment from outside (ADR-0033)."
+  value       = "http://${aws_instance.app.public_dns}/version"
+}

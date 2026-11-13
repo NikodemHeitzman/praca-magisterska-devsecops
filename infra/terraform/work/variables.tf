@@ -57,3 +57,32 @@ variable "root_volume_size" {
   type        = number
   default     = 20
 }
+
+# Deployment in the pull model (docs/adr/0033-mechanizm-wdrozenia-pull.md).
+variable "deploy_branch" {
+  description = "Base branch of the experiment variant whose GHCR tag the instance follows; one variant per session (experiment/PROTOCOL.md)."
+  type        = string
+  default     = "exp/variant-a"
+
+  validation {
+    condition     = contains(["exp/variant-a", "exp/variant-b"], var.deploy_branch)
+    error_message = "deploy_branch must be exp/variant-a or exp/variant-b."
+  }
+}
+
+variable "image_repository" {
+  description = "Public GHCR package of the app image, lowercase (docs/adr/0027-rejestr-obrazow-ghcr.md)."
+  type        = string
+  default     = "ghcr.io/nikodemheitzman/praca-magisterska-devsecops"
+
+  validation {
+    condition     = can(regex("^ghcr[.]io/[a-z0-9._-]+/[a-z0-9._/-]+$", var.image_repository))
+    error_message = "image_repository must be a lowercase ghcr.io/<owner>/<name> reference without a tag."
+  }
+}
+
+variable "source_repository" {
+  description = "Public GitHub repository (owner/name) the instance downloads compose files from, at the commit of the image."
+  type        = string
+  default     = "NikodemHeitzman/praca-magisterska-devsecops"
+}

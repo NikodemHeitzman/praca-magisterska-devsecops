@@ -13,7 +13,8 @@ Ten plik opisuje projekt dla asystentów AI (Claude Code, Copilot, Codex i innyc
 
 - `app/`: aplikacja webowa i `Dockerfile`
 - `infra/terraform/`: infrastruktura AWS (region: `eu-north-1`, ADR-0030, wymuszony przez SCP konta; konto opisane w `docs/aws-konto.md`)
-- `infra/terraform/work/user-data.sh`: Docker i utwardzenie hosta przy pierwszym starcie (ADR-0031; zamiast Ansible)
+- `infra/terraform/work/user-data.sh`: Docker i utwardzenie hosta przy pierwszym starcie (ADR-0031; zamiast Ansible), sekrety `.env` i agent wdrożenia
+- `infra/terraform/work/deploy-agent.sh`: agent wdrożenia w modelu pull (ADR-0033): tag gałęzi w GHCR → digest → `docker compose` z `app/compose.aws.yaml`
 - `.github/workflows/`: potok bazowy i potok DevSecOps
 - `semgrep-rules/`: reguły własne Semgrep z testami (GT-06, GT-14; opis w `semgrep-rules/README.md`)
 - `experiment/`: skrypty pomiarowe, surowe dane (`experiment/data/`), analiza

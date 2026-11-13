@@ -120,6 +120,7 @@ Wersja czysta odpowiada 404, a nie 403, na zgłoszenie innego użytkownika, żeb
 | `GET /` | publiczny | Strona startowa (szablon Jinja2) z opisem aplikacji i odnośnikami do `/login` i `/docs`. | GT-07, GT-13 |
 | `GET /login` | publiczny | Strona z formularzem logowania (Jinja2), wysyłanym do `POST /api/auth/login`. | GT-07, GT-13 |
 | `GET /health` | publiczny | `{"status": "ok"}` i stan połączenia z bazą. Używany w `HEALTHCHECK` (E05-01) i w potoku przed skanem DAST. | |
+| `GET /version` | publiczny | `{"image": …, "revision": …}`: obraz przypięty po digeście i SHA commita, ustawiane przez agenta wdrożenia na instancji (`APP_IMAGE`, `APP_REVISION`, ADR-0033). Poza AWS oba `null`. Potwierdza wdrożenie z zewnątrz. | |
 | `GET /docs`, `GET /openapi.json` | publiczny | Dokumentacja OpenAPI generowana przez FastAPI. | |
 
 Strony `/` i `/login` są celem pająka ZAP: przy domyślnym progu reguła `10020` sprawdza tylko odpowiedzi HTML (`docs/narzedzia.md`, GT-13). Obie są osiągalne bez logowania z adresu głównego. Czy ZAP w potoku działa bez uwierzytelnienia: TODO: zweryfikować w E07.

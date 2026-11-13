@@ -48,3 +48,4 @@ ADR (*Architecture Decision Record*) to krótki zapis jednej decyzji technicznej
 | [0030](0030-region-aws-eu-north-1.md) | Region AWS: eu-north-1 (Sztokholm), region przypisany kontu | przyjęty | 2026-11-11 |
 | [0031](0031-konfiguracja-hosta-user-data.md) | Konfiguracja i utwardzenie instancji: skrypt user-data zamiast Ansible | przyjęty | 2026-11-11 |
 | [0032](0032-potok-bez-poswiadczen-aws-wdrozenie-pull.md) | Potok bez poświadczeń AWS: wdrożenie w modelu pull zamiast OIDC (SCP konta blokuje dostawców tożsamości) | przyjęty | 2026-11-11 |
+| [0033](0033-mechanizm-wdrozenia-pull.md) | Mechanizm wdrożenia w modelu pull: ruchomy tag w GHCR i timer na instancji | przyjęty | 2026-11-13 |

@@ -1,0 +1,74 @@
+# Rollback in the pull model (docs/adr/0033-mechanizm-wdrozenia-pull.md): moves the GHCR tag
+# of a variant branch back to an image published earlier. The deploy agent on the instance
+# picks it up within about a minute, like any other deployment. No AWS access is involved.
+#
+# The manifest is copied byte for byte (GET by digest, PUT under the tag), so the tag points
+# to exactly the same digest; `docker buildx imagetools create` could wrap it in a new index.
+name: rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Variant branch whose tag moves
+        type: choice
+        options:
+          - exp/variant-a
+          - exp/variant-b
+      digest:
+        description: Digest of an image already published in GHCR (sha256:...)
+        type: string
+        required: true
+
+permissions: {}
+
+concurrency:
+  group: deploy-tag-${{ inputs.branch }}
+  cancel-in-progress: false
+
+jobs:
+  retag:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      packages: write
+    steps:
+      - name: Move the tag to the digest
+        env:
+          BRANCH: ${{ inputs.branch }}
+          DIGEST: ${{ inputs.digest }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          [[ $DIGEST =~ ^sha256:[0-9a-f]{64}$ ]] || { echo "::error::invalid digest: $DIGEST"; exit 1; }
+          path=${GITHUB_REPOSITORY,,}
+          tag=${BRANCH//\//-}
+          types="application/vnd.oci.image.index.v1+json,application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.docker.distribution.manifest.v2+json"
+
+          token=$(curl -fsS -u "$GITHUB_ACTOR:$GH_TOKEN" \
+            "https://ghcr.io/token?service=ghcr.io&scope=repository:$path:pull,push" | jq -r .token)
+          echo "::add-mask::$token"
+
+          before=$(curl -fsS -I -H "Authorization: Bearer $token" -H "Accept: $types" \
+            "https://ghcr.io/v2/$path/manifests/$tag" | tr -d '\r' |
+            awk -F': ' 'tolower($1) == "docker-content-digest" { print $2 }' || true)
+
+          headers=$(mktemp)
+          curl -fsS -D "$headers" -o manifest.json -H "Authorization: Bearer $token" -H "Accept: $types" \
+            "https://ghcr.io/v2/$path/manifests/$DIGEST"
+          type=$(tr -d '\r' <"$headers" | awk -F': ' 'tolower($1) == "content-type" { print $2 }')
+          curl -fsS -X PUT -H "Authorization: Bearer $token" -H "Content-Type: $type" \
+            --data-binary @manifest.json "https://ghcr.io/v2/$path/manifests/$tag"
+
+          after=$(curl -fsS -I -H "Authorization: Bearer $token" -H "Accept: $types" \
+            "https://ghcr.io/v2/$path/manifests/$tag" | tr -d '\r' |
+            awk -F': ' 'tolower($1) == "docker-content-digest" { print $2 }')
+          [[ $after == "$DIGEST" ]] || { echo "::error::tag points to $after, expected $DIGEST"; exit 1; }
+
+          {
+            echo "### Rollback of \`$BRANCH\`"
+            echo "- tag: \`ghcr.io/$path:$tag\`"
+            echo "- before: \`${before:-none}\`"
+            echo "- now: \`$after\`"
+            echo "- the instance deploys it within about a minute; check \`/version\`"
+          } >>"$GITHUB_STEP_SUMMARY"

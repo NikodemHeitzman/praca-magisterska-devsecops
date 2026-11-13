@@ -32,6 +32,11 @@ class Settings(BaseSettings):
 
     log_level: str = "INFO"
 
+    # Set by the deploy agent on the instance (docs/adr/0033-mechanizm-wdrozenia-pull.md):
+    # image reference pinned by digest and the commit it was built from. Unset elsewhere.
+    app_image: str | None = None
+    app_revision: str | None = None
+
     @field_validator("s3_endpoint_url", mode="before")
     @classmethod
     def empty_as_none(cls, value: object) -> object:

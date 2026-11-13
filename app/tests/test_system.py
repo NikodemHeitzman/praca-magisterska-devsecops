@@ -6,7 +6,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.exc import OperationalError
 
-from ticketing.config import Settings
+from ticketing.config import Settings, get_settings
 from ticketing.db import get_db
 from ticketing.main import app
 
@@ -34,6 +34,25 @@ def test_health_reports_database_unavailable(client: TestClient) -> None:
 
     assert response.status_code == 503
     assert response.json() == {"status": "degraded", "database": "unavailable"}
+
+
+def test_version_is_empty_outside_deployment(client: TestClient) -> None:
+    response = client.get("/version")
+
+    assert response.status_code == 200
+    assert response.json() == {"image": None, "revision": None}
+
+
+def test_version_reports_deployed_image(client: TestClient) -> None:
+    image = "ghcr.io/example/app@sha256:" + "a" * 64
+    deployed = Settings(app_image=image, app_revision="b" * 40)
+    app.dependency_overrides[get_settings] = lambda: deployed
+    try:
+        response = client.get("/version")
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.json() == {"image": image, "revision": "b" * 40}
 
 
 # No checks of frame-ancestors or X-Frame-Options: the GT-13 patch removes both (conftest.py).
