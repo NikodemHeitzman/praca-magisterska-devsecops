@@ -5,7 +5,7 @@ Infrastruktura z [ADR-0024](../../docs/adr/0024-architektura-aws-ec2-docker-comp
 | Katalog | Warstwa | Zasoby | Cykl życia |
 |---|---|---|---|
 | [`shared/`](shared/) | stała | kubełek stanu Terraformu (później: CloudTrail z E08-01; OIDC z E05-06 zablokowane przez SCP konta, ADR-0032) | zostaje do E15-08 |
-| [`work/`](work/) | robocza | VPC, podsieć publiczna, brama internetowa, grupa bezpieczeństwa (wejście tylko 80), EC2 `t3.small` z IMDSv2 i szyfrowanym EBS, rola i profil instancji (SSM, kubełek załączników), kubełek załączników | `apply` na początku sesji, `destroy` na końcu ([ADR-0019](../../docs/adr/0019-srodowisko-efemeryczne-aws.md)) |
+| [`work/`](work/) | robocza | VPC, podsieć publiczna, brama internetowa, grupa bezpieczeństwa (wejście tylko 80), EC2 `t3.small` z IMDSv2 i szyfrowanym EBS, rola i profil instancji (SSM, kubełek załączników), kubełek załączników, harmonogram sprzątania z rolą ([ADR-0034](../../docs/adr/0034-automatyczne-sprzatanie-eventbridge-scheduler.md)) | `apply` na początku sesji, `destroy` na końcu ([ADR-0019](../../docs/adr/0019-srodowisko-efemeryczne-aws.md)); instancja usuwana automatycznie po 8 h |
 
 Wersje: Terraform `1.17.1`, provider `hashicorp/aws` `6.72.0`, przypięte dokładnie, sumy kontrolne w `.terraform.lock.hcl` ([ADR-0025](../../docs/adr/0025-narzedzie-iac-terraform.md)). System instancji: przypięte AMI Ubuntu 24.04 LTS ([ADR-0028](../../docs/adr/0028-system-instancji-ubuntu-przypiete-ami.md)).
 
@@ -48,6 +48,8 @@ terraform destroy
 terraform state list                  # musi być pusto (docs/aws-konto.md, zasady kosztowe)
 ```
 
+Zamiast dwóch ostatnich poleceń: skrypt teardown (sekcja „Koniec sesji: teardown”).
+
 Pierwszy przebieg (2026-11-11, `eu-north-1`, Terraform 1.17.1, łącze domowe autora):
 
 | Operacja | Zasoby | Czas |
@@ -61,6 +63,54 @@ Po `apply` agent SSM zgłosił się jako `Online` (agent 3.3.4793.0, sprawdzone 
 Instancja nie ma klucza SSH ani otwartego portu 22. Dostęp: AWS Systems Manager, Session Manager (konsola albo `aws ssm start-session --target <instance_id>`). Wdrożenie aplikacji: sekcja „Wdrożenie (model pull)”.
 
 Wariant wdrażany w sesji wybiera zmienna `deploy_branch` (domyślnie `exp/variant-a`), np. `terraform plan "-var=deploy_branch=exp/variant-b" "-out=work.tfplan"`. Zmiana wariantu tworzy nową instancję, bo zmienia user-data.
+
+## Automatyczne sprzątanie (EventBridge Scheduler)
+
+[`work/cleanup.tf`](work/cleanup.tf) tworzy razem z instancją jednorazowy harmonogram EventBridge Scheduler. Usuwa on instancję `instance_ttl_hours` (domyślnie 8) godzin po planie, który ją utworzył ([ADR-0034](../../docs/adr/0034-automatyczne-sprzatanie-eventbridge-scheduler.md)):
+
+- cel uniwersalny `ec2:terminateInstances`, bez Lambdy; z instancją znikają publiczny IPv4 i wolumen,
+- rola `devsecops-thesis-cleanup` może usunąć tylko instancję z tagiem `Project=devsecops-thesis` w `eu-north-1` i nigdy instancji z tagiem `SkipCleanup=true`,
+- po wykonaniu harmonogram sam się usuwa (`action_after_completion = DELETE`),
+- moment usunięcia (UTC) pokazuje wyjście `cleanup_at_utc`.
+
+Sieć, grupy bezpieczeństwa, role i kubełek załączników zostają (są bezpłatne) i czekają na `destroy`. Następny `plan` po automatycznym usunięciu pokaże odtworzenie instancji i harmonogramu.
+
+Dłuższa sesja (np. przebieg E09):
+
+- przy `apply`: `terraform plan "-var=skip_cleanup=true" "-out=work.tfplan"` (tag zmienia się w miejscu, bez wymiany instancji),
+- w trakcie sesji: tag `SkipCleanup` = `true` na instancji w konsoli EC2; kolejny `apply` bez zmiennej go usunie,
+- albo ponowny `apply` po wykonaniu harmonogramu: harmonogram powstaje od nowa z nowym czasem.
+
+Zmiana `instance_ttl_hours` nie przesuwa istniejącego harmonogramu (czas jest ustalany przy jego tworzeniu). Żeby go przesunąć: `terraform apply "-replace=aws_scheduler_schedule.cleanup"`.
+
+## Koniec sesji: teardown
+
+[`teardown.ps1`](teardown.ps1), w lokalnym PowerShell z katalogu repozytorium:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\infra\terraform\teardown.ps1
+```
+
+`-ExecutionPolicy Bypass` dotyczy tylko tego jednego procesu. Bez niego Windows z domyślnymi zasadami wykonywania odrzuca skrypt („running scripts is disabled on this system”). Ustawień systemu nie zmieniamy.
+
+Skrypt:
+
+1. ustawia profil `devsecops-terraform` i region `eu-north-1`,
+2. uruchamia `terraform destroy` warstwy `work/` (z potwierdzeniem; `-AutoApprove` je pomija),
+3. sprawdza, że `terraform state list` jest pusty,
+4. szuka w AWS zasobów z tagiem `Project=devsecops-thesis`: instancji (poza usuniętymi), wolumenów EBS, VPC i adresów Elastic IP, oraz harmonogramów z prefiksem projektu,
+5. wypisuje czasy i kończy się kodem 0 tylko wtedy, gdy nic nie zostało.
+
+`-CheckOnly` pomija `destroy` i robi tylko kontrolę, np. po automatycznym sprzątaniu. Warstwy stałej (`shared/`) skrypt nie dotyka.
+
+Test 2026-11-13 (pojedynczy przebieg, `instance_ttl_hours = 0.25`, szczegóły w ADR-0034, sekcja „Weryfikacja”):
+
+| Krok | Wynik |
+|---|---|
+| automatyczne usunięcie instancji | 41 s po czasie z harmonogramu; wywołanie przez rolę `devsecops-thesis-cleanup` (CloudTrail), harmonogram usunął się sam |
+| `plan` po automatycznym usunięciu | tylko odtworzenie instancji i harmonogramu (2 do dodania) |
+| instancja z `SkipCleanup=true` | przetrwała; jedno wywołanie z `Client.UnauthorizedOperation` (jawna odmowa), bez ponowień |
+| `teardown.ps1` | `destroy` 22 zasobów w 32 s, kontrola OK, razem 42 s |
 
 ## Konfiguracja hosta (user-data)
 

@@ -37,7 +37,7 @@ Odstępstwo dla klucza `terraform` opisuje [ADR-0016](adr/0016-uwierzytelnianie-
 Według [ADR-0019](adr/0019-srodowisko-efemeryczne-aws.md):
 
 1. **Środowisko istnieje tylko w czasie pracy.** Po `terraform apply` i zakończeniu zadania (albo sesji) zawsze `terraform destroy` warstwy roboczej. Dotyczy autora i agentów AI.
-2. **Codzienne sprzątanie wieczorem.** Mechanizm automatyczny usuwa warstwę roboczą, jeśli została. Mechanizm i godzinę ustala E05-08. Do czasu jego wdrożenia sprzątanie jest ręczne, na koniec każdego dnia pracy.
+2. **Automatyczne sprzątanie po 8 godzinach.** EventBridge Scheduler usuwa instancję 8 godzin po jej utworzeniu, chyba że ma tag `SkipCleanup=true` ([ADR-0034](adr/0034-automatyczne-sprzatanie-eventbridge-scheduler.md)). Reszta warstwy roboczej jest bezpłatna i czeka na `destroy`. Do czasu wdrożenia mechanizmu (E05-08) sprzątanie jest ręczne, na koniec każdego dnia pracy.
 3. **Warstwa stała** (stan Terraformu, użytkownicy IAM, budżety, CloudTrail z kubełkiem logów, rejestr obrazów) zostaje do sprzątania po obronie (E15-08).
 4. **Przed zakończeniem sesji** sprawdzenie, że nic nie zostało: `terraform state list` dla warstwy roboczej jest pusty, a w Cost Explorer lub Resource Explorer nie ma zasobów z `Project=devsecops-thesis` poza warstwą stałą.
 
@@ -52,7 +52,7 @@ Progi zaproponował agent, autor zażądał rygorystycznych alertów:
 
 Uzasadnienie progu dziennego: dzień pracy (około 8 h `t3.small` z IPv4 i EBS) kosztuje około 0,25 USD, a doba z zapomnianą instancją około 0,76 USD. Próg 0,50 USD nie reaguje na zwykły dzień pracy, a reaguje na zapomniane środowisko. Czy budżety dzienne obsługują alerty prognozowane: TODO: zweryfikować (dlatego tylko alert rzeczywisty).
 
-Adres alertów: główny e-mail autora (nie zapisujemy go tutaj). Budżety bez akcji są bezpłatne (cennik AWS Budgets, sprawdzone 2026-10-30). Na planie darmowym koszty pokrywają kredyty, więc budżet ma liczyć koszt przed odjęciem kredytów (w opcjach budżetu odznaczyć kredyty), inaczej pokaże 0 USD i nie ostrzeże przed zużywaniem kredytów. Dane kosztowe w Budgets odświeżają się z opóźnieniem (TODO: zweryfikować jak dużym), więc alert jest drugą linią obrony po `destroy` i sprzątaniu. Akcję budżetu zatrzymującą EC2 rozważa E05-08.
+Adres alertów: główny e-mail autora (nie zapisujemy go tutaj). Budżety bez akcji są bezpłatne (cennik AWS Budgets, sprawdzone 2026-10-30). Na planie darmowym koszty pokrywają kredyty, więc budżet ma liczyć koszt przed odjęciem kredytów (w opcjach budżetu odznaczyć kredyty), inaczej pokaże 0 USD i nie ostrzeże przed zużywaniem kredytów. Dane kosztowe w Budgets odświeżają się z opóźnieniem (TODO: zweryfikować jak dużym), więc alert jest drugą linią obrony po `destroy` i sprzątaniu. Akcji budżetu zatrzymującej EC2 nie używamy: zatrzymana instancja nadal płaci za IPv4 i EBS, a automatyczne usuwanie instancji zapewnia [ADR-0034](adr/0034-automatyczne-sprzatanie-eventbridge-scheduler.md).
 
 Test działania: TODO: po ustawieniu zapisać datę testowego e-maila albo pierwszego alertu.
 

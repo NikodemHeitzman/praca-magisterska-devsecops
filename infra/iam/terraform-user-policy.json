@@ -114,6 +114,35 @@
       }
     },
     {
+      "Sid": "IamPassCleanupRoleToScheduler",
+      "Effect": "Allow",
+      "Action": "iam:PassRole",
+      "Resource": "arn:aws:iam::*:role/devsecops-thesis-cleanup",
+      "Condition": {
+        "StringEquals": { "iam:PassedToService": "scheduler.amazonaws.com" }
+      }
+    },
+    {
+      "Sid": "SchedulerProjectSchedules",
+      "Effect": "Allow",
+      "Action": [
+        "scheduler:CreateSchedule",
+        "scheduler:GetSchedule",
+        "scheduler:UpdateSchedule",
+        "scheduler:DeleteSchedule"
+      ],
+      "Resource": "arn:aws:scheduler:eu-north-1:*:schedule/default/devsecops-thesis-*"
+    },
+    {
+      "Sid": "SchedulerListInRegion",
+      "Effect": "Allow",
+      "Action": "scheduler:ListSchedules",
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": { "aws:RequestedRegion": "eu-north-1" }
+      }
+    },
+    {
       "Sid": "S3ProjectBuckets",
       "Effect": "Allow",
       "Action": [

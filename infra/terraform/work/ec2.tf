@@ -61,10 +61,12 @@ resource "aws_instance" "app" {
   user_data                   = local.user_data
   user_data_replace_on_change = true
 
-  # check-host.sh and check-deploy.sh find the instance by its Name tag.
-  tags = {
-    Name = "${var.name_prefix}-app"
-  }
+  # check-host.sh and check-deploy.sh find the instance by its Name tag. SkipCleanup=true
+  # keeps the instance past its time to live (cleanup.tf, ADR-0034).
+  tags = merge(
+    { Name = "${var.name_prefix}-app" },
+    var.skip_cleanup ? { SkipCleanup = "true" } : {},
+  )
 
   volume_tags = {
     Name = "${var.name_prefix}-app-root"

@@ -86,3 +86,21 @@ variable "source_repository" {
   type        = string
   default     = "NikodemHeitzman/praca-magisterska-devsecops"
 }
+
+# Automatic cleanup (docs/adr/0034-automatyczne-sprzatanie-eventbridge-scheduler.md).
+variable "instance_ttl_hours" {
+  description = "Hours after the plan that creates the instance until EventBridge Scheduler terminates it."
+  type        = number
+  default     = 8
+
+  validation {
+    condition     = var.instance_ttl_hours >= 0.25 && var.instance_ttl_hours <= 24
+    error_message = "instance_ttl_hours must be from 0.25 (15 min, for testing the cleanup) to 24."
+  }
+}
+
+variable "skip_cleanup" {
+  description = "Tag the instance SkipCleanup=true so the scheduled cleanup leaves it running (long experiment runs, E09)."
+  type        = bool
+  default     = false
+}

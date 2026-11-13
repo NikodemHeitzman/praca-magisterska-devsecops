@@ -1,6 +1,6 @@
 # 0019. Środowisko AWS efemeryczne: zasoby tylko w czasie pracy
 
-- **Status:** przyjęty
+- **Status:** przyjęty; mechanizm sprzątania (zasada 2) doprecyzowany w [0034](0034-automatyczne-sprzatanie-eventbridge-scheduler.md)
 - **Data:** 2026-10-30
 - **Decydujący:** autor pracy
 - **Powiązane:** [0018](0018-istniejace-konto-aws-plan-platny.md), [0016](0016-uwierzytelnianie-do-aws.md), zadania E05-03, E05-04, E05-07, E05-08, E06-03, E08-01, E09-02, E09-03, E15-08, [`docs/aws-konto.md`](../aws-konto.md), [dziennik 2026-10-30](../log/2026-10-30.md)

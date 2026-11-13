@@ -27,3 +27,8 @@ output "version_url" {
   description = "Deployed image digest and commit, to confirm a deployment from outside (ADR-0033)."
   value       = "http://${aws_instance.app.public_dns}/version"
 }
+
+output "cleanup_at_utc" {
+  description = "When EventBridge Scheduler terminates the instance (UTC), unless it is tagged SkipCleanup=true (ADR-0034)."
+  value       = aws_scheduler_schedule.cleanup.schedule_expression
+}
