@@ -1,6 +1,6 @@
 # 0035. Workflow CI wariantu A: dwa joby (lint, testy), uv z setup-uv bez cache, baza z compose
 
-- **Status:** proponowany
+- **Status:** przyjęty
 - **Data:** 2026-11-16
 - **Decydujący:** autor pracy
 - **Powiązane:** [0008](0008-menedzer-zaleznosci-uv.md), [0011](0011-baza-danych-testow-postgresql.md), [0014](0014-linting-i-formatowanie-ruff.md), [0023](0023-uruchamianie-stosu-docker-compose.md), zadanie E06-01, `.github/workflows/baseline-ci.yml`, `experiment/PROTOCOL.md` (K2, K12), [dziennik 2026-11-16](../log/2026-11-16.md)
