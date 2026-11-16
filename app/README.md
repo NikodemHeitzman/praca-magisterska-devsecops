@@ -58,6 +58,15 @@ uv run ruff format --check .
 - `target-version = "py313"` jest celowo niższy niż `requires-python`. Przy `py314` formatter zamienia `except (A, B):` na składnię z PEP 758, a pyupgrade usuwa cudzysłowy z odwołań w przód w modelach SQLAlchemy.
 - Poprawki automatyczne: `uv run ruff check --fix .` i `uv run ruff format .`.
 
+## CI
+
+Workflow `.github/workflows/baseline-ci.yml` uruchamia lint i testy na każdym pull requeście i pushu do `main` oraz `exp/variant-*` ([ADR-0035](../docs/adr/0035-workflow-ci-lint-i-testy.md)):
+
+- job `lint`: `ruff check` i `ruff format --check`,
+- job `test`: `sh scripts/ci-env.sh` (losowy `.env`), `docker compose up -d --wait db`, `pytest`.
+
+Zależności instaluje `uv sync --locked` bez pamięci podręcznej, bo czas potoku jest mierzony w eksperymencie.
+
 ## Zmiana zależności
 
 Po każdej zmianie w `pyproject.toml`:

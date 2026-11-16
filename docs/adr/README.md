@@ -50,3 +50,4 @@ ADR (*Architecture Decision Record*) to krótki zapis jednej decyzji technicznej
 | [0032](0032-potok-bez-poswiadczen-aws-wdrozenie-pull.md) | Potok bez poświadczeń AWS: wdrożenie w modelu pull zamiast OIDC (SCP konta blokuje dostawców tożsamości) | przyjęty | 2026-11-11 |
 | [0033](0033-mechanizm-wdrozenia-pull.md) | Mechanizm wdrożenia w modelu pull: ruchomy tag w GHCR i timer na instancji | przyjęty | 2026-11-13 |
 | [0034](0034-automatyczne-sprzatanie-eventbridge-scheduler.md) | Automatyczne sprzątanie: EventBridge Scheduler usuwa instancję po 8 godzinach | przyjęty | 2026-11-13 |
+| [0035](0035-workflow-ci-lint-i-testy.md) | Workflow CI wariantu A: dwa joby (lint, testy), uv z setup-uv bez cache, baza z compose | proponowany | 2026-11-16 |

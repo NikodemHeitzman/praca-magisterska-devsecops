@@ -1,0 +1,92 @@
+# Baseline CI (variant A, experiment/PROTOCOL.md): lint and tests, no security controls.
+# Variant B adds its security jobs next to these; the shared jobs stay identical (K2).
+#
+# Decisions: docs/adr/0035-workflow-ci-lint-i-testy.md
+# - uv from astral-sh/setup-uv, same uv version as app/Dockerfile, Python from app/.python-version;
+# - no dependency cache: pipeline time is an experiment metric (E06-04);
+# - PostgreSQL from app/compose.yaml with a generated app/.env (ADR-0023), not `services:`.
+name: baseline-ci
+
+on:
+  pull_request:
+    branches: [main, "exp/variant-*"]
+  push:
+    branches: [main, "exp/variant-*"]
+
+permissions: {}
+
+# One run per ref at a time; queued, not cancelled, so no run is lost from the timing data.
+concurrency:
+  group: baseline-ci-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  UV_VERSION: "0.13.6"
+  # sha256 of uv-x86_64-unknown-linux-gnu.tar.gz 0.13.6 (GitHub release asset)
+  UV_CHECKSUM: f29c3e94ffabd7e6f3ba521dba169a9b7ec12100bf3257087f0f24f6123f3645
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
+          checksum: ${{ env.UV_CHECKSUM }}
+          working-directory: app
+          enable-cache: "false"
+
+      - name: Install dependencies from uv.lock
+        run: uv sync --locked
+
+      - name: ruff check
+        run: uv run --no-sync ruff check --output-format=github .
+
+      - name: ruff format
+        run: uv run --no-sync ruff format --check .
+
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
+          checksum: ${{ env.UV_CHECKSUM }}
+          working-directory: app
+          enable-cache: "false"
+
+      - name: Generate app/.env with random secrets
+        run: sh scripts/ci-env.sh
+
+      - name: Start PostgreSQL
+        run: docker compose up -d --wait db
+
+      - name: Install dependencies from uv.lock
+        run: uv sync --locked
+
+      - name: pytest
+        run: uv run --no-sync pytest
+
+      - name: Stop PostgreSQL
+        if: always()
+        run: docker compose down --volumes
