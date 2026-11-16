@@ -25,8 +25,8 @@ Aplikacja ma być wdrażana do chmury publicznej, a potok DevSecOps ma obejmowa�
 
 Wybrano **AWS**, ponieważ:
 
-- jest obecnie wiodącym dostawcą chmury publicznej i ma najwięcej materiałów do nauki i rozwiązywania problemów, <!-- TODO: zweryfikować udział w rynku w źródle branżowym -->
-- według oceny autora ma najkorzystniejszy darmowy pakiet (*free tier*) spośród rozważanych dostawców. <!-- TODO: zweryfikować w aktualnych warunkach AWS i Azure -->
+- jest obecnie wiodącym dostawcą chmury publicznej i ma najwięcej materiałów do nauki i rozwiązywania problemów, <!-- Synergy Research Group, Q3 2026 (raport z 2026-10-30): Amazon 26%, Microsoft 19%, Google 16% rynku usług infrastruktury chmurowej; sprawdzone 2026-11-16 (docs/weryfikacja-todo-2026-11-16.md, A1). „Najwięcej materiałów” pozostaje oceną autora. -->
+- według oceny autora ma najkorzystniejszy darmowy pakiet (*free tier*) spośród rozważanych dostawców. <!-- Stan na 2026-11-16 (A2): AWS daje 100 USD kredytu przy rejestracji i do 100 USD za zadania, plan Free trwa do 6 miesięcy; Azure daje 200 USD kredytu na 30 dni i 12 miesięcy wybranych usług. Która oferta jest najkorzystniejsza, to ocena autora. -->
 
 Azure odpadł, bo autorowi pracuje się na nim nieprzyjemnie. To subiektywny powód, ale w projekcie realizowanym przez jedną osobę wygoda pracy z narzędziem przekłada się na czas realizacji.
 
@@ -37,7 +37,7 @@ Regionu AWS ten ADR nie rozstrzyga. Wybór regionu należy do zadania E01-07.
 ## Konsekwencje
 
 - (+) Duża baza dokumentacji i przykładów skraca rozwiązywanie problemów.
-- (+) Projekt mieści się w darmowych limitach. <!-- TODO: zweryfikować po zaprojektowaniu infrastruktury -->
+- (+) Projekt mieści się w darmowych limitach. <!-- Po E05: projekt działa na kredytach planu Free (ADR-0020), koszt środowiska roboczego to około 3,2 USD na 100 h pracy (ADR-0024), odczyty w docs/koszty.md. -->
 - (−) Zależność od jednego dostawcy. Infrastruktura w Terraformie będzie specyficzna dla AWS.
 - (−) Darmowe limity są ograniczone w czasie lub ilości. Trzeba monitorować koszty i ustawić alert budżetowy.
 - Uwierzytelnianie potoku do AWS idzie przez OIDC, bez długoterminowych kluczy (konwencja z `AGENTS.md`, wynika też z [0004](0004-publiczne-repozytorium.md)).
@@ -45,4 +45,4 @@ Regionu AWS ten ADR nie rozstrzyga. Wybór regionu należy do zadania E01-07.
 
 ## Źródła
 
-- TODO: zweryfikować; źródło udziału w rynku chmury publicznej (raport branżowy), aktualne warunki AWS Free Tier i Azure Free Account; dodać do rejestru źródeł.
+- Synergy Research Group, Q3 2026: https://www.srgresearch.com/articles/cloud-market-growth-rate-rises-again-in-q3-biggest-ever-sequential-increase; warunki AWS Free Tier: https://aws.amazon.com/free/terms/; Azure free account: https://azure.microsoft.com/en-us/pricing/purchase-options/azure-account (sprawdzone 2026-11-16). Rejestrowane dopiero przy cytowaniu w tekście pracy (`README.md`, zasada 8).

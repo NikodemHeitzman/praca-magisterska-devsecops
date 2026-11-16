@@ -25,7 +25,7 @@ Aplikację webową trzeba zbudować, przetestować w potoku i wdrożyć do chmur
 
 Wybrano **kontenery Docker**, ponieważ łatwiej pracuje się na kilku małych obrazach, które składa się w całość, niż na jednym dużym pakiecie. Każdy obraz można osobno zbudować, przeskanować i wymienić.
 
-Konkretnego podziału na obrazy jeszcze nie ustalono. Ustali się go przy projektowaniu aplikacji (epik E04). Podział musi zmieścić się w zakresie pracy, bo architektura mikroserwisowa i orkiestracja w Kubernetesie są wyłączone (`AGENTS.md`). Rozdzielenie komponentów uruchomieniowych, np. aplikacji i bazy danych, nie jest jeszcze architekturą mikroserwisową. Jest nią dopiero dzielenie samej logiki aplikacji na wiele usług. <!-- TODO: zweryfikować docelowy podział na obrazy w E04 -->
+Konkretnego podziału na obrazy jeszcze nie ustalono. Ustali się go przy projektowaniu aplikacji (epik E04). Podział musi zmieścić się w zakresie pracy, bo architektura mikroserwisowa i orkiestracja w Kubernetesie są wyłączone (`AGENTS.md`). Rozdzielenie komponentów uruchomieniowych, np. aplikacji i bazy danych, nie jest jeszcze architekturą mikroserwisową. Jest nią dopiero dzielenie samej logiki aplikacji na wiele usług. <!-- Rozstrzygnięte w E04 i E05: obraz aplikacji (ADR-0022) i oficjalny obraz PostgreSQL (ADR-0005). -->
 
 ## Konsekwencje
 
@@ -37,4 +37,4 @@ Konkretnego podziału na obrazy jeszcze nie ustalono. Ustali się go przy projek
 
 ## Źródła
 
-- TODO: zweryfikować; dokumentacja Dockera i wytyczne dotyczące bezpieczeństwa kontenerów (np. OWASP Docker Security Cheat Sheet, NIST SP 800-190); dodać do rejestru źródeł.
+- Dokumentacja Dockera i wytyczne dotyczące bezpieczeństwa kontenerów (np. OWASP Docker Security Cheat Sheet, NIST SP 800-190): rejestrowane dopiero przy cytowaniu w tekście pracy (`README.md`, zasada 8).

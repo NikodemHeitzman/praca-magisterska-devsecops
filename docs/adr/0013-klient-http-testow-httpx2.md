@@ -32,4 +32,4 @@ Wybrano **httpx2**, ponieważ zaleca go starlette, a testy nie zgłaszają ostrz
 ## Źródła
 
 - PyPI JSON API, `https://pypi.org/pypi/httpx2/json` i `https://pypi.org/pypi/httpx/json` (sprawdzone 2026-10-30).
-- Źródła spoza rejestru `Zrodla/`: TODO: zweryfikować, czy rejestrować.
+- Źródła spoza rejestru `Zrodla/` (rejestrowane dopiero przy cytowaniu w tekście pracy, zob. `README.md`, zasada 8).

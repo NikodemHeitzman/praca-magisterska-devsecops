@@ -41,4 +41,5 @@ GitLab CI rozważano krótko i odrzucono, bo autor najlepiej zna GitHuba. Ta pla
 
 ## Źródła
 
-- TODO: zweryfikować; dokumentacja GitHub Actions (model rozliczeń, runnery hostowane przez GitHub) i rekomendacje NIST SP 800-204D dotyczące łańcucha dostaw w potokach CI/CD; dodać do rejestru źródeł.
+- GitHub Docs, rozliczanie GitHub Actions: standardowe runnery hostowane przez GitHub są bezpłatne w repozytoriach publicznych, https://docs.github.com/en/billing/concepts/product-billing/github-actions (sprawdzone 2026-11-16, `docs/weryfikacja-todo-2026-11-16.md`, G1). Rejestrowane dopiero przy cytowaniu w tekście pracy (`README.md`, zasada 8).
+- Łańcuch dostaw w potokach CI/CD: [@NIST-SP800-204D], sek. 3.2.1 (s. 12) i 5.1.2 (s. 18).

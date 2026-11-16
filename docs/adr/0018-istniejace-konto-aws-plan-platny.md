@@ -40,12 +40,12 @@ Opcję 3 odrzucono w [0017](0017-plan-konta-aws-darmowy.md): łamie warunki AWS 
 - (+) Dostęp do wszystkich usług, łącznie z Fargate i Lightsail, bez ograniczeń planu darmowego.
 - (−) Każda godzina działania zasobów kosztuje. Ochrona kosztowa to zasady z [0019](0019-srodowisko-efemeryczne-aws.md) i alerty budżetowe.
 - (−) Stare konto może mieć pozostałości: zasoby w innych regionach, klucze dostępu roota, nieużywanych użytkowników IAM. Przed pracą trzeba je przejrzeć (lista kroków w `docs/aws-konto.md`). Kryteria E01-07 obowiązują bez zmian.
-- (−) AWS dolicza VAT do faktur klientów indywidualnych w UE. Stawka 23% według wiedzy agenta, TODO: zweryfikować na pierwszej fakturze.
-- Darmowe limity *Always Free* (np. część limitów CloudWatch) obowiązują też na planie płatnym. TODO: zweryfikować, które dotyczą starego konta.
+- (−) AWS dolicza VAT do faktur klientów indywidualnych w UE. Stawka dla Polski: 23% (AWS, tabele VAT EMEA, sprawdzone 2026-11-16).
+- Darmowe limity *Always Free* (np. część limitów CloudWatch) obowiązują też na planie płatnym. Po przejściu na nowe konto (ADR-0020) bez znaczenia; nie sprawdzano.
 
 ## Źródła
 
-Źródła spoza rejestru `Zrodla/` (TODO: zweryfikować, czy rejestrować), sprawdzone 2026-10-30:
+Źródła spoza rejestru `Zrodla/` (rejestrowane dopiero przy cytowaniu w tekście pracy, zob. `README.md`, zasada 8), sprawdzone 2026-10-30:
 
 - AWS, *AWS Free Tier Terms*, https://aws.amazon.com/free/terms/.
 - AWS Price List API, `eu-central-1`: AmazonEC2, AmazonRDS, AmazonECS, AmazonECR, AmazonS3, AmazonCloudWatch, AWSCloudTrail, `https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/<usługa>/current/eu-central-1/index.json`.

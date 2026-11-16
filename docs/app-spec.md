@@ -201,7 +201,7 @@ Wymagania:
 | GT-08 | `Dockerfile`, `FROM` (E05-01) | `python:3.14-slim` przypięty aktualnym digestem | starszy digest `python:3.14-slim` (katalog v1, ADR-0007) |
 | GT-09 | `Dockerfile` (E05-01) | `USER` z nieuprzywilejowanym użytkownikiem tylko w etapie końcowym | brak `USER` |
 | GT-10 | Terraform, grupa zabezpieczeń (E05) | brak reguły dla portu 22 | ingress tcp/22 z `0.0.0.0/0` |
-| GT-11 | Terraform, kubełek S3 na załączniki albo wolumen (E05) | szyfrowanie w spoczynku | szyfrowanie wyłączone (TODO: zweryfikować, czy dla S3 da się je wyłączyć; katalog dopuszcza EBS) |
+| GT-11 | Terraform, kubełek S3 na załączniki albo wolumen (E05) | szyfrowanie w spoczynku | szyfrowanie wyłączone na wolumenie EBS (S3 szyfruje każdy obiekt bez możliwości wyłączenia; decyzja autora z 2026-11-16) |
 | GT-12 | `add_middleware(CORSMiddleware, ...)` | `allow_origins` z konfiguracji | `allow_origins=["*"]` |
 | GT-13 | middleware nagłówków bezpieczeństwa | CSP `frame-ancestors 'none'` i `X-Frame-Options: DENY` | oba usunięte |
 | GT-14 | konstruktor `FastAPI()` | bez `debug` | `debug=True`; stack trace widoczny przy wyjątku z p. 5 |

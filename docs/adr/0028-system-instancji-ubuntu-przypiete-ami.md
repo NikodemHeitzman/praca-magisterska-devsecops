@@ -38,7 +38,7 @@ Wybrano **Ubuntu Server 24.04 LTS z przypiętym ID AMI**. Rekomendacją agenta b
   - przenośność: ten sam system działa poza AWS.
 - **Przypięte ID zamiast parametru SSM:** odtwarzalność. Każde `apply` daje ten sam system bazowy, więc w eksperymencie jest mniej zmiennych.
 
-Przypięty obraz: `ami-06fb1802e2b757f09`, Ubuntu 24.04 LTS (noble), amd64, `hvm-ssd-gp3`, kompilacja z 2026-10-23, region `eu-north-1` (ADR-0030; pierwotnie `ami-0c228cd2b65888e1b` w `eu-central-1`) (Ubuntu Cloud Image Locator, sprawdzone 2026-11-11). Terraform sprawdza przy `plan`, że AMI należy do Canonical (ID właściciela `099720109477`: TODO: zweryfikować w dokumentacji Canonical).
+Przypięty obraz: `ami-06fb1802e2b757f09`, Ubuntu 24.04 LTS (noble), amd64, `hvm-ssd-gp3`, kompilacja z 2026-10-23, region `eu-north-1` (ADR-0030; pierwotnie `ami-0c228cd2b65888e1b` w `eu-central-1`) (Ubuntu Cloud Image Locator, sprawdzone 2026-11-11). Terraform sprawdza przy `plan`, że AMI należy do Canonical (ID właściciela `099720109477`, potwierdzone w dokumentacji Canonical *Find Ubuntu images on AWS*, 2026-11-16).
 
 Agent SSM jest preinstalowany w AMI Ubuntu Server 24.04 LTS (dokumentacja AWS Systems Manager) jako pakiet snap.
 
@@ -53,7 +53,7 @@ Agent SSM jest preinstalowany w AMI Ubuntu Server 24.04 LTS (dokumentacja AWS Sy
 
 ## Źródła
 
-Źródła spoza rejestru `Zrodla/` (TODO: zweryfikować, czy rejestrować):
+Źródła spoza rejestru `Zrodla/` (rejestrowane dopiero przy cytowaniu w tekście pracy, zob. `README.md`, zasada 8):
 
 - Ubuntu Cloud Image Locator, `https://cloud-images.ubuntu.com/locator/releasesTable` (sprawdzone 2026-11-11)
 - Ubuntu Packages, *docker-compose-v2 (noble)*: https://packages.ubuntu.com/noble/docker-compose-v2 (sprawdzone 2026-11-11)

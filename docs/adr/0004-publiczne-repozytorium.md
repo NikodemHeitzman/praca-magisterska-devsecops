@@ -24,7 +24,7 @@ Repozytorium projektu powstało na GitHubie w zadaniu E01-06. Potok DevSecOps ma
 
 ## Decyzja
 
-Wybrano **repozytorium publiczne**, ponieważ daje więcej czasu runnerów na skany i jest tańsze. Dla repozytoriów publicznych minuty standardowych runnerów GitHub Actions i code scanning są bezpłatne, a w repozytoriach prywatnych obowiązują limity lub płatny plan. <!-- TODO: zweryfikować aktualne limity i ceny w dokumentacji GitHuba -->
+Wybrano **repozytorium publiczne**, ponieważ daje więcej czasu runnerów na skany i jest tańsze. Dla repozytoriów publicznych minuty standardowych runnerów GitHub Actions i code scanning są bezpłatne, a w repozytoriach prywatnych obowiązują limity lub płatny plan. <!-- Potwierdzone 2026-11-16 (docs/weryfikacja-todo-2026-11-16.md, G1, G2): runnery standardowe są bezpłatne w repozytoriach publicznych; plan Free konta osobistego daje dla repozytoriów prywatnych przydział 12 USD miesięcznie; code scanning w repozytoriach prywatnych wymaga GitHub Code Security. -->
 
 Autor potwierdził, że w repozytorium nie będzie danych poufnych.
 
@@ -34,8 +34,8 @@ Autor potwierdził, że w repozytorium nie będzie danych poufnych.
 - (+) Kod, infrastruktura, potoki i surowe dane eksperymentu są jawne, co ułatwia weryfikację i odtworzenie badania.
 - (−) Wszystko, co trafi do repozytorium lub do logów potoku, jest publiczne. Obowiązuje zakaz sekretów, identyfikatorów kont AWS i danych osobowych w repozytorium i dzienniku.
 - (−) Uwierzytelnianie do AWS tylko przez OIDC, bez długoterminowych kluczy. Sekrety wyłącznie w GitHub Secrets.
-- (−) Publiczne repozytorium może być celem automatycznych skanów i zgłoszeń z zewnątrz. Workflowy uruchamiane z forków trzeba konfigurować ostrożnie. <!-- TODO: zweryfikować zalecenia GitHuba dla pull_request_target -->
+- (−) Publiczne repozytorium może być celem automatycznych skanów i zgłoszeń z zewnątrz. Workflowy uruchamiane z forków trzeba konfigurować ostrożnie. <!-- GitHub (G3, G10): unikać pull_request_target, jeśli nie jest potrzebny, i nie pobierać w nim kodu z forków; sekrety nie trafiają do workflow uruchomionego z forka. -->
 
 ## Źródła
 
-- TODO: zweryfikować; dokumentacja GitHuba o rozliczaniu GitHub Actions i dostępności code scanning dla repozytoriów publicznych i prywatnych; dodać do rejestru źródeł.
+- GitHub Docs: https://docs.github.com/en/billing/concepts/product-billing/github-actions, https://docs.github.com/en/get-started/learning-about-github/about-github-advanced-security, https://docs.github.com/en/actions/reference/security/secure-use (sprawdzone 2026-11-16). Rejestrowane dopiero przy cytowaniu w tekście pracy (`README.md`, zasada 8).

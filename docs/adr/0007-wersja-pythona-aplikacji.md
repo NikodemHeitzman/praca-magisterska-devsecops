@@ -36,7 +36,7 @@ Sprawdzenie zgodności (2026-10-30, Windows, Python 3.14.8): najnowsze fastapi, 
 
 ## Konsekwencje
 
-- (+) Lockfile wersji czystej nie ma znanych podatności według OSV na dzień decyzji. Nowe CVE mogą się pojawić w trakcie eksperymentu, bo wersje są zamrożone; datę bazy podatności skanera trzeba więc zapisywać przy każdej próbie (TODO: zweryfikować, czy `PROTOCOL.md` już to wymaga).
+- (+) Lockfile wersji czystej nie ma znanych podatności według OSV na dzień decyzji. Nowe CVE mogą się pojawić w trakcie eksperymentu, bo wersje są zamrożone; datę bazy podatności skanera trzeba więc zapisywać przy każdej próbie (protokół już to wymaga: `experiment/PROTOCOL.md`, P2, p. 2.3 pkt 4 i p. 3.1; sprawdzone 2026-11-16).
 - (−) GT-08 w obecnej postaci nie zadziała: obraz z Pythonem 3.9 nie zainstaluje zależności wersji czystej. Decyzja autora z 2026-10-30: GT-08 przechodzi na zamiennik, który katalog już przewiduje, czyli starszy digest tego samego obrazu, z którego korzysta wersja czysta. Opis GT-08 w `experiment/ground-truth.yaml` trzeba zmienić przed zamrożeniem katalogu v1 (E03-07).
 - (−) GT-08 przestaje dotyczyć interpretera po końcu wsparcia. Zostają przestarzałe pakiety systemowe obrazu bazowego.
 - Kod może używać składni Pythona 3.10+ (np. `X | None`). Ograniczenie z `app-spec.md`, p. 7 („bez `match` i unii `X | Y`”) przestaje obowiązywać.
@@ -44,9 +44,9 @@ Sprawdzenie zgodności (2026-10-30, Windows, Python 3.14.8): najnowsze fastapi, 
 
 ## Źródła
 
-Źródła spoza rejestru (TODO: zweryfikować, czy zarejestrować w `Zrodla/`), sprawdzone 2026-10-30:
+Źródła spoza rejestru `Zrodla/` (rejestrowane dopiero przy cytowaniu w tekście pracy, zob. `README.md`, zasada 8), sprawdzone 2026-10-30:
 
 - PyPI JSON API (`https://pypi.org/pypi/<pakiet>/json`), pole `requires_python` poszczególnych wydań,
 - OSV (`https://api.osv.dev/v1/querybatch`),
 - daty wydań Pythona 3.14.0 (2025-10-07) i 3.15.0 (2026-10-09): `https://www.python.org/api/v2/downloads/release/`,
-- koniec wsparcia: `https://endoflife.date/api/python.json` (3.9: 2025-10-31, 3.14: 2030-10-31). Przed cytowaniem w pracy zweryfikować w PEP 745 (harmonogram 3.14): TODO: zweryfikować.
+- koniec wsparcia: `https://endoflife.date/api/python.json` (3.9: 2025-10-31, 3.14: 2030-10-31). PEP 745 (sprawdzone 2026-11-16): 3.14.0 wydano 2025-10-07, poprawki bezpieczeństwa do około października 2030 (PEP nie podaje dnia). PEP 596: 3.9 osiągnął koniec wsparcia 2025-10-31.

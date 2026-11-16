@@ -37,4 +37,4 @@ Wybrano **moto**, ponieważ jest najprostszy: jeden lekki kontener bez konfigura
 ## Źródła
 
 - Repozytoria: https://github.com/minio/minio (zarchiwizowane), https://github.com/localstack/localstack (zarchiwizowane), https://github.com/getmoto/moto (wydanie 5.2.5), sprawdzone 2026-10-30 przez API GitHuba.
-- Źródła spoza rejestru `Zrodla/`: TODO: zweryfikować, czy rejestrować.
+- Źródła spoza rejestru `Zrodla/` (rejestrowane dopiero przy cytowaniu w tekście pracy, zob. `README.md`, zasada 8).

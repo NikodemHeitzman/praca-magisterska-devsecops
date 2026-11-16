@@ -66,8 +66,8 @@ Według porady Aqua Security (GHSA-69fq-xp46-6x23) 19.03.2026 atakujący z przej
 
 - [x] Autor przyjął mapowanie w sekcji 2 (2026-10-20).
 - [x] Artykuły naukowe o incydentach: nie dodajemy (decyzja autora z 2026-10-20). Opisy opierają się na źródłach pierwotnych od firm, CISA, NVD i GHSA.
-- [ ] Raport FireEye/Mandiant o SUNBURST (13.12.2020): TODO: zweryfikować. Stary adres przekierowuje, a kopii nie udało się otworzyć.
-- [ ] Jak długo „Jia Tan” współtworzył xz: TODO: zweryfikować. Strona L. Collina tego nie podaje.
-- [ ] Zasada 5 w `AGENTS.md` i GT-16: czy opisać w 4.3 ograniczenie przypinania (akcje złożone, wątek reviewdog)? Wiąże się to z regułą zizmora dotyczącą niepinowanych `uses:`. TODO: sprawdzić, czy zizmor analizuje akcje złożone przechodnio. Incydent Trivy (3.5) to drugi przykład tego samego mechanizmu.
+- [x] Raport FireEye o SUNBURST (13.12.2020): „Highly Evasive Attacker Leverages SolarWinds Supply Chain to Compromise Multiple Global Victims With SUNBURST Backdoor”, obecnie na Google Cloud Blog: https://cloud.google.com/blog/topics/threat-intelligence/evasive-attacker-leverages-solarwinds-supply-chain-compromises-with-sunburst-backdoor (sprawdzone 2026-11-16).
+- [x] „Jia Tan” w xz: pierwsza łata na liście xz-devel 2021-10-29, pierwszy commit 2022-02-07, ujawnienie backdoora 2024-03-29 (R. Cox, https://research.swtch.com/xz-timeline, sprawdzone 2026-11-16).
+- [ ] Zasada 5 w `AGENTS.md` i GT-16: czy opisać w 4.3 ograniczenie przypinania (akcje złożone, wątek reviewdog)? Wiąże się to z regułą zizmora dotyczącą niepinowanych `uses:`. zizmor nie analizuje przechodnio plików, do których odwołują się workflow i akcje (dokumentacja zizmor, sprawdzone 2026-11-16), więc `uses:` wewnątrz zewnętrznej akcji złożonej nie zostanie sprawdzone. Incydent Trivy (3.5) to drugi przykład tego samego mechanizmu.
 - [ ] Trivy: źródła wtórne wymienione w poradzie (Microsoft, Wiz, Aqua) nie są sprawdzone. Opis opiera się tylko na poradzie i NVD.
 - [ ] Top 10 CI/CD przypisuje Codecov także do CICD-SEC-5 (dok. s. 23, por. `owasp-devsecops.md`, sekcja 8). Do decyzji autora, czy dopisać w sekcji 1.

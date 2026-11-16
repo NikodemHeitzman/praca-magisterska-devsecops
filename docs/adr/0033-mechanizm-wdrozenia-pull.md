@@ -118,10 +118,10 @@ Obraz ma etykietę OCI `org.opencontainers.image.revision` z SHA commita. Po pob
 - (+) Wdrożenie i rollback nie wymagają poświadczeń AWS w potoku ani tokenu GitHub na instancji. Instancja czyta tylko publiczne zasoby: pakiet GHCR i pliki repozytorium.
 - (+) Wdrażany jest zawsze konkretny digest, zapisany w dzienniku instancji i widoczny w `/version`. Audyt po wdrożeniu (protokół, sekcja 4) może pobrać ten sam obraz po digeście.
 - (+) Rola instancji się nie zmienia: SSM do kontroli i kubełek S3 na załączniki (E05-04).
-- (−) **Widoczność pakietu GHCR.** Według dokumentacji pierwsza publikacja tworzy pakiet prywatny, a zmiany na publiczny nie da się cofnąć (GitHub Docs, sprawdzone 2026-11-13). W teście pakiet opublikowany przez workflow tego publicznego repozytorium był dostępny anonimowo od pierwszej publikacji (HTTP 200 na zapytanie o manifest), bez ręcznej zmiany. Ustawienie widoczności w interfejsie GitHub: TODO: zweryfikować. Dotyczy TODO z ADR-0027.
+- (−) **Widoczność pakietu GHCR.** Według dokumentacji pierwsza publikacja tworzy pakiet prywatny, a zmiany na publiczny nie da się cofnąć (GitHub Docs, sprawdzone 2026-11-13). W teście pakiet opublikowany przez workflow tego publicznego repozytorium był dostępny anonimowo od pierwszej publikacji (HTTP 200 na zapytanie o manifest), bez ręcznej zmiany. Dokumentacja (sprawdzona ponownie 2026-11-16) mówi wprost, że pakiet powiązany z repozytorium dziedziczy uprawnienia, ale nie widoczność. Ustawienie widoczności w interfejsie GitHub sprawdza autor: TODO: zweryfikować. Dotyczy TODO z ADR-0027.
 - (−) **Tag w GHCR jest zmienny.** Kto ma `packages: write` w tym repozytorium, ten wskazuje, co wdroży instancja. Ochroną są gałęzie bazowe wariantów, uprawnienie `packages: write` tylko w workflow i przypięcie po digeście. Podpis obrazu jest odroczony (wyżej). Materiał do 2.3 i 5.3.
 - (−) **Potok kończy się na publikacji.** Czas i wynik wdrożenia nie są widoczne w potoku. Pomiaru to nie zmienia: H2 mierzy workflow PR, a protokół opisuje pełny potok z wdrożeniem opisowo. Uwaga agenta: E06-03 („Merge do main = nowa wersja na AWS”, OIDC, środowisko `production`) trzeba odczytać przez ten ADR.
-- (−) **Opóźnienie wdrożenia do około minuty** plus czas pobrania obrazu. Limity anonimowych zapytań do GHCR nie są opisane w dokumentacji (TODO: zweryfikować); timer robi około 60 zapytań o manifest na godzinę.
+- (−) **Opóźnienie wdrożenia do około minuty** plus czas pobrania obrazu. Limity anonimowych zapytań do GHCR nie są opisane w dokumentacji (sprawdzone ponownie 2026-11-16); timer robi około 60 zapytań o manifest na godzinę.
 - (−) **Sekrety, w tym hasła kont z `seed`, są różne na każdej instancji.** Skrypt audytu po wdrożeniu (protokół, sekcja 4) musi najpierw odczytać hasła przez SSM z CloudShell. Komentarz w `app/.env.example` (hasła w AWS z GitHub Secrets) poprawiono w E05-07.
 - (−) `CORS_ORIGINS` musi zawierać publiczny adres instancji. `user-data.sh` odczytuje publiczny adres IPv4 i nazwę DNS z IMDSv2 przy pierwszym starcie. Zawartości `.env` w teście nie wypisywano (TODO: zweryfikować wartość przy audycie).
 - (−) Zmienna `deploy_branch` w Terraformie: zmiana wariantu w sesji to `apply` z inną wartością. Czy wymusza nową instancję, zależy od tego, czy trafia do user-data (`user_data_replace_on_change`); ustalane przy implementacji.
@@ -149,7 +149,7 @@ Test end-to-end 2026-11-13 w `eu-north-1`, pojedynczy przebieg. Środowisko post
 
 ## Źródła
 
-Źródła spoza rejestru `Zrodla/` (TODO: zweryfikować, czy rejestrować):
+Źródła spoza rejestru `Zrodla/` (rejestrowane dopiero przy cytowaniu w tekście pracy, zob. `README.md`, zasada 8):
 
 - GitHub Docs, *Working with the Container registry* (anonimowy dostęp do publicznych obrazów, `GITHUB_TOKEN`, etykieta `org.opencontainers.image.source`): https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry (sprawdzone 2026-11-13)
 - GitHub Docs, *Configuring a package's access control and visibility* (domyślnie prywatny, publicznego nie da się cofnąć): https://docs.github.com/en/packages/learn-github-packages/configuring-a-packages-access-control-and-visibility (sprawdzone 2026-11-13)

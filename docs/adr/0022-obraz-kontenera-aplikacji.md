@@ -59,7 +59,7 @@ Wybrano **`python:3.14-slim`, uv z obrazu Astral i migracje osobnym poleceniem**
   - prostota i debugowanie: obraz ma powłokę, więc łatwiej diagnozować kontener i napisać `HEALTHCHECK` niż w distroless.
 - **uv z obrazu Astral:**
   - jeden lockfile: obraz instaluje ten sam `uv.lock` co komputer autora i CI (ciągłość z ADR-0008),
-  - szybkość budowania w CI. Wielkość zysku względem `pip`: TODO: zweryfikować (nie mierzono).
+  - szybkość budowania w CI. Wielkości zysku w tym projekcie nie mierzono; producent deklaruje „10-100x faster than pip” (README uv, sprawdzone 2026-11-16).
 - **Migracje osobnym poleceniem:**
   - prostszy obraz, który tylko uruchamia aplikację,
   - mniej uprawnień: aplikacja nie musi startować z prawem do zmiany schematu bazy.
@@ -84,12 +84,12 @@ Postać Dockerfile (decyzje agenta przy implementacji, zgodne z wymaganiami zada
 - (+) Obraz końcowy nie zawiera uv ani zależności deweloperskich.
 - (+) Łatki GT-08 i GT-09 zmieniają po jednym miejscu w Dockerfile. Sprawdzone 2026-11-11 na kopiach Dockerfile (bez commitów łatek): po zmianie digestu Trivy zgłasza 62 nowe CVE, a po usunięciu `USER` Trivy `config` zgłasza DS-0002 (HIGH); wersja czysta ma 0 błędów konfiguracji. Checkov nie był uruchamiany: TODO: zweryfikować w E04-04.
 - (−) Obraz slim ma powłokę i menedżer pakietów, więc większą powierzchnię ataku niż distroless. Wersja czysta ma według Trivy (2026-11-11) 204 zgłoszenia w pakietach systemowych (92 identyfikatory CVE; 49 zgłoszeń HIGH, 0 CRITICAL), z czego tylko 3 mają dostępną poprawkę. Zgłoszeń w pakietach Pythona: 0.
-- Bramka wariantu B z progiem HIGH zablokuje wersję czystą, jeśli liczy też podatności bez poprawki. Czy bramka ma pomijać podatności bez poprawki (`--ignore-unfixed`) i jak to opisać w `experiment/PROTOCOL.md`: TODO: zweryfikować w E07. Liczba zgłoszeń wersji czystej zmienia się z bazą podatności, więc w eksperymencie trzeba zapisywać datę bazy.
-- (−) Korzyść „mniej uprawnień” wymaga osobnego użytkownika bazy dla aplikacji bez prawa DDL. Dziś aplikacja i migracje używają tego samego użytkownika `ticketing` (`compose.yaml`), więc korzyść jest na razie tylko możliwa. Czy rozdzielać użytkowników w AWS (E05-04, E05-07): TODO: zweryfikować.
+- Bramka wariantu B z progiem HIGH zablokuje wersję czystą, jeśli liczy też podatności bez poprawki. Decyzja autora z 2026-11-16: bramka pomija podatności bez poprawki (`--ignore-unfixed`), opis w `experiment/PROTOCOL.md`. Liczba zgłoszeń wersji czystej zmienia się z bazą podatności, więc w eksperymencie trzeba zapisywać datę bazy.
+- (−) Korzyść „mniej uprawnień” wymaga osobnego użytkownika bazy dla aplikacji bez prawa DDL. Dziś aplikacja i migracje używają tego samego użytkownika `ticketing` (`compose.yaml`), więc korzyść jest na razie tylko możliwa. Decyzja autora z 2026-11-16: rozdzielić role bazy (migracje z prawem DDL, aplikacja bez DDL) lokalnie i w AWS. Wdrożenie: TODO (osobne zadanie).
 - Wdrożenie (E05-07) i potok z DAST (E07) muszą uruchamiać migracje jako osobny krok przed startem aplikacji.
 - Dwa obrazy do aktualizowania digestem: `python:3.14-slim` i `ghcr.io/astral-sh/uv:0.13.6`.
 
 ## Źródła
 
 - Obrazy i digesty: Docker Hub (`library/python`, tag `3.14-slim`) i GitHub Container Registry (`astral-sh/uv`, tag `0.13.6`), sprawdzone 2026-11-11.
-- Źródła spoza rejestru `Zrodla/`: TODO: zweryfikować, czy rejestrować.
+- Źródła spoza rejestru `Zrodla/` (rejestrowane dopiero przy cytowaniu w tekście pracy, zob. `README.md`, zasada 8).

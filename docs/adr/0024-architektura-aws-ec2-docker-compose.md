@@ -82,7 +82,7 @@ Ceny `eu-central-1` z AWS Price List API, bez VAT, sprawdzone 2026-11-11 (wersje
 - zadanie Fargate i usługa App Runner mają 0,5 vCPU i 1 GB,
 - jeden publiczny IPv4 na instancję albo zadanie, a ALB w dwóch strefach dostępności ma dwa adresy.
 
-Kwoty nie obejmują warstwy stałej (ECR, S3, CloudWatch, CloudTrail; około 1 USD miesięcznie według `docs/aws-konto.md`), transferu danych ani jednostek LCU load balancera (stawka LCU: TODO: zweryfikować).
+Kwoty nie obejmują warstwy stałej (ECR, S3, CloudWatch, CloudTrail; około 1 USD miesięcznie według `docs/aws-konto.md`), transferu danych ani jednostek LCU load balancera (w `eu-north-1`: 0,0076 USD za LCU-godzinę i 0,02394 USD za godzinę ALB; AWS Price List API, sprawdzone 2026-11-16).
 
 | Wariant | Składniki | USD/mies. 24/7 | USD/mies. 100 h |
 |---|---|---|---|
@@ -104,7 +104,7 @@ Koszty, których unika wybrana sieć (24/7):
 
 | Czynnik | EC2 + compose | ECS Fargate + RDS | ECS Express Mode + RDS | App Runner |
 |---|---|---|---|---|
-| Dostępność dla nowego konta | EC2 na liście usług planu darmowego | ECS na liście, Fargate niewymieniony osobno (TODO: zweryfikować w konsoli) | jak ECS | zamknięty dla nowych klientów od 2026-04-30, brak na liście planu darmowego |
+| Dostępność dla nowego konta | EC2 na liście usług planu darmowego | ECS na liście, Fargate niewymieniony osobno (potwierdzone w dokumentacji listy usług planu Free, 2026-11-16) | jak ECS | zamknięty dla nowych klientów od 2026-04-30, brak na liście planu darmowego |
 | Zgodność z lokalnym i CI | ten sam compose (bez moto, S3 prawdziwy) | inna definicja środowiska (definicja zadania, RDS) | jak ECS Fargate | inna definicja środowiska |
 | Zasoby w Terraformie | VPC, podsieć, SG, EC2, rola i profil instancji | dodatkowo klaster, definicja zadania, usługa, RDS i grupa podsieci | dodatkowo ALB i role infrastruktury | usługa App Runner, RDS, konektor VPC |
 | Odpowiedzialność za system operacyjny | po stronie autora (aktualizacje, utwardzanie, E05-05) | po stronie AWS | po stronie AWS | po stronie AWS |
@@ -144,7 +144,7 @@ Wybrano **jedną instancję EC2 `t3.small` w podsieci publicznej własnego VPC. 
   - pomiar nie cierpi: H2a mierzy workflow PR, a pełny potok z wdrożeniem raportujemy opisowo (E03-02).
 - **Ten sam compose z `migrate` i `seed` w AWS.** Powód: jednakowe środowisko lokalnie, w CI i w AWS.
 - **Tylko HTTP, bez HTTPS.** Powody:
-  - brak domeny, więc nie ma zaufanego certyfikatu (TODO: zweryfikować, czy urzędy certyfikacji wystawiają certyfikaty dla adresów IP),
+  - brak domeny, więc nie ma zaufanego certyfikatu (uwaga z 2026-11-16: Let's Encrypt wydaje od 2026-01-15 certyfikaty dla adresów IP, ale tylko krótkotrwałe, ważne 160 h; do omówienia w 5.3),
   - koszt i czas: domena, DNS i reverse proxy wykraczają poza cel pracy,
   - aplikacja jest badawcza: dane są fikcyjne, środowisko działa tylko w czasie pracy, a skan DAST idzie w CI na compose.
 
@@ -164,14 +164,14 @@ Wybór rejestru obrazów (GHCR albo ECR) należy do E05-04, a szczegóły wdroż
 - (−) Ruch HTTP jest nieszyfrowany: dane logowania kont testowych i token JWT idą otwartym tekstem. Ograniczenie do 5.3. Wdrożona aplikacja nie powinna przyjmować prawdziwych danych.
 - (−) Instancja w podsieci publicznej ma publiczny adres IPv4, a ruch wychodzący (SSM, rejestr obrazów, S3) idzie przez bramę internetową. Ochronę zapewnia grupa bezpieczeństwa, nie izolacja sieci.
 - (−) Merge do `main` przy usuniętej infrastrukturze nic nie wdraża. Wdrożenie trzeba wtedy wywołać ponownie po postawieniu środowiska (E06-03).
-- Ceny i dostępność usług pochodzą z 2026-11-11. App Runner może zostać całkiem wycofany (TODO: zweryfikować przy pisaniu 4.2).
+- Ceny i dostępność usług pochodzą z 2026-11-11. App Runner może zostać całkiem wycofany (stan 2026-11-16: zamknięty dla nowych klientów, daty wycofania AWS nie podaje; TODO: sprawdzić ponownie przy pisaniu 4.2).
 - Rozstrzyga sprawy otwarte w ADR-0005 (kontener, nie RDS), ADR-0019 (wdrożenie tylko przy postawionym środowisku) i ADR-0023 (compose z `seed` także w AWS). Treści tamtych ADR-ów się nie zmienia.
 - E05-04: Terraform tworzy VPC, podsieć publiczną, bramę internetową, grupę bezpieczeństwa (wejście 80), instancję `t3.small` z IMDSv2 i szyfrowanym EBS, rolę i profil instancji z politykami SSM i dostępu do kubełka S3.
 - E05-07: wdrożenie przez SSM Run Command, sprawdzenie istnienia instancji po tagach i źródło sekretów `.env` na instancji.
 
 ## Źródła
 
-Źródła spoza rejestru `Zrodla/` (TODO: zweryfikować, czy rejestrować):
+Źródła spoza rejestru `Zrodla/` (rejestrowane dopiero przy cytowaniu w tekście pracy, zob. `README.md`, zasada 8):
 
 - AWS Price List API, cenniki regionalne `eu-central-1` (wersje w sekcji „Porównanie kosztu”): https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/
 - AWS, *AWS App Runner availability change*: https://docs.aws.amazon.com/apprunner/latest/dg/apprunner-availability-change.html (sprawdzone 2026-11-11)

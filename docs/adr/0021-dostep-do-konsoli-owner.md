@@ -14,7 +14,7 @@
 - strona IAM ostrzega, że użytkownicy IAM są przeznaczeni do dostępu programowego. Utworzony użytkownik `Admin-magister` nie miał w zakładce *Security credentials* sekcji logowania do konsoli,
 - ludzi dodaje się przez *Team* (settings.aws.com/team). Członek zespołu dostaje dostęp deweloperski, bez uprawnień administracyjnych i finansowych, a zaproszenie wymaga osobnego adresu e-mail.
 
-Czy logowanie użytkownika IAM do konsoli da się w tym modelu włączyć inną drogą: TODO: zweryfikować w dokumentacji AWS.
+Według dokumentacji AWS (*Sign up for AWS*, sprawdzone 2026-11-16) na kontach z nowej ścieżki rejestracji użytkownicy i role IAM służą tylko do dostępu programowego, nie do konsoli. Którą ścieżką założono konto projektu (`docs/aws-konto.md` wymienia też klasycznego roota): TODO: zweryfikować.
 
 ## Czynniki decyzyjne
 
@@ -39,9 +39,9 @@ Pozostałe ustalenia [0016](0016-uwierzytelnianie-do-aws.md) obowiązują: potok
 - (+) Jedno logowanie z MFA, bez dodatkowych tożsamości do utrzymania.
 - (−) Codzienna praca na koncie właściciela, czyli z pełnymi uprawnieniami, także finansowymi. To odstępstwo od zasady najmniejszych uprawnień, do opisania w 5.3 (ograniczenia).
 - Środki łagodzące: MFA na Builder ID i na klasycznym roocie, brak kluczy dostępu roota (`AccountAccessKeysPresent = 0`), budżety z alertami, środowisko efemeryczne ([0019](0019-srodowisko-efemeryczne-aws.md)), zasoby tworzone przez Terraform, a nie ręcznie w konsoli.
-- Materiał do 2.3 (model współdzielonej odpowiedzialności): konsola AWS w 2026 r. zmieniła model tożsamości dla nowych kont. TODO: zweryfikować w dokumentacji AWS i dodać źródło.
+- Materiał do 2.3 (model współdzielonej odpowiedzialności): konsola AWS w 2026 r. zmieniła model tożsamości dla nowych kont. Nowa ścieżka rejestracji (What's New z 2026-09-16, wdrażana stopniowo) tworzy konto należące do AWS Builder ID, bez użytkownika root: https://aws.amazon.com/about-aws/whats-new/2026/09/New-AWS-Builder-Experience (sprawdzone 2026-11-16).
 
 ## Źródła
 
 - Konsola AWS (IAM, Team, AWS Builder ID), stan z 2026-11-10 (zrzuty ekranu autora, nie publikowane).
-- Dokumentacja AWS o Builder ID i zespołach: TODO: zweryfikować i dodać.
+- AWS, *Sign up for AWS*: https://docs.aws.amazon.com/accounts/latest/reference/sign-up-for-aws.html; What's New z 2026-09-16 (jw.); sprawdzone 2026-11-16.

@@ -33,7 +33,7 @@ Wersje (zasada 6 `AGENTS.md`), najnowsze w dniu decyzji:
 
 Pozostałe opcje autor odrzucił bez osobnego powodu. Agent odnotowuje różnice, które nie były powodem decyzji:
 
-- OpenTofu ma licencję MPL-2.0 i niemal tę samą składnię. Terraform od 2023 r. ma licencję Business Source License (TODO: zweryfikować datę i warunki w źródle HashiCorp). Dla pracy magisterskiej licencja BSL nie ogranicza użycia (TODO: zweryfikować).
+- OpenTofu ma licencję MPL-2.0 i niemal tę samą składnię. Terraform od 2023 r. ma licencję Business Source License 1.1 (ogłoszenie HashiCorp z 2023-08-10, od wersji 1.6.0). Dla pracy magisterskiej licencja BSL nie ogranicza użycia: FAQ HashiCorp uznaje użycie na własne potrzeby za niekonkurencyjne, a każde wydanie po 4 latach przechodzi na MPL 2.0 (https://www.hashicorp.com/en/bsl, sprawdzone 2026-11-16).
 - CloudFormation trzyma stan po stronie AWS, więc nie potrzebuje kubełka stanu, ale wiąże kod z jednym dostawcą.
 
 ## Konsekwencje
@@ -46,7 +46,7 @@ Pozostałe opcje autor odrzucił bez osobnego powodu. Agent odnotowuje różnice
 
 ## Źródła
 
-Źródła spoza rejestru `Zrodla/` (TODO: zweryfikować, czy rejestrować):
+Źródła spoza rejestru `Zrodla/` (rejestrowane dopiero przy cytowaniu w tekście pracy, zob. `README.md`, zasada 8):
 
 - HashiCorp Checkpoint API, `https://checkpoint-api.hashicorp.com/v1/check/terraform` (aktualna wersja 1.17.1, sprawdzone 2026-11-11)
 - Terraform Registry, `https://registry.terraform.io/v1/providers/hashicorp/aws/versions` (najnowsza 6.72.0, sprawdzone 2026-11-11)

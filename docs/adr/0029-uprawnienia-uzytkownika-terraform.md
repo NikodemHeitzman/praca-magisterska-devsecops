@@ -44,11 +44,11 @@ Uprawnienia do dostawcy OIDC (E05-06) i CloudTrail (E08-01) dopisują te zadania
 - (+) Polityka jest materiałem do 4.2 i do oceny zgodności z najmniejszymi uprawnieniami.
 - (−) Polityka wymaga dopracowania przez kolejne próby (`AccessDenied` przy `plan` i `apply`). Każda zmiana zasobów w Terraformie może wymagać jej rozszerzenia.
 - (−) Odczytowe działania EC2 (`Describe*`) nie obsługują ograniczeń do zasobów, więc obejmują całe konto w regionie.
-- (−) Ryzyko szczątkowe (uwaga agenta): `iam:PutRolePolicy` na rolach z prefiksem pozwala dopisać roli dowolną politykę wbudowaną, a `iam:PassRole` i `ec2:RunInstances` pozwalają uruchomić instancję z tą rolą. Kto ma klucz `terraform`, może więc pośrednio uzyskać szersze uprawnienia. Domknięciem byłaby granica uprawnień (*permissions boundary*) wymagana przy `iam:CreateRole`. Do rozważenia w E05-06 albo jako ograniczenie w 5.3 (TODO: zweryfikować z autorem).
+- (−) Ryzyko szczątkowe (uwaga agenta): `iam:PutRolePolicy` na rolach z prefiksem pozwala dopisać roli dowolną politykę wbudowaną, a `iam:PassRole` i `ec2:RunInstances` pozwalają uruchomić instancję z tą rolą. Kto ma klucz `terraform`, może więc pośrednio uzyskać szersze uprawnienia. Domknięciem byłaby granica uprawnień (*permissions boundary*) wymagana przy `iam:CreateRole`. Do rozważenia w E05-06 albo jako ograniczenie w 5.3 (decyzja autora z 2026-11-16: opis w 5.3 jako ograniczenie, bez granicy uprawnień).
 - (−) Zmiana polityki to krok ręczny autora w konsoli (polityka nie jest zarządzana przez Terraform, bo użytkownik `terraform` nie może zmieniać własnych uprawnień).
 - Użytkownik i klucz są usuwane przy sprzątaniu po obronie (E15-08).
 
 ## Źródła
 
 - AWS, *IAM JSON policy elements: Condition* i *Actions, resources, and condition keys for Amazon EC2*: TODO: zweryfikować adresy przy pisaniu polityki.
-- [@NIST-SP800-204D]: zasada najmniejszych uprawnień dla poświadczeń potoku, TODO: zweryfikować numer rekomendacji.
+- [@NIST-SP800-204D]: dokument nie używa sformułowania „least privilege”; najbliżej są sek. 5 (s. 15, „granular authorizations” i role aktorów) i sek. 3.2.2 (s. 12, ścisła kontrola zapisu do SCM). Sprawdzone 2026-11-16.
