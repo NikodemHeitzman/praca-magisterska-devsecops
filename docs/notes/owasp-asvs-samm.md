@@ -32,13 +32,13 @@ Wybory w sekcjach 5 i 6 to **propozycje agenta**, nie decyzje.
 
 - Dokument świadomościowy (*awareness document*) o najważniejszych ryzykach aplikacji webowych, a nie standard weryfikacji. Nie daje kryteriów „spełnia / nie spełnia”. Do weryfikacji służy ASVS (sekcja 2).
 - Ósma edycja. Poprzednia: 2021.
-- **Status i data:** w repozytorium oznaczenie wersji kandydującej (RC) usunięto 2025-12-24 (commity „Remove RC notice” i „Removed RC”). TODO: zweryfikować oficjalną datę wydania na owasp.org, bo strona top10.owasp.org jej nie podaje (por. notatka źródła).
+- **Status i data:** w repozytorium oznaczenie wersji kandydującej (RC) usunięto 2025-12-24 (commity „Remove RC notice” i „Removed RC”). OWASP nie podaje oficjalnej daty (sprawdzone 2026-11-16; RC ogłoszono 2025-11-06). Decyzja autora z 2026-11-16: w bibliografii rok 2025 z datą dostępu.
 - **Autorzy wiodący** (*Lead Authors*): Andrew van der Stock, Brian Glas, Neil Smithline, Tanya Janca, Torsten Gigler. Notatka źródła ma jako autora „OWASP Foundation” (decyzja w sekcji 7).
 
 ### 1.2. Metodyka (rozdz. „Introduction”)
 
 - Lista jest oparta na danych (*data-informed*), ale nie wyłącznie na nich (*not blindly data-driven*). 8 kategorii pochodzi z danych, a 2 z ankiety wśród praktyków. Uzasadnienie: dane z testów pokazują przeszłość, bo nowe klasy podatności trafiają do narzędzi z opóźnieniem.
-  - Których dwóch kategorii dotyczy ankieta, dokument nie mówi wprost w jednym miejscu. Z opisów kategorii wynika, że chodzi o A03 (najwyżej w ankiecie, połowa respondentów dała ją na 1. miejsce) i A09 („ponownie wybrana” głosami ankiety). TODO: zweryfikować przed cytowaniem.
+  - Których dwóch kategorii dotyczy ankieta, dokument nie mówi wprost w jednym miejscu. Z opisów kategorii wynika, że chodzi o A03 (najwyżej w ankiecie, połowa respondentów dała ją na 1. miejsce) i A09 („ponownie wybrana” głosami ankiety). Potwierdzone we wstępie Top 10:2025: osiem kategorii z danych, A03 i A09 z ankiety (sprawdzone 2026-11-16).
 - Dane: ponad 2,8 mln aplikacji od kilkunastu dostawców (m.in. Semgrep, Sonar, Veracode, Contrast Security, Bugcrowd).
 - Miarą jest **częstość występowania w populacji aplikacji** (*incidence rate*), czyli odsetek aplikacji z co najmniej jednym wystąpieniem danego CWE. Liczba wystąpień w aplikacji się nie liczy, bo testy automatyczne raportują każde wystąpienie osobno, a testerzy ręczni zwykle raz.
   - To ta sama logika co liczenie unikalnych zgłoszeń przy H2b w `docs/metodyka.md`, p. 2.2. Można się na to powołać w 5.1.
@@ -168,7 +168,7 @@ Razem 345 wymagań w 17 rozdziałach (liczby policzone z pliku CSV standardu, zg
   1. czynność wykonywana doraźnie, „najlepszym wysiłkiem”,
   2. spójny, powtarzalny proces, na którym można polegać,
   3. maksymalna skuteczność dzięki ciągłemu doskonaleniu na podstawie informacji zwrotnej.
-- **Wersja 2.2.0 względem 2.1.0:** 18 commitów, 117 zmienionych plików, żaden plik nie doszedł ani nie zniknął. Zmiany są redakcyjne (gramatyka, ujednolicenie terminologii, zestawy odpowiedzi, zależności między czynnościami). Struktura modelu się nie zmieniła. Wydanie v2.2.0 nie ma opisu zmian. Strona owaspsamm.org/model mogła jeszcze opisywać v2.0 (notatka źródła). TODO: zweryfikować przed cytowaniem, którą wersję pokazuje strona.
+- **Wersja 2.2.0 względem 2.1.0:** 18 commitów, 117 zmienionych plików, żaden plik nie doszedł ani nie zniknął. Zmiany są redakcyjne (gramatyka, ujednolicenie terminologii, zestawy odpowiedzi, zależności między czynnościami). Struktura modelu się nie zmieniła. Wydanie v2.2.0 nie ma opisu zmian. Strona owaspsamm.org/model mogła jeszcze opisywać v2.0 (notatka źródła). Strona owaspsamm.org/model pokazuje wersję 2.0 (sprawdzone 2026-11-16), a v2.2.0 wydano w repozytorium 2026-07-06, więc SAMM cytujemy z repozytorium.
 
 ### 3.2. Praktyki związane z potokiem
 
@@ -270,9 +270,9 @@ Kandydaci pochodzą z definicji E03-03 na tablicy. CWE sprawdzono na listach CWE
 | Zależność z publicznym CVE | zależności | CWE-1395 | A03 | 15.2.1 | numer CVE wybrać i sprawdzić w NVD/OSV przy E03-03, nie z pamięci |
 | Stary obraz bazowy | kontener | CWE-1395 albo CWE-1104 | A03 | 15.2.1 | |
 | Kontener uruchamiany jako root | kontener | CWE-250 | **brak na listach Top 10:2025** | — | najbliżej CWE-269 (A06). Decyzja: CWE-250 bez kategorii albo CWE-269 z A06 |
-| SG otwarty na 0.0.0.0/0, port 22 | IaC | CWE-284 | A01 | — | CWE-16 (A02) to CWE kategorii, MITRE odradza mapowanie na takie CWE. TODO: zweryfikować zalecenie MITRE |
+| SG otwarty na 0.0.0.0/0, port 22 | IaC | CWE-284 | A01 | — | CWE-16 ma w MITRE status PROHIBITED, a CWE-284 (Pillar) DISCOURAGED; lepszego Base dla reguły zapory MITRE nie wskazuje (CWE 5.0, sprawdzone 2026-11-16). Decyzja autora: CWE-284 z tą adnotacją |
 | Nieszyfrowany EBS/S3 | IaC | CWE-311 | A06 | — | w 2025 CWE-311 jest w A06, nie w A04 |
-| IMDSv1 | IaC | TODO | TODO | — | brak oczywistego CWE na listach. Kandydaci: CWE-1188 (spoza list), kontekst SSRF CWE-918 (A01). Do decyzji w E03-03 |
+| IMDSv1 | IaC | CWE-1188 | — | — | MITRE nie wskazuje CWE dla IMDSv1; CWE-1188 (Insecure Default Initialization) i CWE-918 (SSRF) mają status ALLOWED. Decyzja autora z 2026-11-16: CWE-1188, bo opisuje przyczynę (domyślnie dopuszczony v1), a nie sposób ataku |
 | CORS `*` | konfiguracja web | CWE-942 | A02 | 3.4.2 | |
 | Brak nagłówków bezpieczeństwa | konfiguracja web | CWE-693 | A06 | 3.4.1, 3.4.3, 3.4.4 | dla braku `frame-ancestors` CWE-1021 (A06). Opis A02 też wymienia brak nagłówków |
 | Tryb debug na produkcji | konfiguracja web | CWE-489 | A02 | 13.4.2 | |
@@ -306,7 +306,7 @@ Do decyzji:
 
 Otwarte:
 
-- [ ] Oficjalna data wydania Top 10:2025 (TODO: zweryfikować na owasp.org).
-- [ ] Które dwie kategorie Top 10:2025 pochodzą z ankiety (z opisów wynika A03 i A09; TODO: zweryfikować).
-- [ ] Czy owaspsamm.org opisuje już model 2.2 (TODO: zweryfikować przed cytowaniem SAMM ze strony).
-- [ ] Zalecenie MITRE co do mapowania na CWE kategorii (np. CWE-16) (TODO: zweryfikować na cwe.mitre.org przy E03-03).
+- [x] Oficjalna data wydania Top 10:2025: OWASP jej nie podaje; w bibliografii rok 2025 z datą dostępu (2026-11-16).
+- [x] Kategorie z ankiety: A03 i A09 (potwierdzone 2026-11-16).
+- [x] owaspsamm.org opisuje model 2.0, nie 2.2 (2026-11-16).
+- [x] CWE-16: PROHIBITED (Grouping, Frequent Misuse); CWE-284 i CWE-668: DISCOURAGED (2026-11-16).

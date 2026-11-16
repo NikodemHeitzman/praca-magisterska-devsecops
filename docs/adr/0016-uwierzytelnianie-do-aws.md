@@ -46,11 +46,11 @@ Klucz użytkownika `terraform` jest długoterminowy, więc to odstępstwo od zas
 
 - klucz w `~/.aws/credentials` w profilu nazwanym, nie w zmiennych środowiskowych zapisanych w plikach projektu,
 - usunięcie klucza i użytkownika przy sprzątaniu AWS (E15-08),
-- uprawnienia użytkownika `terraform` ustala E05. Do tego czasu TODO: zweryfikować, czy wystarczy coś węższego niż `AdministratorAccess`.
+- uprawnienia użytkownika `terraform` ustala E05. Rozstrzygnięte w ADR-0029 (węższa polityka zamiast `AdministratorAccess`).
 
 ## Konsekwencje
 
-- (+) Potok nie ma długoterminowych poświadczeń AWS. Poświadczenia z OIDC wygasają po zakończeniu jobu (TODO: zweryfikować domyślny czas sesji roli).
+- (+) Potok nie ma długoterminowych poświadczeń AWS. Poświadczenia z OIDC wygasają po zakończeniu jobu (domyślnie godzina, ADR-0032).
 - (+) Prosta konfiguracja dla jednej osoby, znana autorowi.
 - (−) Klucz `terraform` na dysku nie wymaga MFA. Jego wyciek z komputera autora daje dostęp do konta. Ryzyko opisać w 5.3 (ograniczenia).
 - (−) Dostawcę OIDC i rolę potoku tworzy lokalny Terraform (użytkownik `terraform`), więc przed pierwszym wdrożeniem z potoku jest krok ręczny (*bootstrap*) w E05.
@@ -59,4 +59,4 @@ Klucz użytkownika `terraform` jest długoterminowy, więc to odstępstwo od zas
 ## Źródła
 
 - `docs/narzedzia.md`, sekcja 3: GitHub, *OpenID Connect in Amazon Web Services*; AWS, *Create an OpenID Connect (OIDC) identity provider in IAM*.
-- Wymóg ochrony poświadczeń potoku w NIST SP 800-204D: TODO: zweryfikować numer rekomendacji w `docs/notes/nist-800-204d.md` [@NIST-SP800-204D].
+- Ochrona poświadczeń potoku: SP 800-204D nie ma osobnej rekomendacji; najbliżej są PULL-PUSH-REQ-3 (sek. 5.1.2, s. 18) i sek. 5.3 pkt 4 (s. 22) [@NIST-SP800-204D]. Sprawdzone 2026-11-16 (`docs/weryfikacja-todo-2026-11-16.md`, N2).

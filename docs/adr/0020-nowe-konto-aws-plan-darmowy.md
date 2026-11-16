@@ -39,7 +39,7 @@ Plan B (z [0017](0017-plan-konta-aws-darmowy.md)): przejście na plan płatny pr
 - (+) Czyste konto: bez zasobów, użytkowników IAM i historii kosztów (przegląd 2026-11-10, `docs/aws-konto.md`).
 - (−) Plan wygasa 2027-05-10, 15 dni po M4 (2027-04-25). Opóźnienie E09 wymaga przejścia na plan płatny (plan B). Przypomnienie: przy punkcie kontrolnym tempa po M2 (2027-02-14) sprawdzić zapas.
 - (−) Plan darmowy daje dostęp tylko do części usług. Dostępność ECS i Fargate sprawdzić w konsoli przed ADR-em architektury (E05-03). EC2 i ECR są dostępne (strona AWS Free Tier, 2026-10-30).
-- (−) Warunki AWS Free Tier dają kredyty najwyżej dla jednego konta. Stare konto autora pochodzi sprzed modelu kredytowego z lipca 2025 i kredytów nie dostało (według autora, TODO: zweryfikować w warunkach, czy wcześniejsze konto wpływa na uprawnienie).
+- (−) Warunki AWS Free Tier dają kredyty najwyżej dla jednego konta. Stare konto autora pochodzi sprzed modelu kredytowego z lipca 2025 i kredytów nie dostało (według autora). Warunki AWS (sprawdzone 2026-11-16): regulamin wyklucza kredyty dla więcej niż jednego konta, a FAQ wyklucza osoby, które mają albo miały konto AWS. Nowe konto kredyty dostało, ale zapis FAQ to ryzyko do opisania w 5.3.
 - (−) Dołączenie do AWS Organizations przełącza konto na plan płatny. Zgodne z [0016](0016-uwierzytelnianie-do-aws.md), który Organizations odrzuca.
 
 ## Źródła

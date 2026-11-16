@@ -75,4 +75,4 @@ Na tej próbie precyzja reguły GT-06 wynosi 8/14. W eksperymencie liczą się f
 
 - Pliki testów zawierają celowo podatny kod. Skanery w potoku (Semgrep, Bandit, CodeQL) uruchamiamy na `app/` albo wykluczamy z nich `semgrep-rules/`. W przeciwnym razie testy reguł staną się zgłoszeniami w eksperymencie.
 - Wywołanie w wariancie B: `semgrep --config p/python --config semgrep-rules/ app/` (zestaw rejestru do ustalenia w E07).
-- Czas pisania i testowania reguł (koszt, RQ2): TODO: zweryfikować, uzupełnia autor.
+- Czas pisania i testowania reguł (koszt, RQ2): TODO: zweryfikować; decyzja autora z 2026-11-16: przedziały odtworzone z commitów i sesji, oznaczone jako przybliżone, poprawia autor.

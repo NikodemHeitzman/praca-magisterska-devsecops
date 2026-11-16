@@ -163,8 +163,9 @@ pozycje:
     najwczesniejszy_etap: PR
     uzasadnienie: >-
       aplikacja i tak używa Jinja2 (strona HTML, E04-01), więc obniżenie wersji jest realistyczne. Trafienie =
-      zgłoszenie dowolnej z podatności z listy referencji dla jinja2. Zgodność 3.1.2 z wybraną wersją FastAPI/Starlette:
-      TODO: zweryfikować w E04-02
+      zgłoszenie dowolnej z podatności z listy referencji dla jinja2. Zgodność 3.1.2: Starlette `Jinja2Templates` wymaga tylko
+      Jinja 3.0+, ale `fastapi[standard]` wymaga jinja2>=3.1.5, więc łatka używa `fastapi` bez extras `standard`
+      (decyzja autora z 2026-11-16; sprawdzić w E04-04, czy wersja czysta używa extras)
 
   # ---------------------------------------------------------------- kontener
   - id: GT-08
@@ -263,8 +264,8 @@ pozycje:
     najwczesniejszy_etap: PR
     uzasadnienie: >-
       CWE-312 zamiast CWE-311, bo MITRE odradza mapowanie na CWE-311 i wskazuje CWE-312 dla przechowywania.
-      Uwaga: nowe kubełki S3 są domyślnie szyfrowane po stronie AWS (TODO: zweryfikować), więc dla S3 pozycja może
-      wymagać jawnego wyłączenia albo wyboru wolumenu EBS
+      Od 2023-01-05 S3 szyfruje każdy nowy obiekt i nie da się tego wyłączyć (AWS S3 Default encryption FAQ,
+      sprawdzone 2026-11-16), więc pozycja dotyczy wolumenu EBS bez szyfrowania (decyzja autora z 2026-11-16)
 
   # ---------------------------------------------------------------- konfiguracja web
   - id: GT-12

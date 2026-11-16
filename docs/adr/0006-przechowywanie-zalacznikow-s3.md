@@ -37,8 +37,8 @@ Odrzucone:
 ## Konsekwencje
 
 - (+) Kontener aplikacji nie przechowuje danych trwale; dane są w bazie (0005) i w S3.
-- (+) Kubełek S3 to naturalny zasób IaC dla GT-11 (nieszyfrowany magazyn). Czy szyfrowanie kubełka da się wyłączyć: TODO: zweryfikować w E05; katalog dopuszcza zamiast tego wolumen EBS.
-- (−) Lokalnie i w CI potrzebna jest usługa zgodna z S3 (np. MinIO w `compose.yaml`), bo skan DAST uruchamia aplikację bez AWS. TODO: zweryfikować wybór w E04-02/E05.
+- (+) Kubełek S3 to naturalny zasób IaC dla GT-11 (nieszyfrowany magazyn). Szyfrowania kubełka nie da się wyłączyć: od 2023-01-05 S3 szyfruje każdy nowy obiekt (SSE-S3), AWS S3 *Default encryption FAQ*, sprawdzone 2026-11-16. GT-11 dotyczy więc wolumenu EBS, który katalog dopuszcza (decyzja autora z 2026-11-16).
+- (−) Lokalnie i w CI potrzebna jest usługa zgodna z S3 (np. MinIO w `compose.yaml`), bo skan DAST uruchamia aplikację bez AWS. Wybrano moto (ADR-0009, ADR-0012).
 - (−) Aplikacja w AWS potrzebuje uprawnień IAM do kubełka (rola, bez kluczy dostępowych), co poszerza infrastrukturę w E05.
 - Katalog podręczny jest ulotny; przy restarcie kontenera pliki są ponownie pobierane z S3.
 

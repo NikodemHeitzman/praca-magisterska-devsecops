@@ -36,6 +36,12 @@ Po rozpoczęciu serii właściwej nie zmieniamy żadnego z tych elementów. Zmia
 - Akcje GitHub przypięte do pełnego SHA commita, obrazy narzędzi (m.in. ZAP, Trivy) do digestu.
 - Zależności aplikacji zapisane z dokładnymi wersjami.
 - **Bazy podatności** (Trivy, skaner zależności) aktualizują się przy każdym uruchomieniu i nie są zamrażane. Serię skuteczności wykonujemy w krótkim oknie czasu (docelowo jeden dzień), a przy każdym przebiegu zapisujemy wersję lub datę bazy. Nowe CVE, które pojawią się w trakcie, klasyfikujemy jako zgłoszenia spoza katalogu ([`README.md`](README.md), „Jak liczymy trafienia”).
+- **Ustawienia skanerów** (decyzje autora z 2026-11-16, uzupełnienie v1 zapisane w `docs/log/2026-11-16.md`; uzasadnienia w [`docs/weryfikacja-todo-2026-11-16.md`](../docs/weryfikacja-todo-2026-11-16.md)):
+  - skanery uruchamiamy bezpośrednio (CLI z przypiętą wersją albo oficjalny obraz po digeście), nie przez akcje firm trzecich;
+  - bramka Trivy w wariancie B pomija podatności bez dostępnej poprawki (`--ignore-unfixed`); w pomiarze nie ma innych wyjątków od bramek;
+  - Trivy działa z `--skip-check-update`, czyli z regułami wbudowanymi w przypiętą binarkę; wersję reguł zapisujemy w manifeście wersji (P4);
+  - ZAP baseline dostaje regułę Replacer, która dodaje do żądań nagłówek `Origin` (pająk ZAP go nie wysyła, a bez niego reguła CORS 10098 nie ma czego ocenić); ta sama konfiguracja dla czystej i podatnej wersji;
+  - sprawdzenie spójności `requirements.txt` z `uv.lock` jest krokiem wspólnym obu wariantów.
 
 ### P3. Gałęzie
 
@@ -100,7 +106,7 @@ Skrypt wywołujący: TODO (E09).
 
 - Wdrażana jest wyłącznie czysta wersja, więc zabezpieczenia z sekcji 6 dotyczą jej w mniejszym stopniu. Środowisko istnieje tylko w oknie serii main.
 - Czas wdrożenia zależy też od AWS. Ten składnik jest wspólny dla obu wariantów, więc nie zmienia narzutu M5 liczonego jako różnica median. Czas kroków skanerów pokazuje rozbicie M5.
-- Czy oba warianty wdrażają do jednego środowiska, czy do dwóch identycznych: TODO (E05).
+- Oba warianty wdrażają do jednego środowiska, serie A i B wykonujemy kolejno (decyzja autora z 2026-11-16).
 
 Czas trwania całej serii: TODO, po pilotażu (P5).
 
@@ -256,4 +262,4 @@ Wariant A celowo wdraża do AWS aplikację z podatnościami, które da się wyko
 3. **Brak logowania na instancję.** Instancja nie ma klucza SSH ani logowania hasłem, więc otwarty port 22 (GT-10) jest mierzalny, ale nie daje dostępu.
 4. **Workflow odporny na nadużycie.** Brak wyzwalacza `pull_request_target`. Pull requesty eksperymentu pochodzą tylko z gałęzi tego repozytorium. Uruchomienie workflow dla zewnętrznych kontrybutorów wymaga zgody (ustawienie repozytorium). Rola AWS (OIDC) pozwala wdrażać tylko z gałęzi `exp/variant-*`, nie z pull requestów.
 
-TODO: zweryfikować politykę AWS dotyczącą testów bezpieczeństwa dla usług wybranych w E05 (przy pasywnym audycie sprawa drobna).
+Polityka AWS dotycząca testów bezpieczeństwa (https://aws.amazon.com/security/penetration-testing/, sprawdzone 2026-11-16) dopuszcza bez wcześniejszej zgody testy instancji EC2, w tym skanowanie aplikacji webowych; zakazane są m.in. ataki DoS. Pasywny audyt nie wymaga zgłoszenia.

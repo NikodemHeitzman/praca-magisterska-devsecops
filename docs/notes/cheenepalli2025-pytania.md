@@ -123,7 +123,7 @@ Pozostałe zalecenia dotyczą kultury, szkoleń, kierownictwa i AI.
 - **Dobór próby.** Do ankiety dopuszczono tylko osoby z doświadczeniem w DevSecOps (s. 2), więc 68% „pełnych wdrożeń” nie opisuje wszystkich MŚP.
 - **Brak stopy odpowiedzi** mimo nagłówka „Survey Distribution and Response Rate” (s. 2).
 - **Brak testów statystycznych.** Zdanie o „istotnie lepszej” integracji przy zaangażowanym kierownictwie (s. 4) nie jest poparte testem.
-- **Definicja MŚP.** 1–5000 pracowników to znacznie więcej niż w definicji UE. TODO: zweryfikować definicję UE ze źródłem przed użyciem.
+- **Definicja MŚP.** 1–5000 pracowników to znacznie więcej niż w definicji UE. Definicja UE: mniej niż 250 pracowników i obrót do 50 mln EUR lub suma bilansowa do 43 mln EUR (Zalecenie Komisji 2003/361/WE, Dz.U. L 124 z 20.05.2003, s. 36; sprawdzone 2026-11-16).
 - **Brak łańcucha dostaw.** W tekście nie ma NIST, OWASP, SBOM, SLSA, GitHub ani fałszywych alarmów.
 - Autorzy zaznaczają, że przy redakcji tekstu korzystali z Grammarly i ChatGPT (s. 6).
 

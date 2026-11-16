@@ -31,19 +31,19 @@ Wybrano **środowisko efemeryczne**. Powód autora: to najbardziej logiczne przy
 Doprecyzowania agenta (do potwierdzenia w E05-08):
 
 - **Dwie warstwy zasobów.** Warstwa robocza (EC2, publiczny IPv4, EBS, grupy bezpieczeństwa, sieć) podlega `destroy`. Warstwa stała jest tania i potrzebna między sesjami: kubełek stanu Terraformu, dostawca OIDC i rola potoku, użytkownicy IAM, budżety, trail CloudTrail z kubełkiem logów (wymóg audytowalności z E08-01), repozytorium ECR albo GHCR. Szacunek warstwy stałej: poniżej 1 USD miesięcznie, TODO: zweryfikować w E05-08 na podstawie Cost Explorer.
-- **Mechanizm codziennego sprzątania** wybiera E05-08 (ADR). Opcje: zaplanowany workflow GitHub Actions (`schedule`) z `terraform destroy` warstwy roboczej przez OIDC; EventBridge Scheduler z funkcją Lambda; akcja AWS Budgets zatrzymująca instancje EC2 po przekroczeniu progu. Godzina: wieczorem, dokładną ustala E05-08. Zaplanowane workflow GitHub uruchamiają się według UTC i mogą się opóźniać (TODO: zweryfikować w dokumentacji GitHub).
+- **Mechanizm codziennego sprzątania** wybiera E05-08 (ADR). Opcje: zaplanowany workflow GitHub Actions (`schedule`) z `terraform destroy` warstwy roboczej przez OIDC; EventBridge Scheduler z funkcją Lambda; akcja AWS Budgets zatrzymująca instancje EC2 po przekroczeniu progu. Godzina: wieczorem, dokładną ustala E05-08. Zaplanowane workflow GitHub uruchamiają się według UTC i mogą się opóźniać (dokumentacja GitHub, sprawdzone 2026-11-16: domyślnie UTC, opcjonalnie strefa IANA; przy dużym obciążeniu przebiegi mogą się opóźnić albo zostać pominięte).
 
 ## Konsekwencje
 
 - (+) Koszt projektu spada z około 97 USD (4 miesiące 24/7) do około 15–20 USD bez VAT (szacunek z [0018](0018-istniejace-konto-aws-plan-platny.md)).
 - (+) Środowisko jest regularnie odtwarzane z kodu, więc Terraform jest stale sprawdzany pod kątem powtarzalności. Materiał do 4.2.
-- (−) **Wdrożenie z `main` (E06-03, E05-07) wymaga działającego środowiska.** Merge do `main` przy usuniętej infrastrukturze zakończy job deploy błędem. Do rozstrzygnięcia w E05-03 i E06-03: potok stawia warstwę roboczą sam (`terraform apply` w potoku) albo deploy działa tylko w sesjach, w których środowisko jest postawione. Pierwsza opcja wydłuża potok. H2a dotyczy workflow PR, a pełny potok z wdrożeniem raportujemy opisowo (E03-02), więc wpływ na pomiar jest ograniczony (TODO: zweryfikować przy E06-03).
+- (−) **Wdrożenie z `main` (E06-03, E05-07) wymaga działającego środowiska.** Merge do `main` przy usuniętej infrastrukturze zakończy job deploy błędem. Do rozstrzygnięcia w E05-03 i E06-03: potok stawia warstwę roboczą sam (`terraform apply` w potoku) albo deploy działa tylko w sesjach, w których środowisko jest postawione. Pierwsza opcja wydłuża potok. H2a dotyczy workflow PR, a pełny potok z wdrożeniem raportujemy opisowo (E03-02), więc wpływ na pomiar jest ograniczony (rozstrzygnięte w ADR-0032 i ADR-0033: potok tylko publikuje obraz w GHCR, a instancja sama go pobiera, więc merge przy usuniętej infrastrukturze nie kończy się błędem).
 - (−) Przebiegi E09-02 i E09-03 z audytem po wdrożeniu muszą się zmieścić w jednej sesji ze środowiskiem postawionym albo stawiać je za każdym razem od nowa. Każde odtworzenie to dodatkowa zmienna (nowy adres IP, nowy wolumen). Ująć w `experiment/PROTOCOL.md` przy pilotażu (E09-01).
 - (−) Dane w bazie PostgreSQL na EBS znikają przy `destroy`. Aplikacja ma dane z `seed.py`, więc odtworzenie jest proste, ale trzeba je wykonać przy każdym `apply` (np. w user-data albo kroku wdrożenia).
-- (−) Alerty AWS Budgets przychodzą z opóźnieniem, bo dane kosztowe odświeżają się kilka razy na dobę (TODO: zweryfikować). Główną ochroną jest więc `destroy` i automatyczne sprzątanie, a alerty są drugą linią.
+- (−) Alerty AWS Budgets przychodzą z opóźnieniem, bo dane kosztowe odświeżają się do trzech razy na dobę (dokumentacja AWS Budgets, sprawdzone 2026-11-16). Główną ochroną jest więc `destroy` i automatyczne sprzątanie, a alerty są drugą linią.
 - Sprzątanie po obronie (E15-08) obejmuje warstwę stałą.
 
 ## Źródła
 
 - Szacunek kosztu: [0018](0018-istniejace-konto-aws-plan-platny.md), `docs/aws-konto.md`.
-- Mechanizmy sprzątania: TODO: zweryfikować w dokumentacji GitHub (`on.schedule`) i AWS (EventBridge Scheduler, AWS Budgets actions) w E05-08.
+- Mechanizmy sprzątania: wybór i źródła w ADR-0034; `on.schedule`: https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows (sprawdzone 2026-11-16).

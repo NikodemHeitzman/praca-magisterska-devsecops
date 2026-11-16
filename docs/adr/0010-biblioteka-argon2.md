@@ -26,7 +26,7 @@ Wybrano **argon2-cffi**, ponieważ jest prostsza: to jedna biblioteka bez dodatk
 ## Konsekwencje
 
 - (+) Mniej zależności w lockfile'u.
-- Parametry Argon2: domyślne z `argon2.PasswordHasher`. Czy są zgodne z zaleceniami OWASP dotyczącymi przechowywania haseł: TODO: zweryfikować.
+- Parametry Argon2: domyślne z `argon2.PasswordHasher`. W argon2-cffi 25.1.0 (`uv.lock`) to Argon2id, t=3, m=64 MiB, p=4 (profil RFC 9106 low-memory). OWASP Password Storage Cheat Sheet podaje jako minimum Argon2id z m=19 MiB, t=2, p=1, więc parametry domyślne je przekraczają (sprawdzone 2026-11-16).
 - Obie biblioteki działają na Pythonie 3.14 (sprawdzone 2026-10-30, argon2-cffi 25.1.0).
 
 ## Źródła

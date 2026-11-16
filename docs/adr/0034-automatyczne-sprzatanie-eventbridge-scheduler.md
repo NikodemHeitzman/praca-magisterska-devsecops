@@ -98,7 +98,7 @@ Autor ich nie wybierał. Wynikają z powyższych decyzji i zasad projektu:
 - (−) **Sesja dłuższa niż 8 godzin wymaga działania autora:** tagu `SkipCleanup=true` albo ponownego `apply`, który odtworzy instancję z nowym harmonogramem. Przebiegi E09 trzeba zaplanować z tym ograniczeniem (`experiment/PROTOCOL.md` przy pilotażu E09-01).
 - (−) **Po automatycznym usunięciu stan Terraformu nie zgadza się z AWS.** Następny `plan` pokaże odtworzenie instancji i harmonogramu. Reszta warstwy roboczej zostaje do `destroy`. Zasada z ADR-0019 („po zakończeniu zadania `destroy`”) nadal obowiązuje, a automat jest drugą linią obrony.
 - (−) Automat nie usuwa niczego poza instancją. Zasób dodany w przyszłości do `work/`, który kosztuje sam z siebie (np. brama NAT, load balancer), wymagałby rozszerzenia mechanizmu. Obecna architektura takich zasobów nie ma ([0024](0024-architektura-aws-ec2-docker-compose.md)).
-- (−) **Odmowa przy tagu wyjątku może wywołać ponowienia.** Harmonogram ponawia nieudane wywołania według polityki ponowień. W teście odmowa dostępu nie została ponowiona (sekcja „Weryfikacja”), a w kodzie i tak są tylko dwie próby. Dokumentacji, które błędy Scheduler ponawia, nie sprawdzono (TODO: zweryfikować).
+- (−) **Odmowa przy tagu wyjątku może wywołać ponowienia.** Harmonogram ponawia nieudane wywołania według polityki ponowień. W teście odmowa dostępu nie została ponowiona (sekcja „Weryfikacja”), a w kodzie i tak są tylko dwie próby. Dokumentacja Scheduler (sprawdzone 2026-11-16) ponawia tylko błędy, które cel zgłasza jako możliwe do ponowienia, a błędy trwałe trafiają do kolejki DLQ bez ponowień. Listy błędów nie podaje, więc to, że `AccessDenied` jest błędem trwałym, wynika z testu, a nie z dokumentacji.
 - Akcja AWS Budgets, którą rozważał `docs/aws-konto.md`, nie jest potrzebna. Alerty budżetowe zostają jako druga linia obrony.
 - Zasada 2 ADR-0019 („codzienne sprzątanie wieczorem”) przyjmuje postać „usunięcie instancji 8 godzin po utworzeniu”. Aktualizacja w `docs/aws-konto.md`.
 
@@ -119,7 +119,7 @@ Test 2026-11-13 w `eu-north-1` (pojedynczy przebieg, `instance_ttl_hours = 0.25`
 
 ## Źródła
 
-Źródła spoza rejestru `Zrodla/` (TODO: zweryfikować, czy rejestrować), wszystkie sprawdzone 2026-11-13:
+Źródła spoza rejestru `Zrodla/` (rejestrowane dopiero przy cytowaniu w tekście pracy, zob. `README.md`, zasada 8), wszystkie sprawdzone 2026-11-13:
 
 - AWS, *Managed policies for your organization* (SCP kont-projektów, w tym `AllowFreeTierServices` i SCP dla limitów wydatków): https://docs.aws.amazon.com/accounts/latest/reference/scps-and-rcps-for-projects.html
 - AWS, *Supported AWS services for Sign up for AWS (new)* (EventBridge, Lambda, AWS Budgets w planie darmowym): https://docs.aws.amazon.com/accounts/latest/reference/supported-services-sign-up-new.html

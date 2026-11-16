@@ -65,7 +65,7 @@ Ustawienia stanu (rekomendacja agenta przyjęta przez autora razem z opcjami):
 
 ## Źródła
 
-Źródła spoza rejestru `Zrodla/` (TODO: zweryfikować, czy rejestrować):
+Źródła spoza rejestru `Zrodla/` (rejestrowane dopiero przy cytowaniu w tekście pracy, zob. `README.md`, zasada 8):
 
 - HashiCorp, *Backend Type: s3*: https://developer.hashicorp.com/terraform/language/backend/s3 (sprawdzone 2026-11-11)
 - HashiCorp, *Upgrading to Terraform v1.10* i *Upgrading to Terraform v1.11*: https://developer.hashicorp.com/terraform/language/v1.10.x/upgrade-guides, https://developer.hashicorp.com/terraform/language/v1.11.x/upgrade-guides

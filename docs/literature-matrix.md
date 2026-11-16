@@ -77,7 +77,7 @@ Strony według przeglądarki PDF preprintu arXiv:2503.22612v1 (preprint nie ma n
 - **Ograniczenia:**
   - Dane deklaratywne. Autorzy sami piszą, że mogą zawyżać albo zaniżać poziom wdrożenia i skuteczności, i zalecają walidację empiryczną: studia przypadków, obserwację (s. 6).
   - Ocena agenta: dobór z panelu wyłącznie osób z doświadczeniem w DevSecOps (s. 2) sprzyja zawyżeniu odsetka wdrożeń. Brak stopy odpowiedzi mimo nagłówka „Response Rate” (s. 2). Zapowiedziana część jakościowa nie jest opisana. Brak testów statystycznych, choć tekst mówi o „istotnie lepszej” integracji przy zaangażowaniu kierownictwa (s. 4).
-  - MŚP zdefiniowano szeroko, jako 1–5000 pracowników (s. 5); w definicji UE MŚP to mniej niż 250 osób. TODO: zweryfikować definicję UE ze źródłem, jeśli ją przytoczę.
+  - MŚP zdefiniowano szeroko, jako 1–5000 pracowników (s. 5); w definicji UE MŚP to mniej niż 250 osób. Źródło definicji UE: Zalecenie Komisji 2003/361/WE (Dz.U. L 124 z 20.05.2003, s. 36; sprawdzone 2026-11-16).
   - W tekście nie występują łańcuch dostaw, SBOM, SLSA, GitHub ani fałszywe alarmy (sprawdzone wyszukiwaniem).
 - **Gdzie użyję:** 2.5 (motywacja: MŚP potrzebują prostszych, tańszych rozwiązań, a skanowanie przy każdej zmianie jest rzadkie), 5.3 (moje pomiary kosztu na tle barier „złożoność i zasoby” z ankiety), ewentualnie 1 (motywacja „lekkiego” potoku).
 
@@ -125,7 +125,7 @@ Strony według rękopisu z arXiv (numeracja „N of 23” = numer w przeglądarc
 
 Strony według wersji opublikowanej, s. 77–90 (numer w PDF + 76). Opracowanie: [`notes/janczewski2025-pytania.md`](notes/janczewski2025-pytania.md).
 
-- **Jakość źródła:** artykuł w *Zeszytach Naukowych Wyższej Szkoły Bankowej w Poznaniu* (2025, t. 108, nr 1), jeden autor, WSB w Warszawie (s. 77). Polska publikacja, jedyna polska w rdzeniu. TODO: zweryfikować, czy czasopismo jest recenzowane i ile ma punktów na liście ministerialnej, jeśli to będzie potrzebne w pracy. Tytuł w bibliografii według PDF („…Analiza bezpieczeństwa procesów CI/CD”, s. 77), a nie według Crossref, który podaje „…Analiza integracji bezpieczeństwa z procesami CI/CD” (decyzja autora, 2026-10-14).
+- **Jakość źródła:** artykuł w *Zeszytach Naukowych Wyższej Szkoły Bankowej w Poznaniu* (2025, t. 108, nr 1), jeden autor, WSB w Warszawie (s. 77). Polska publikacja, jedyna polska w rdzeniu. Czasopismo deklaruje podwójnie ślepą recenzję i ma 20 pkt w wykazie MNiSW 2024 (dyscyplina ekonomia i finanse); artykuł: s. 77–90, doi: 10.58683/dnswsb.2064; metoda: przegląd literatury i ankieta ekspertów bez podanej liczby respondentów (sprawdzone 2026-11-16). Tytuł w bibliografii według PDF („…Analiza bezpieczeństwa procesów CI/CD”, s. 77), a nie według Crossref, który podaje „…Analiza integracji bezpieczeństwa z procesami CI/CD” (decyzja autora, 2026-10-14).
 - **Problem:** jak wdrażać praktyki DevSecOps w środowiskach chmurowych infrastruktury krytycznej i jak skuteczne są narzędzia SAST, DAST, SCA i IAST w CI/CD (streszczenie, s. 77; s. 79).
 - **Metoda:** „podejście mieszane” (s. 83):
   1. Przegląd literatury naukowej i branżowej. Autor nazywa go systematycznym, ale podaje tylko ogólne kryteria doboru: prace recenzowane, raporty branżowe i dokumentacja, po angielsku lub polsku, z ostatnich kilku lat. Brak baz, zapytań i liczby prac (s. 83).
@@ -159,10 +159,10 @@ Opis wyłącznie na podstawie abstraktu (Semantic Scholar, pobrany 2026-10-14) i
 
 - **Jakość źródła:** praca konferencyjna IEEE (ICRITO 2025, 12th International Conference on Reliability, Infocom Technologies and Optimization), s. 1–4, opublikowana 18.09.2025 (Crossref). Jeden autor, według Crossref „DevOps Engineer, Deutsche Bank, Pune, India”, czyli praktyk, nie pracownik naukowy. Krótka praca: według kryterium z [@Rajapakse2022] (wykluczenie prac do 5 stron) nie weszłaby do tamtego przeglądu.
 - **Problem** (abstrakt): zarządzanie podatnościami w obrazach kontenerów w chmurze, a zwłaszcza wyjątkami dla znanych podatności. Abstrakt wymienia nieautoryzowane zatwierdzanie wyjątków, nieefektywne procesy ręczne i brak audytowalności. Źle zarządzane wyjątki mogą narazić aplikację na naruszenia bezpieczeństwa.
-- **Metoda** (abstrakt): propozycja skalowalnej, zautomatyzowanej ramy (frameworku) DevSecOps dla obrazów Docker w Google Cloud Artifact Registry. Sposób ewaluacji: TODO, z abstraktu nie wynika, czy rama była mierzona.
+- **Metoda** (abstrakt): propozycja skalowalnej, zautomatyzowanej ramy (frameworku) DevSecOps dla obrazów Docker w Google Cloud Artifact Registry. Sposób ewaluacji: z abstraktu nie wynika, czy rama była mierzona (ICRITO 2025, s. 1–4, doi: 10.1109/ICRITO66076.2025.11241906; wersji otwartej brak, sprawdzone 2026-11-16). Decyzja autora z 2026-11-16: pełny tekst przez bibliotekę.
 - **Główne wyniki** (abstrakt, deklaracje): rama tworzy i utrzymuje dynamiczne polityki wyjątków, automatyzuje przepływy CI/CD i daje rozbudowany audyt. Według autora poprawia bezpieczeństwo bez zakłócania potoku i przy minimalnym narzucie operacyjnym.
 - **Związek z RQ1–RQ3:**
-  - RQ1 (skuteczność): wyjątek od podatności to świadoma decyzja, żeby przepuścić podatność przez bramkę. W moim eksperymencie trzeba określić, czy i jak wariant B pozwala na wyjątki, bo wpływa to na to, co dociera na produkcję. TODO: decyzja autora przy projekcie bramek wariantu B (E07).
+  - RQ1 (skuteczność): wyjątek od podatności to świadoma decyzja, żeby przepuścić podatność przez bramkę. W moim eksperymencie trzeba określić, czy i jak wariant B pozwala na wyjątki, bo wpływa to na to, co dociera na produkcję. Decyzja autora z 2026-11-16: w pomiarze bramki bez wyjątków (poza pomijaniem podatności bez poprawki, `--ignore-unfixed`); mechanizm wyjątków opisany w 5.3.
   - RQ2 (koszt): ręczna obsługa zgłoszeń i wyjątków to część kosztu bramek blokujących, obok fałszywych alarmów.
   - RQ3: z abstraktu nie wynika odniesienie do standardów.
 - **Ograniczenia:**

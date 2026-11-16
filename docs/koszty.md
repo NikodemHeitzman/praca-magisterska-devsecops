@@ -36,7 +36,7 @@ aws ce get-cost-and-usage \
 
 Użytkownik `terraform` nie ma uprawnień `ce:*` i nie powinien ich mieć, bo jego polityka obejmuje tylko zasoby projektu ([ADR-0029](adr/0029-uprawnienia-uzytkownika-terraform.md)).
 
-**Tag `Project` jako tag alokacji kosztów.** Żeby filtrować koszty po tagu `Project=devsecops-thesis`, trzeba go aktywować w Billing → Cost allocation tags. Tag działa tylko dla kosztów od chwili aktywacji, nie wstecz. Stan: TODO: aktywować (autor) i wpisać tu datę. Na tym koncie nie ma innych projektów, więc koszt całego konta jest równy kosztowi pracy.
+**Tag `Project` jako tag alokacji kosztów.** Żeby filtrować koszty po tagu `Project=devsecops-thesis`, trzeba go aktywować w Billing → Cost allocation tags. Tag pojawia się do aktywacji do 24 h po otagowaniu zasobu, a aktywacja trwa kolejne do 24 h. Domyślnie działa od chwili aktywacji; od 2024 r. można zlecić uzupełnienie wstecz (backfill) do 12 miesięcy (dokumentacja AWS Billing, sprawdzone 2026-11-16). Stan: TODO: aktywować (autor) i wpisać tu datę. Na tym koncie nie ma innych projektów, więc koszt całego konta jest równy kosztowi pracy.
 
 ## Koszty miesięczne
 
@@ -60,7 +60,7 @@ Wypełniać dla każdego miesiąca z tabeli wyżej.
 | 2026-11 (wstępnie) | Amazon Virtual Private Cloud | 0,0009597 | publiczny IPv4, 0,19 h |
 | 2026-11 (wstępnie) | Amazon Simple Storage Service | 0,0005682 | żądania do kubełków stanu i załączników |
 | 2026-11 (wstępnie) | EC2 – Other | 0,0004509 | wolumen EBS gp3 i transfer danych |
-| 2026-11 (wstępnie) | AWS Secrets Manager | 0,0000100 | 2 żądania API; projekt nie używa tej usługi (TODO: zweryfikować pochodzenie w CloudTrail) |
+| 2026-11 (wstępnie) | AWS Secrets Manager | 0,0000100 | 2 żądania API; projekt nie używa tej usługi (dokumentacja nie wyjaśnia takich wywołań; TODO: sprawdzić w CloudTrail Event history z filtrem `eventSource = secretsmanager.amazonaws.com`, pola `userIdentity` i `userAgent`) |
 | 2026-11 (wstępnie) | AWS CloudShell | 0,0000010 | |
 | 2026-11 (wstępnie) | AWS Glue, AWS KMS, Amazon SNS, Amazon SQS | 0 | w darmowym limicie |
 | 2026-11 (wstępnie) | **razem** | **0,0058718** | równe wykorzystanym kredytom |
@@ -102,7 +102,7 @@ Kredyty w tym samym okresie (`RECORD_TYPE = Credit`): −0,0058718337 USD.
 Obserwacje:
 
 - **Pozycje `EUC1-…` (Frankfurt)** pochodzą z pierwszej próby `apply` w `eu-central-1`, którą odrzuciła SCP konta (E05-04, ADR-0030).
-- **Żądania KMS** wynikają najpewniej z szyfrowania wolumenu EBS kluczem zarządzanym przez AWS (`aws/ebs`) i mieszczą się w darmowym limicie (TODO: zweryfikować).
+- **Żądania KMS** wynikają najpewniej z szyfrowania wolumenu EBS kluczem zarządzanym przez AWS (`aws/ebs`) i mieszczą się w darmowym limicie. Dokumentacja EBS potwierdza wywołania KMS (`GenerateDataKeyWithoutPlaintext`, `CreateGrant`, `Decrypt`) przy tworzeniu i podłączaniu wolumenu, a żądania do kluczy zarządzanych przez AWS są bezpłatne do 20 000 miesięcznie (sprawdzone 2026-11-16).
 - **Odczyt przez API kosztuje więcej niż infrastruktura.** Pięć zapytań `ce` z 2026-11-13 to 0,05 USD, czyli około ośmiokrotność kosztu całej infrastruktury w tym okresie. Kolejne odczyty lepiej robić w konsoli albo ograniczyć do jednego zapytania zbiorczego na miesiąc.
 
 ## Warstwa stała

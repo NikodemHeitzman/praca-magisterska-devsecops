@@ -79,7 +79,7 @@ Wybrano **skrypt user-data (bash) w Terraformie, Dockera z archiwum Ubuntu, wył
   - prostota.
 - **Automatyczne łatki bezpieczeństwa bez pełnego upgrade'u:**
   - czas startu środowiska,
-  - `unattended-upgrades` jest w Ubuntu włączony domyślnie, a skrypt tylko jawnie to potwierdza. Potwierdzono na instancji (sekcja „Weryfikacja”); dokumentacja Ubuntu była 2026-11-11 niedostępna (TODO: zweryfikować w dokumentacji).
+  - `unattended-upgrades` jest w Ubuntu włączony domyślnie, a skrypt tylko jawnie to potwierdza. Potwierdzono na instancji (sekcja „Weryfikacja”); dokumentacja Ubuntu Server *Automatic updates* (sprawdzone 2026-11-16): pakiet jest instalowany domyślnie, a aktualizacje bezpieczeństwa są włączone po instalacji; obrazów chmurowych strona nie wymienia osobno.
 - **Użytkownik `app` w grupie `docker` zamiast trybu rootless:**
   - tryb rootless komplikuje port 80 i dostęp kontenera do IMDS,
   - izolację zapewnia kontener: aplikacja działa w nim jako użytkownik bez uprawnień roota (ADR-0022),
@@ -142,7 +142,7 @@ Test 2026-11-11 w `eu-north-1`, instancja `t3.small` z przypiętym AMI, kontrola
 
 ## Źródła
 
-Źródła spoza rejestru `Zrodla/` (TODO: zweryfikować, czy rejestrować), wszystkie sprawdzone 2026-11-11:
+Źródła spoza rejestru `Zrodla/` (rejestrowane dopiero przy cytowaniu w tekście pracy, zob. `README.md`, zasada 8), wszystkie sprawdzone 2026-11-11:
 
 - Ansible, *Installing Ansible*: https://docs.ansible.com/projects/ansible/latest/installation_guide/intro_installation.html
 - Ansible, *amazon.aws.aws_ssm connection*: https://docs.ansible.com/ansible/latest/collections/amazon/aws/aws_ssm_connection.html

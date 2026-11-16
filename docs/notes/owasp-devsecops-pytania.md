@@ -99,7 +99,7 @@ Niezaufane wartości z kontekstu zdarzenia (np. tytuł PR) przekazywać przez zm
 
 **Skąd wiadomo, że przypinanie do SHA ma znaczenie w praktyce?** (`2-3-6-3`, `2-3-3-1 Container Scanning`)
 
-Dokument podaje dwa przypadki przestawienia tagów na złośliwy kod, który wykradał sekrety CI: `tj-actions/changed-files` (marzec 2025) i `aquasecurity/trivy-action` (marzec 2026). Drugi dotyczy skanera, którego używa nasz potok. Według GHSA-69fq-xp46-6x23 (21.03.2026) dotknął on tagów trivy-action sprzed 0.35.0, setup-trivy v0.2.0–v0.2.5 i binarki Trivy v0.69.4. Wersje w `docs/narzedzia.md` są późniejsze. Dane GHSA: TODO: zweryfikować w oryginale.
+Dokument podaje dwa przypadki przestawienia tagów na złośliwy kod, który wykradał sekrety CI: `tj-actions/changed-files` (marzec 2025) i `aquasecurity/trivy-action` (marzec 2026). Drugi dotyczy skanera, którego używa nasz potok. Według GHSA-69fq-xp46-6x23 (21.03.2026) dotknął on tagów trivy-action sprzed 0.35.0, setup-trivy v0.2.0–v0.2.5 i binarki Trivy v0.69.4. Wersje w `docs/narzedzia.md` są późniejsze. Dane GHSA sprawdzone w oryginale (2026-10-28 i ponownie 2026-11-16, `owasp-devsecops.md`, otwarte kwestie).
 
 **Co dokument mówi o podpisach i provenance?** (`2-3-6-2`, `2-5-1 Release`, `2-6-1 Deploy`)
 

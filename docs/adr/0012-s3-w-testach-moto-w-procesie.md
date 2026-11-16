@@ -27,10 +27,10 @@ Wybrano **moto w procesie**, ponieważ każdy test dostaje czysty S3 bez stanu d
 
 - (+) Fixture tworzy kubełek w `mock_aws` na czas jednego testu; nie trzeba sprzątać kubełka.
 - (−) Testy nie sprawdzają połączenia z usługą przez `S3_ENDPOINT_URL`. Sprawdza je test dymny na `compose.yaml` (E04-03) i skan DAST (E07).
-- (−) Pakiet `moto[s3]` jest zależnością deweloperską w `uv.lock` i dokłada do niego pakiety pośrednie (m.in. `cryptography`, `werkzeug`, `requests`). Eksport `requirements.txt` dla pip-audit pomija grupę dev (`--no-dev`). Czy Trivy, czytając `uv.lock`, zgłasza też zależności deweloperskie: TODO: zweryfikować w E07.
+- (−) Pakiet `moto[s3]` jest zależnością deweloperską w `uv.lock` i dokłada do niego pakiety pośrednie (m.in. `cryptography`, `werkzeug`, `requests`). Eksport `requirements.txt` dla pip-audit pomija grupę dev (`--no-dev`). Trivy domyślnie nie zgłasza zależności deweloperskich z `uv.lock`; włącza je flaga `--include-dev-deps` (dokumentacja Trivy, sprawdzone 2026-11-16).
 - W E04-02 instalacja moto nie powiodła się w środowisku o bardzo długiej ścieżce na Windows (limit długości ścieżek). W `app/.venv` instaluje się bez problemu (sprawdzone 2026-10-30).
 
 ## Źródła
 
 - Repozytorium moto: https://github.com/getmoto/moto (wydanie 5.2.5 na PyPI, sprawdzone 2026-10-30).
-- Źródła spoza rejestru `Zrodla/`: TODO: zweryfikować, czy rejestrować.
+- Źródła spoza rejestru `Zrodla/` (rejestrowane dopiero przy cytowaniu w tekście pracy, zob. `README.md`, zasada 8).
