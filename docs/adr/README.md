@@ -51,4 +51,4 @@ ADR (*Architecture Decision Record*) to krótki zapis jednej decyzji technicznej
 | [0033](0033-mechanizm-wdrozenia-pull.md) | Mechanizm wdrożenia w modelu pull: ruchomy tag w GHCR i timer na instancji | przyjęty | 2026-11-13 |
 | [0034](0034-automatyczne-sprzatanie-eventbridge-scheduler.md) | Automatyczne sprzątanie: EventBridge Scheduler usuwa instancję po 8 godzinach | przyjęty | 2026-11-13 |
 | [0035](0035-workflow-ci-lint-i-testy.md) | Workflow CI wariantu A: dwa joby (lint, testy), uv z setup-uv bez cache, baza z compose | przyjęty | 2026-11-16 |
-| [0036](0036-build-i-publikacja-obrazu.md) | Build i publikacja obrazu w wariancie A: docker CLI, publikacja tylko z pushu, po testach, bez podpisu i cache | proponowany | 2026-11-16 |
+| [0036](0036-build-i-publikacja-obrazu.md) | Build i publikacja obrazu w wariancie A: docker CLI, publikacja tylko z pushu, po testach, bez podpisu i cache | przyjęty | 2026-11-16 |

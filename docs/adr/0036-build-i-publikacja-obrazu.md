@@ -1,6 +1,6 @@
 # 0036. Build i publikacja obrazu w wariancie A: docker CLI, publikacja tylko z pushu, po testach, bez podpisu i cache
 
-- **Status:** proponowany
+- **Status:** przyjęty
 - **Data:** 2026-11-16
 - **Decydujący:** autor pracy
 - **Powiązane:** [0022](0022-obraz-kontenera-aplikacji.md), [0027](0027-rejestr-obrazow-ghcr.md), [0032](0032-potok-bez-poswiadczen-aws-wdrozenie-pull.md), [0033](0033-mechanizm-wdrozenia-pull.md), [0035](0035-workflow-ci-lint-i-testy.md), zadanie E06-02, `.github/workflows/baseline-ci.yml`, `experiment/PROTOCOL.md` (sekcje 0, 2.3 i 6, K2), [dziennik 2026-11-16](../log/2026-11-16.md)
