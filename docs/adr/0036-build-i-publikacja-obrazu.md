@@ -92,8 +92,23 @@ Postać joba (decyzje agenta przy implementacji):
 - (−) Na pull requeście `GITHUB_SHA` to commit scalający (merge), więc etykieta `revision` obrazu z PR wskazuje commit scalający. Ten obraz nie jest publikowany.
 - (−) Wariant A nie ma podpisu, więc kto ma `packages: write`, ten wskazuje, co wdroży instancja (ryzyko szczątkowe z ADR-0033). Materiał do 2.3 i 5.3.
 - (−) Push na `main` publikuje obraz pod tagiem `main`, którego agent wdrożenia nie śledzi, dopóki `deploy_branch` wskazuje gałąź wariantu.
-- Typ manifestu: `docker build` z domyślnym sterownikiem `docker` dodaje atestację provenance tylko przy magazynie obrazów containerd, a atestacje zamieniają manifest w indeks obrazu (dokumentacja Docker, niżej). Który magazyn ma runner `ubuntu-24.04`, sprawdzi pierwszy przebieg na `main` (typ manifestu w GHCR): TODO: zweryfikować.
+- Typ manifestu: `docker build` z domyślnym sterownikiem `docker` dodaje atestację provenance tylko przy magazynie obrazów containerd, a atestacje zamieniają manifest w indeks obrazu (dokumentacja Docker, niżej). Na runnerze `ubuntu-24.04` obraz trafia do GHCR jako zwykły manifest bez atestacji (`application/vnd.docker.distribution.manifest.v2+json`, sprawdzone 2026-11-16, sekcja „Weryfikacja”). Zmiana obrazu runnera może to zmienić.
 - Rozbieżność do rozstrzygnięcia: protokół (sekcja 2.3, punkt 3) zakłada „cache jak w codziennej pracy” z przebiegiem rozgrzewkowym, a ADR-0035 i ten ADR wyłączają cache. TODO: zweryfikować, czy zmienić protokół (zapis w dzienniku) przed serią czasową.
+
+## Weryfikacja
+
+Pojedyncze przebiegi z 2026-11-16, czasy jobów i kroków z GitHub REST API.
+
+| Przebieg | Wynik |
+|---|---|
+| `pull_request` [43923746792](https://github.com/NikodemHeitzman/praca-magisterska-devsecops/actions/runs/43923746792) (PR [#3](https://github.com/NikodemHeitzman/praca-magisterska-devsecops/pull/3), commit `2cdbaa2`) | `build` po `lint` i `test`, 19 s; kroki logowania, pushu i wylogowania pominięte |
+| `push` na `main` [43923993380](https://github.com/NikodemHeitzman/praca-magisterska-devsecops/actions/runs/43923993380) (merge `575a9dd`) | `build` 42 s (budowanie 13 s, push 22 s); tagi `sha-575a9dd10e6fe8e8f4e31c35d59cb6be375122ea` i `main` wskazują `sha256:246817ba934e9e80efa366dd7b484fff31f938208b7d9bca4d32ae9a975890c3` |
+
+Sprawdzenie w GHCR anonimowym tokenem, tak jak robi to agent wdrożenia:
+
+- oba tagi zwracają HTTP 200 i ten sam digest; typ manifestu `application/vnd.docker.distribution.manifest.v2+json`, czyli bez indeksu i atestacji,
+- konfiguracja obrazu ma etykiety `org.opencontainers.image.revision=575a9dd10e6fe8e8f4e31c35d59cb6be375122ea` i `org.opencontainers.image.source=https://github.com/NikodemHeitzman/praca-magisterska-devsecops` oraz `User` `10001:10001`,
+- krok `Push image` kończy się sukcesem tylko wtedy, gdy digest pasuje do `^sha256:[0-9a-f]{64}$`; zapisuje go wtedy w outputach joba i w podsumowaniu przebiegu.
 
 ## Źródła
 
