@@ -53,3 +53,5 @@ ADR (*Architecture Decision Record*) to krótki zapis jednej decyzji technicznej
 | [0035](0035-workflow-ci-lint-i-testy.md) | Workflow CI wariantu A: dwa joby (lint, testy), uv z setup-uv bez cache, baza z compose | przyjęty | 2026-11-16 |
 | [0036](0036-build-i-publikacja-obrazu.md) | Build i publikacja obrazu w wariancie A: docker CLI, publikacja tylko z pushu, po testach, bez podpisu i cache | przyjęty | 2026-11-16 |
 | [0037](0037-wdrozenie-wariantu-a-z-galezi-bazowej.md) | Wdrożenie wariantu A: „main” to gałąź bazowa wariantu, bez środowiska GitHub i bez joba potwierdzającego | przyjęty | 2026-11-20 |
+| [0038](0038-seria-czasowa-bez-cache.md) | Seria czasowa bez cache w obu wariantach, przebieg rozgrzewkowy jako kontrola | proponowany | 2026-11-20 |
+| [0039](0039-skrypt-zbierajacy-czasy-potoku.md) | Zbieranie czasów potoku: skrypt w Pythonie bez zależności, lista ID przebiegów, wynik w JSON i trzech CSV | proponowany | 2026-11-20 |
