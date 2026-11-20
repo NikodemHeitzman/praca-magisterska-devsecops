@@ -69,19 +69,24 @@ Odczytanie kryterium: „merge do gałęzi bazowej wariantu A (`exp/variant-a`) 
 - (+) Mierzony czas potoku kończy się na publikacji obrazu, tak samo w obu wariantach.
 - (−) Merge do `main` repozytorium niczego nie wdraża. Obraz pod tagiem `main` istnieje, ale instancja go nie śledzi (konsekwencja już opisana w ADR-0036).
 - (−) Potok nie wie, czy wdrożenie się udało. Potwierdzenie zostaje po stronie autora albo skryptu audytu (ADR-0033).
-- (−) Tag `sha-<commit>` nie jest jednoznaczny między gałęziami. Push tego samego commita na `main` i na `exp/variant-a` buduje obraz dwa razy, a drugi build przesuwa tag `sha-<commit>` na nowy digest, jeśli build nie jest bitowo powtarzalny. Dotyczy to też eksperymentu, w którym obie gałęzie bazowe powstaną z jednego tagu czystej wersji. TODO: zweryfikować w teście (porównanie digestów) i rozstrzygnąć przed zamrożeniem wariantu A (E06-05).
-- (−) Usunięcie obrazów spod tagu `exp-variant-a` po teście wymaga usunięcia wersji pakietu w GHCR. Wersja z pierwszego wdrożenia niesie też tag `sha-<commit>` commita z `main`, więc ten tag zniknie razem z nią. Usunięcie wymaga uprawnienia `delete:packages`, którego obecny token `gh` nie ma (interfejs GitHub albo `gh auth refresh`).
+- (−) Tag `sha-<commit>` nie jest jednoznaczny między gałęziami. Push tego samego commita na `main` i na `exp/variant-a` buduje obraz dwa razy, a drugi build przesuwa tag `sha-<commit>` na nowy digest, jeśli build nie jest bitowo powtarzalny. Test potwierdził, że nie jest (sekcja „Weryfikacja”, punkt 4). Dotyczy to też eksperymentu, w którym obie gałęzie bazowe powstaną z jednego tagu czystej wersji. Do rozstrzygnięcia przed zamrożeniem wariantu A (E06-05). TODO: zweryfikować.
+- (−) Usunięcie obrazów spod tagu `exp-variant-a` po teście wymaga usunięcia wersji pakietu w GHCR (uprawnienie `delete:packages` tokenu `gh`). Wersja z pierwszego wdrożenia niosła też tag `sha-<commit>` commita z `main`, więc przed jej usunięciem tag wrócił na obraz z `main` przez kopię manifestu (jak w `rollback.yml`).
 - Definicja E06-03 w katalogu zadań (OIDC, środowisko „production”) jest nieaktualna i czyta się ją przez ten ADR.
 
 ## Weryfikacja
 
-TODO: uzupełnić po teście end-to-end. Plan:
+Test end-to-end z 2026-11-20 (czasy UTC). Czasy jobów z GitHub REST API, stan wdrożenia z publicznego `/version` instancji odpytywanego co 5 s. Pojedynczy przebieg, nie pomiar.
 
-1. Utworzyć tymczasową gałąź `exp/variant-a` z `main` i wypchnąć ją. Push publikuje obraz pod tagiem `exp-variant-a`.
-2. `terraform apply` warstwy roboczej z domyślnym `deploy_branch = "exp/variant-a"`. Instancja wdraża pierwszy digest, a `/version` zwraca commit z `main`.
-3. Pull request z gałęzi testowej do `exp/variant-a` z drobną zmianą i merge. Potok publikuje nowy digest pod `exp-variant-a`, a instancja wdraża go bez kroku ręcznego. `/version` zwraca commit scalający. Zapisać czas od merge'u do zmiany `/version`.
-4. Porównać digest `sha-<commit>` z kroku 1 z digestem tego samego tagu z przebiegu na `main`.
-5. `terraform destroy`, usunięcie gałęzi `exp/variant-a` i gałęzi testowej oraz wersji pakietu GHCR z tagiem `exp-variant-a`.
+| Krok | Wynik |
+|---|---|
+| 1. Tymczasowa `exp/variant-a` z `main` (commit `400991f`) | przebieg [44735866366](https://github.com/NikodemHeitzman/praca-magisterska-devsecops/actions/runs/44735866366): `exp-variant-a` → `sha256:daf6009890c7f56989d33c8815bdbdb9db0cf6a1760ee4dbf6ceb25ae0162367` |
+| 2. `terraform apply` (23 zasoby, `deploy_tag` = `…:exp-variant-a`) | 12:31:44 `/version`: obraz `@sha256:daf60098…2367`, commit `400991f` |
+| 3. PR [#4](https://github.com/NikodemHeitzman/praca-magisterska-devsecops/pull/4) do `exp/variant-a` | przebieg `pull_request` [44736575951](https://github.com/NikodemHeitzman/praca-magisterska-devsecops/actions/runs/44736575951): `build` bez publikacji |
+| 3. Merge PR #4 (12:33:31, commit `5f102d5`) | przebieg push [44736780743](https://github.com/NikodemHeitzman/praca-magisterska-devsecops/actions/runs/44736780743) 12:33:33–12:34:50 (lint 8 s, test 37 s, build 34 s); 12:35:15 `/version`: obraz `@sha256:3c4d9cc057f8f535e2d2d9cedfc746c1b69316931e6c340de50ff8606aac91cf`, commit `5f102d5`, bez kroku ręcznego. Od merge'u do nowej wersji około 104 s, z tego około 25 s po zakończeniu publikacji |
+| 4. Ten sam commit `400991f` z `main` (przebieg [44735847511](https://github.com/NikodemHeitzman/praca-magisterska-devsecops/actions/runs/44735847511)) i z `exp/variant-a` | dwa różne digesty: `main` → `sha256:ea44c17d…986f`, `exp-variant-a` → `sha256:daf60098…2367`; tag `sha-400991f…` wskazywał obraz z drugiej publikacji |
+| 5. Sprzątanie | `terraform destroy` 23 zasoby, `terraform state list` pusty; tag `sha-400991f…` przywrócony na `sha256:ea44c17d…` (kopia manifestu, HTTP 201); wersje `daf60098…` i `3c4d9cc0…` usunięte z GHCR, anonimowe zapytanie o `exp-variant-a` zwraca 404; gałęzie `exp/variant-a` i `test/e06-03-merge` usunięte |
+
+Kryterium E06-03 w odczytaniu z tego ADR jest spełnione: merge do gałęzi bazowej wariantu A dał nową wersję na AWS bez kroku ręcznego.
 
 ## Źródła
 
