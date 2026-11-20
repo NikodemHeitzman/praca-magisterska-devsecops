@@ -36,63 +36,66 @@ Te ustalenia zapadły wcześniej i projekt ich nie zmienia:
 
 ## 2. Diagram potoku
 
-Etapy wariantu B. Na szaro elementy spoza pomiaru, przerywaną linią przejścia poza potokiem (instancja odpytuje rejestr i magazyn atestacji).
+Etapy wariantu B. Ramki z przerywaną linią to elementy spoza pomiaru, a strzałki przerywane to przejścia poza potokiem (instancja odpytuje rejestr i magazyn atestacji). Strzałka z ramki „2.” oznacza wszystkie joby tej ramki.
 
 ```mermaid
-flowchart LR
+flowchart TB
   subgraph DEV["0. Stacja autora (poza pomiarem)"]
-    PC["pre-commit: Gitleaks<br/>(doradczo)"]
+    PC["pre-commit: Gitleaks (doradczo)"]
   end
 
   subgraph PLAT["1. Platforma GitHub (ustawienia, E07-02)"]
-    RS["Ruleset na exp/variant-b i main:<br/>PR wymagany, wymagane checki,<br/>bez force push i obejść"]
+    direction LR
+    RS["Ruleset na exp/variant-b i main:<br/>PR wymagany, wymagane checki"]
     SS["Secret scanning<br/>+ push protection"]
-    DB["Dependabot: alerty, security updates,<br/>aktualizacje akcji i uv z karencją"]
+    DB["Dependabot<br/>(karencja aktualizacji)"]
   end
 
-  subgraph PR["2. Pull request: joby równoległe, bez sekretów, contents: read"]
+  subgraph PR["2. Pull request i push: joby równoległe, bez sekretów"]
+    direction LR
     LT["lint, test<br/>(z wariantu A)"]
     SEC["secrets<br/>Gitleaks"]
-    SAST["sast<br/>Semgrep + reguły własne,<br/>Bandit"]
-    SCA["sca<br/>pip-audit, zgodność<br/>requirements ↔ uv.lock"]
+    SAST["sast<br/>Semgrep, Bandit"]
+    SCA["sca<br/>pip-audit,<br/>requirements ↔ uv.lock"]
     IAC["iac<br/>Checkov, Trivy config,<br/>hadolint"]
     WF["workflow-lint<br/>actionlint, zizmor"]
   end
 
   subgraph BLD["3. Build i test artefaktu"]
-    B["build (z A)<br/>docker build"]
-    IS["Trivy image<br/>przed push"]
-    DAST["dast<br/>ZAP baseline<br/>na kontenerze w runnerze"]
+    B["build (z A): docker build"]
+    IS["Trivy image przed push"]
+    DAST["dast: ZAP baseline<br/>na obrazie z artefaktu"]
+    B --> IS --> DAST
   end
 
-  subgraph PUB["4. Publikacja (tylko push na gałąź)"]
-    P["push obrazu<br/>tag SHA + tag gałęzi"]
-    SB["sbom<br/>Syft: SPDX + CycloneDX"]
-    AT["attest<br/>provenance + SBOM<br/>(Sigstore keyless)"]
+  subgraph PUB["4. Publikacja (tylko push)"]
+    P["push obrazu:<br/>tag SHA + tag gałęzi"]
+    SB["sbom: Syft"]
+    AT["attest: provenance + SBOM"]
+    P --> SB --> AT
   end
 
-  subgraph DEP["5. Wdrożenie na instancji (model pull)"]
-    V["weryfikacja atestacji<br/>digestu"]
-    UP["docker compose up<br/>po digeście"]
+  subgraph DEP["5. Instancja AWS (model pull)"]
+    V["weryfikacja atestacji digestu"]
+    UP["docker compose up po digeście"]
+    V --> UP
   end
 
   subgraph AUD["6. Audyt po wdrożeniu (poza potokiem)"]
-    AU["ZAP + Trivy z komputera autora<br/>(PROTOCOL, sekcja 4)"]
+    AU["ZAP + Trivy z komputera autora"]
   end
 
-  PC --> RS
-  RS --> LT & SEC & SAST & SCA & IAC & WF
-  LT --> B --> IS
-  IS -->|"obraz jako artefakt"| DAST
+  DEV --> PLAT --> PR
+  PR -->|"needs: lint, test"| B
   IS -->|"tylko push"| P
-  P --> SB --> AT
-  SEC & SAST & SCA & IAC & WF & DAST -->|"needs: wszystkie bramki"| AT
+  PR -->|"needs: wszystkie bramki"| AT
+  DAST -->|"needs"| AT
   P -.->|"tag gałęzi → digest"| V
-  AT -.->|"atestacja digestu"| V
-  V --> UP --> AU
+  AT -.->|"atestacja"| V
+  UP --> AU
 
-  classDef out fill:#eee,stroke:#999,color:#555
-  class DEV,PC,AUD,AU out
+  classDef out stroke-dasharray: 5 5
+  class DEV,AUD out
 ```
 
 Uwagi do diagramu:
