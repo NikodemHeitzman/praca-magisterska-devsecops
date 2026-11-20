@@ -156,7 +156,7 @@ Uwaga: RV wychodzi poza moment wydania. Potok nie kończy się na wdrożeniu: RV
 - **Etapy** jak w liście kontrolnej SP 800-204D (`nist-800-204d.md`, sekcja 2): Platforma, PR/commit, Build, Test, Rejestr, Wdrożenie, Eksploatacja.
 - **Realizacja:** propozycje agenta. Wybór narzędzi należy do E02-10 i ADR-ów.
 - **204D:** czy zadanie występuje w mapowaniu dodatku A SP 800-204D (na poziomie praktyki); „nie (dod. B)” oznacza, że SP 800-204D świadomie je pomija.
-- Ocena w kolumnie „Potok” to propozycja agenta do przeglądu przez autora.
+- Ocena w kolumnie „Potok” to propozycja agenta do przeglądu przez autora. Oceny 20 zadań użytych w projekcie potoku autor zatwierdził 2026-11-20 bez zmian (E07-01, `docs/projekt-potoku.md`, sekcja 7.2); reszta czeka na E13.
 
 | Zadanie | Treść (streszczenie) | dok./PDF | Potok | Etap | Realizacja w GitHub Actions / AWS (propozycja) | 204D |
 |---|---|---|---|---|---|---|
