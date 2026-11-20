@@ -55,4 +55,4 @@ ADR (*Architecture Decision Record*) to krótki zapis jednej decyzji technicznej
 | [0037](0037-wdrozenie-wariantu-a-z-galezi-bazowej.md) | Wdrożenie wariantu A: „main” to gałąź bazowa wariantu, bez środowiska GitHub i bez joba potwierdzającego | przyjęty | 2026-11-20 |
 | [0038](0038-seria-czasowa-bez-cache.md) | Seria czasowa bez cache w obu wariantach, przebieg rozgrzewkowy jako kontrola | przyjęty | 2026-11-20 |
 | [0039](0039-skrypt-zbierajacy-czasy-potoku.md) | Zbieranie czasów potoku: skrypt w Pythonie bez zależności, lista ID przebiegów, wynik w JSON i trzech CSV | przyjęty | 2026-11-20 |
-| [0040](0040-tag-sha-z-nazwa-galezi.md) | Tag SHA obrazu z nazwą gałęzi: `<gałąź>-sha-<commit>` | proponowany | 2026-11-20 |
+| [0040](0040-tag-sha-z-nazwa-galezi.md) | Tag SHA obrazu z nazwą gałęzi: `<gałąź>-sha-<commit>` | przyjęty | 2026-11-20 |
