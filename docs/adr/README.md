@@ -52,3 +52,4 @@ ADR (*Architecture Decision Record*) to krótki zapis jednej decyzji technicznej
 | [0034](0034-automatyczne-sprzatanie-eventbridge-scheduler.md) | Automatyczne sprzątanie: EventBridge Scheduler usuwa instancję po 8 godzinach | przyjęty | 2026-11-13 |
 | [0035](0035-workflow-ci-lint-i-testy.md) | Workflow CI wariantu A: dwa joby (lint, testy), uv z setup-uv bez cache, baza z compose | przyjęty | 2026-11-16 |
 | [0036](0036-build-i-publikacja-obrazu.md) | Build i publikacja obrazu w wariancie A: docker CLI, publikacja tylko z pushu, po testach, bez podpisu i cache | przyjęty | 2026-11-16 |
+| [0037](0037-wdrozenie-wariantu-a-z-galezi-bazowej.md) | Wdrożenie wariantu A: „main” to gałąź bazowa wariantu, bez środowiska GitHub i bez joba potwierdzającego | przyjęty | 2026-11-20 |
