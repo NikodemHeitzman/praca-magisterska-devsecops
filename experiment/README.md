@@ -7,7 +7,45 @@ Katalog `experiment/` zawiera dane i skrypty eksperymentu porównawczego wariant
 | [`ground-truth.yaml`](ground-truth.yaml) | katalog podatności referencyjnych (ground truth) | E03-03 |
 | [`scripts/validate_ground_truth.py`](scripts/validate_ground_truth.py) | walidacja katalogu i kryteriów | E03-03 |
 | `PROTOCOL.md` | procedura eksperymentu | E03-05 (do zrobienia) |
-| `data/` | surowe wyniki przebiegów | E09 (do zrobienia) |
+| [`scripts/collect_timings.py`](scripts/collect_timings.py) | czasy przebiegów, jobów i kroków z GitHub API (M4, M5) | E06-04 |
+| [`scripts/watch_jobs.py`](scripts/watch_jobs.py) | obserwacja jobów przebiegu na żywo: kiedy job pojawia się w każdym stanie (pilotaż P5, znaczenie `created_at`) | E06-04 |
+| `data/` | surowe wyniki przebiegów; [`data/pilot-e06-04/`](data/pilot-e06-04/): pilotaż skryptu czasów | E09, E06-04 |
+
+## Czasy potoku
+
+Skrypt [`scripts/collect_timings.py`](scripts/collect_timings.py) pobiera z GitHub REST API czasy przebiegów z listy i liczy T_czek i T_wyk według `docs/metodyka.md`, p. 3.2. Decyzje: [ADR-0039](../docs/adr/0039-skrypt-zbierajacy-czasy-potoku.md). Wymaga tylko Pythona 3 z biblioteką standardową (sprawdzone na 3.14), bez pakietów.
+
+1. Przygotuj listę przebiegów `manifest.csv` w katalogu serii, np. `data/<seria>/manifest.csv`:
+
+   ```csv
+   run_id,variant,trigger,seq,role
+   44736575951,A,pr,1,measure
+   44736780743,A,main,1,measure
+   ```
+
+   `variant`: `A` albo `B`; `trigger`: `pr` (zdarzenie `pull_request`) albo `main` (zdarzenie `push` na gałąź bazową wariantu); `seq`: numer kolejny w serii; `role`: `warmup`, `measure` albo `pilot`. Skrypt odrzuca przebieg, którego zdarzenie nie pasuje do wyzwalacza, i przebieg niezakończony.
+
+2. Uruchom (lokalny PowerShell, w katalogu repozytorium; token z `gh auth token` albo ze zmiennej `GH_TOKEN`):
+
+   ```powershell
+   uv run --no-project python experiment/scripts/collect_timings.py experiment/data/<seria>/manifest.csv
+   ```
+
+3. Wynik w katalogu listy:
+
+   | Plik | Zawartość |
+   |---|---|
+   | `raw/<run_id>-run.json`, `raw/<run_id>-jobs.json` | odpowiedzi API (przebieg, joby próby 1 z krokami) |
+   | `raw/<run_id>-runner.json` | z logu każdego joba: wersja programu runnera, obraz, wersja obrazu, chmura (AWS albo Azure) i region |
+   | `runs.csv` | przebieg: zdarzenie, gałąź, commit, `run_attempt`, `t_wait_s` (T_czek), `t_exec_s` (T_wyk), `first_job_queue_s` |
+   | `jobs.csv` | job: czasy, kolejka, czas trwania, runner, wersja obrazu, chmura i region; `counted=False` dla jobów pominiętych |
+   | `steps.csv` | krok: czas trwania d(s) |
+
+   `run_attempt` większe od 1 oznacza ponowne uruchomienie przebiegu. Czasy liczone są z próby 1, a protokół takiego przebiegu nie dopuszcza (2.2).
+
+4. Przeliczenie CSV z zapisanych plików, bez sieci: dodaj `--from-raw`. Logi jobów wygasają (domyślnie po 90 dniach według dokumentacji GitHub), więc dane zbieramy niedługo po serii.
+
+Testy (bez sieci): `uv run --no-project python -m unittest discover -s experiment/scripts/tests`.
 
 ## Katalog podatności referencyjnych
 
