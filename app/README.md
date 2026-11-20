@@ -67,7 +67,7 @@ Workflow `.github/workflows/baseline-ci.yml` uruchamia lint i testy na każdym p
 
 Zależności instaluje `uv sync --locked` bez pamięci podręcznej, bo czas potoku jest mierzony w eksperymencie.
 
-Job `build` startuje po zielonych `lint` i `test` ([ADR-0036](../docs/adr/0036-build-i-publikacja-obrazu.md)). Na pull requeście tylko buduje obraz. Push na `main` lub `exp/variant-*` publikuje go w GHCR z dwoma tagami: `sha-<commit>` i tagiem gałęzi (`main`, `exp-variant-a`, `exp-variant-b`). Obraz ma etykiety OCI `source` i `revision`, a digest jest w outputach joba i w podsumowaniu przebiegu. Agent wdrożenia na instancji śledzi tag gałęzi wariantu ([ADR-0033](../docs/adr/0033-mechanizm-wdrozenia-pull.md)).
+Job `build` startuje po zielonych `lint` i `test` ([ADR-0036](../docs/adr/0036-build-i-publikacja-obrazu.md)). Na pull requeście tylko buduje obraz. Push na `main` lub `exp/variant-*` publikuje go w GHCR z dwoma tagami: `<gałąź>-sha-<commit>` (np. `exp-variant-a-sha-<commit>`, [ADR-0040](../docs/adr/0040-tag-sha-z-nazwa-galezi.md)) i tagiem gałęzi (`main`, `exp-variant-a`, `exp-variant-b`). Obraz ma etykiety OCI `source` i `revision`, a digest jest w outputach joba i w podsumowaniu przebiegu. Agent wdrożenia na instancji śledzi tag gałęzi wariantu ([ADR-0033](../docs/adr/0033-mechanizm-wdrozenia-pull.md)).
 
 ## Zmiana zależności
 
