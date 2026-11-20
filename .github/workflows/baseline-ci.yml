@@ -93,10 +93,12 @@ jobs:
         if: always()
         run: docker compose down --volumes
 
-  # Decisions: docs/adr/0036-build-i-publikacja-obrazu.md
+  # Decisions: docs/adr/0036-build-i-publikacja-obrazu.md, docs/adr/0040-tag-sha-z-nazwa-galezi.md
   # Pull requests only build the image; a push to main or exp/variant-* also publishes it to
-  # GHCR as sha-<commit> and as the branch tag. The deploy agent on the instance follows the
-  # branch tag and needs the revision label (docs/adr/0033-mechanizm-wdrozenia-pull.md).
+  # GHCR as <branch>-sha-<commit> and as the branch tag. The SHA tag carries the branch because
+  # the same commit built on two branches gives two different digests (ADR-0040).
+  # The deploy agent on the instance follows the branch tag and needs the revision label
+  # (docs/adr/0033-mechanizm-wdrozenia-pull.md).
   build:
     needs: [lint, test]
     runs-on: ubuntu-24.04
@@ -124,9 +126,10 @@ jobs:
           docker build \
             --label "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
             --label "org.opencontainers.image.revision=$GITHUB_SHA" \
-            --tag "$image:sha-$GITHUB_SHA" --tag "$image:$tag" app/
+            --tag "$image:$tag-sha-$GITHUB_SHA" --tag "$image:$tag" app/
           echo "IMAGE=$image" >>"$GITHUB_ENV"
           echo "BRANCH_TAG=$tag" >>"$GITHUB_ENV"
+          echo "SHA_TAG=$tag-sha-$GITHUB_SHA" >>"$GITHUB_ENV"
 
       - name: Log in to GHCR
         if: github.event_name == 'push'
@@ -139,16 +142,16 @@ jobs:
         if: github.event_name == 'push'
         run: |
           set -euo pipefail
-          docker push "$IMAGE:sha-$GITHUB_SHA"
+          docker push "$IMAGE:$SHA_TAG"
           docker push "$IMAGE:$BRANCH_TAG"
-          digest=$(docker image inspect --format '{{ index .RepoDigests 0 }}' "$IMAGE:sha-$GITHUB_SHA")
+          digest=$(docker image inspect --format '{{ index .RepoDigests 0 }}' "$IMAGE:$SHA_TAG")
           digest=${digest#*@}
           [[ $digest =~ ^sha256:[0-9a-f]{64}$ ]] || { echo "::error::no digest after push: $digest"; exit 1; }
           echo "image=$IMAGE" >>"$GITHUB_OUTPUT"
           echo "digest=$digest" >>"$GITHUB_OUTPUT"
           {
             echo "### Published image"
-            echo "- \`$IMAGE:sha-$GITHUB_SHA\`"
+            echo "- \`$IMAGE:$SHA_TAG\`"
             echo "- \`$IMAGE:$BRANCH_TAG\`"
             echo "- digest \`$digest\`"
           } >>"$GITHUB_STEP_SUMMARY"
