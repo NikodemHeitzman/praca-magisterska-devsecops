@@ -1,0 +1,23 @@
+{
+  "136315430149": {
+    "runner_version": "2.338.2",
+    "runner_image": "ubuntu-24.04",
+    "runner_image_version": "20261116.376.1",
+    "runner_cloud": "Azure",
+    "runner_region": "westus"
+  },
+  "136315430729": {
+    "runner_version": "2.338.2",
+    "runner_image": "ubuntu-24.04",
+    "runner_image_version": "20261116.376.1",
+    "runner_cloud": "Azure",
+    "runner_region": "eastus2"
+  },
+  "136315786143": {
+    "runner_version": "2.338.2",
+    "runner_image": "ubuntu-24.04",
+    "runner_image_version": "20261111.370.1",
+    "runner_cloud": "Azure",
+    "runner_region": "westus2"
+  }
+}
