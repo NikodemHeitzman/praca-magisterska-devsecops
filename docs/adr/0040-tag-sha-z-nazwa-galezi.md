@@ -1,6 +1,6 @@
 # 0040. Tag SHA obrazu z nazwą gałęzi: `<gałąź>-sha-<commit>`
 
-- **Status:** proponowany
+- **Status:** przyjęty
 - **Data:** 2026-11-20
 - **Decydujący:** autor pracy, po rekomendacji agenta
 - **Powiązane:** [0033](0033-mechanizm-wdrozenia-pull.md), [0036](0036-build-i-publikacja-obrazu.md) (zastępuje format tagu SHA), [0037](0037-wdrozenie-wariantu-a-z-galezi-bazowej.md), zadania E06-03 i E06-05, `.github/workflows/baseline-ci.yml` (job `build`), `experiment/PROTOCOL.md` (P1, P3, K2), [dziennik 2026-11-20](../log/2026-11-20.md)
