@@ -1,6 +1,6 @@
 # 0038. Seria czasowa bez cache w obu wariantach, przebieg rozgrzewkowy jako kontrola
 
-- **Status:** proponowany
+- **Status:** przyjęty
 - **Data:** 2026-11-20
 - **Decydujący:** autor pracy
 - **Powiązane:** [0035](0035-workflow-ci-lint-i-testy.md), [0036](0036-build-i-publikacja-obrazu.md), [0039](0039-skrypt-zbierajacy-czasy-potoku.md), zadanie E06-04, `experiment/PROTOCOL.md` (2.1, 2.3, K7), `docs/metodyka.md` (p. 3.2, M4, M5), [dziennik 2026-11-20](../log/2026-11-20.md)

@@ -1,6 +1,6 @@
 # 0039. Zbieranie czasów potoku: skrypt w Pythonie bez zależności, lista ID przebiegów, wynik w JSON i trzech CSV
 
-- **Status:** proponowany
+- **Status:** przyjęty
 - **Data:** 2026-11-20
 - **Decydujący:** autor pracy
 - **Powiązane:** [0035](0035-workflow-ci-lint-i-testy.md), [0038](0038-seria-czasowa-bez-cache.md), zadanie E06-04, `experiment/scripts/collect_timings.py`, `experiment/PROTOCOL.md` (P4, P5, 2.3, K12), `docs/metodyka.md` (p. 3.2, M4, M5), [dziennik 2026-11-20](../log/2026-11-20.md)
