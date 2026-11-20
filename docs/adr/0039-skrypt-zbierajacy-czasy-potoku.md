@@ -115,22 +115,22 @@ Postać skryptu (decyzje agenta przy implementacji):
 
 ## Weryfikacja
 
-2026-11-20, wszystkie 14 przebiegów `baseline-ci` wariantu A z 16–20 listopada (E06-01, E06-02, E06-03; lista w `experiment/data/pilot-e06-04/manifest.csv`, rola `pilot`, poza wynikami eksperymentu, P5). Pięć pierwszych przebiegów ma dwa joby (`lint`, `test`), bo job `build` doszedł w E06-02.
+2026-11-20, wszystkie 15 przebiegów `baseline-ci` wariantu A z 16–20 listopada (E06-01, E06-02, E06-03 i przebieg PR #5 tego zadania; lista w `experiment/data/pilot-e06-04/manifest.csv`, rola `pilot`, poza wynikami eksperymentu, P5). Pięć pierwszych przebiegów ma dwa joby (`lint`, `test`), bo job `build` doszedł w E06-02.
 
 | Sprawdzenie | Wynik |
 |---|---|
 | Testy `unittest` (14) na zapisanej odpowiedzi API i nagłówku logu | wszystkie przechodzą |
-| Zbieranie z API: 14 przebiegów, 37 jobów, 352 kroki | bez błędów i bez ostrzeżeń; wartości odczytane z 37 logów |
+| Zbieranie z API: 15 przebiegów, 40 jobów, 380 kroków | bez błędów i bez ostrzeżeń; wartości odczytane z 40 logów |
 | Czasy jobów kontra notatki E06-02 i E06-03 | zgodne: PR 43923746792 lint 11 s, test 39 s, build 19 s; push 43923993380 8 s, 43 s, 42 s; push 44736780743 8 s, 37 s, 34 s |
 | Czasy w interfejsie GitHub (przebieg 44736780743) | czasy jobów 8, 37 i 34 s, równe `completed_at` − `started_at`. „Total duration” 1m 17s to czas od utworzenia przebiegu do jego ostatniej zmiany (`updated_at`), a nie T_czek (75 s). Kolejki zakończonych jobów interfejs nie pokazuje |
 | T_czek i T_wyk | T_czek 41–89 s, T_wyk 39–87 s; kolejka pierwszego joba 1–2 s |
-| `--from-raw` | `runs.csv`, `jobs.csv` i `steps.csv` identyczne bajt w bajt z wynikiem zbierania z API (14 przebiegów) |
-| Infrastruktura runnerów | 37 jobów: 22 na Azure i 15 na AWS, w 9 regionach; 4 wersje obrazu `ubuntu-24.04` (20261111.370.1: 20 jobów, 20261111.127.1: 8, 20261116.133.1: 7, 20261116.376.1: 2). Numer po dacie różni się między chmurami (`.370` i `.376` na Azure, `.127` i `.133` na AWS). W 9 z 14 przebiegów joby jednego przebiegu działały w obu chmurach i na różnych wersjach obrazu. Wydanie 20261116.376 miało w `actions/runner-images` status prerelease, a przebiegi z 2026-11-20 dostawały jeszcze obraz z 20261111. Wersja programu runnera wszędzie 2.338.2 |
-| Czas jobów według chmury (opisowo) | `lint`: AWS 15 s (2 joby), Azure mediana 8 s (12 jobów); różnica głównie w checkout (4 s kontra 1–2 s). `test`: AWS mediana 43 s (5), Azure 39 s (9). Mała próba, nie pomiar |
+| `--from-raw` | `runs.csv`, `jobs.csv` i `steps.csv` identyczne bajt w bajt z wynikiem zbierania z API (15 przebiegów) |
+| Infrastruktura runnerów | 40 jobów: 25 na Azure i 15 na AWS, w 10 regionach; 4 wersje obrazu `ubuntu-24.04` (20261111.370.1: 21 jobów, 20261111.127.1: 8, 20261116.133.1: 7, 20261116.376.1: 4). Numer po dacie różni się między chmurami (`.370` i `.376` na Azure, `.127` i `.133` na AWS). W 9 z 15 przebiegów joby jednego przebiegu działały w obu chmurach, a w 10 z 15 na różnych wersjach obrazu. Wydanie 20261116.376 miało w `actions/runner-images` status prerelease, a przebiegi z 2026-11-20 dostawały jeszcze obraz z 20261111. Wersja programu runnera wszędzie 2.338.2 |
+| Czas jobów według chmury (opisowo) | `lint`: AWS 15 s (2 joby), Azure mediana 8 s (13 jobów); różnica głównie w checkout (4 s kontra 1–2 s). `test`: AWS mediana 43 s (5), Azure 40 s (10). Mała próba, nie pomiar |
 
 Dokumentacja GitHub mówi, że joby Linux na standardowych runnerach trafiają do puli wielochmurowej (AWS albo Azure), a aktualizacja obrazów trwa kilka dni. Nie podaje regionów ani tego, że joby jednego przebiegu mogą dostać różne wersje obrazu.
 
-Znaczenie `created_at` joba (P5): w 9 z 9 przebiegów z jobem `build` (`needs: [lint, test]`) jego `created_at` jest równe zakończeniu ostatniej zależności (różnica 0–1 s). Pierwsze joby mają `created_at` 0–1 s po utworzeniu przebiegu. Dokumentacja REST API nie opisuje znaczenia pola. Obserwacja na żywo: TODO, przy przebiegu PR tego zadania.
+Znaczenie `created_at` joba (P5). Dokumentacja REST API nie opisuje znaczenia pola. Pierwsze joby mają `created_at` 0–1 s po utworzeniu przebiegu. Obserwacja na żywo przebiegu `pull_request` 44744281273 (PR #5, 2026-11-20; `experiment/scripts/watch_jobs.py`, wynik w `experiment/data/pilot-e06-04/watch-pr-1fdf7c2.csv`): job `build` (`needs: [lint, test]`) pojawił się w API dopiero po zakończeniu `test`, od razu ze statusem `queued`. Jego `created_at` (13:26:52) jest równe `completed_at` joba `test`. Przy odpytaniach od 13:26:12 (co około 2 s) joba `build` nie było na liście. Ten sam wzór, `created_at` joba zależnego równe zakończeniu ostatniej zależności z dokładnością do 1 s, występuje w 10 z 10 przebiegów z jobem `build`. Wniosek: `created_at` to chwila utworzenia joba, czyli jego wejścia do kolejki. Dodatkowo: dopóki job czeka w kolejce, API zwraca `started_at` równe `created_at`; prawdziwą wartość podaje dopiero po starcie joba. Skrypt odrzuca przebiegi niezakończone, więc tej wartości nie zapisuje.
 
 ## Źródła
 

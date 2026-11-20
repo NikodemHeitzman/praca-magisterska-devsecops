@@ -60,7 +60,7 @@ Struktura plików: TODO (E09).
 Przed serią właściwą wykonujemy 1–2 próby i kilka przebiegów czasowych, żeby sprawdzić:
 
 - skrypty tworzenia gałęzi, pobierania danych i zapisu,
-- znaczenie pola `created_at` joba jako chwili wejścia do kolejki (otwarta kwestia z E03-04), przez porównanie z czasami w interfejsie GitHub,
+- znaczenie pola `created_at` joba jako chwili wejścia do kolejki (otwarta kwestia z E03-04). Sprawdzone w pilotażu E06-04 obserwacją na żywo (`scripts/watch_jobs.py`) i grafem zależności jobów, bo interfejs GitHub nie pokazuje kolejki zakończonych jobów: `created_at` to chwila utworzenia joba i wejścia do kolejki (`docs/metodyka.md`, p. 3.2, uwagi),
 - czy łatki przechodzą testy funkcjonalne w wariancie A (P3),
 - czy workflow A różni się od workflow B wyłącznie krokami bezpieczeństwa (diff plików, K2 w sekcji 5),
 - czy wynik próby jest powtarzalny: próbę wariantu B dla wybranych pozycji, zwłaszcza GT-12–14 wykrywanych przez ZAP, wykonujemy dwukrotnie i porównujemy zgłoszenia (zagrożenie TN5, `docs/metodyka.md`, p. 4.5).
