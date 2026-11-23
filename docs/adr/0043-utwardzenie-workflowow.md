@@ -84,7 +84,11 @@ Decyzje agenta (techniczne, w ramach decyzji autora):
   - **E07-03…E07-10:** każde zadanie dopisuje swój job do `required_status_checks` w `infra/github/rulesets/main.json` i `variant-b.json` i uruchamia `infra/github/settings.sh apply`,
   - **E07-14:** przenieść job `workflow-lint` do workflow wariantu B i usunąć `workflow-lint.yml`,
   - **E09:** sprawdzić przy tworzeniu `exp/variant-b`, że obejście (H13) działa dla pushy skryptu serii.
-- TODO: zweryfikować: identyfikator roli admina w `bypass_actors` (`actor_id: 5`) po pierwszym `apply`; czy `update` w rulesecie tagów nie blokuje tworzenia nowych tagów; zachowanie `patterns_allowed` (według dokumentacji działa tylko w repozytoriach publicznych, a repozytorium jest publiczne).
+- Sprawdzone po pierwszym `apply` (2026-11-23):
+  - `actor_id: 5` to rola admina: API zwraca `current_user_can_bypass` = `always` dla `exp-variant-b` i `never` dla `main` i `tags`,
+  - `patterns_allowed` zapisane (repozytorium jest publiczne),
+  - API dopisuje do reguły `pull_request` domyślny parametr `require_extra_approval_for_unattributed_changes: true`, a z reguły `update` dla tagów usuwa `update_allows_fetch_and_merge`. Pliki JSON zapisują stan zwrócony przez API.
+- TODO: zweryfikować: znaczenie `require_extra_approval_for_unattributed_changes` przy zerowej liczbie zatwierdzeń; czy reguła `update` nie blokuje tworzenia nowych tagów (według dokumentacji tworzenie to osobna reguła `creation`; sprawdzić przy następnym tagu, np. zamrożeniu B).
 
 ## Źródła
 
