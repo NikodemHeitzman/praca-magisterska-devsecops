@@ -1,0 +1,14 @@
+# NEGATIVE TEST (E07-02), do not merge: action pinned to a tag, not a full SHA.
+name: neg-unpinned
+on:
+  pull_request:
+permissions: {}
+jobs:
+  unpinned:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
