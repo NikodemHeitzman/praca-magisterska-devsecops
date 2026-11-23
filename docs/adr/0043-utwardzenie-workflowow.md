@@ -88,7 +88,8 @@ Decyzje agenta (techniczne, w ramach decyzji autora):
   - `actor_id: 5` to rola admina: API zwraca `current_user_can_bypass` = `always` dla `exp-variant-b` i `never` dla `main` i `tags`,
   - `patterns_allowed` zapisane (repozytorium jest publiczne),
   - API dopisuje do reguły `pull_request` domyślny parametr `require_extra_approval_for_unattributed_changes: true`, a z reguły `update` dla tagów usuwa `update_allows_fetch_and_merge`. Pliki JSON zapisują stan zwrócony przez API.
-- TODO: zweryfikować: znaczenie `require_extra_approval_for_unattributed_changes` przy zerowej liczbie zatwierdzeń; czy reguła `update` nie blokuje tworzenia nowych tagów (według dokumentacji tworzenie to osobna reguła `creation`; sprawdzić przy następnym tagu, np. zamrożeniu B).
+- Test negatywny (PR #12, 2026-11-23, szczegóły w dzienniku): akcję przypiętą do tagu zatrzymały trzy warstwy: zizmor w `workflow-lint` (high), polityka platformy (`startup_failure` z adnotacją o SHA i liście) i ruleset (PR `BLOCKED`). Akcja przypięta do SHA, ale spoza listy, przeszła przez zizmora i zatrzymała ją tylko platforma (`startup_failure`).
+- TODO: zweryfikować: przyczynę `startup_failure` akcji spoza listy (brak adnotacji); znaczenie `require_extra_approval_for_unattributed_changes` przy zerowej liczbie zatwierdzeń; czy reguła `update` nie blokuje tworzenia nowych tagów (według dokumentacji tworzenie to osobna reguła `creation`; sprawdzić przy następnym tagu, np. zamrożeniu B).
 
 ## Źródła
 
