@@ -6,7 +6,7 @@
 # - GT-09 removes the USER instruction. USER appears only in the final stage on purpose: Checkov
 #   CKV_DOCKER_3 and Trivy DS-0002 look at the whole file, so a USER in another stage would hide the patch.
 
-FROM ghcr.io/astral-sh/uv:0.13.6@sha256:af22a52f5eafef3d78e551599d405c02df61919d18028f0cea8eda93bc9986d0 AS uv
+FROM ghcr.io/astral-sh/uv:0.13.9@sha256:d3b601f0c7b118bc1753febf7c41cc80981df678445e0254284eecf84db79a7d AS uv
 
 FROM python:3.14-slim@sha256:9aaa474097d094040649f2162a627c0049b408f52138d980916788d80f04802f AS base
 
