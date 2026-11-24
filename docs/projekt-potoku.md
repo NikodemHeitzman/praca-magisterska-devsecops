@@ -228,7 +228,7 @@ Guideline zaleca organizacjom zaczynać od ostrzeżeń i stopniowo zaostrzać pr
 ### 4.6. Ryzyko resztkowe polityki
 
 - **Zmiana bramki w samym PR.** Pliki konfiguracji skanerów i workflow są w repozytorium. PR może zmienić próg albo zastąpić krok bramki poleceniem `exit 0` przy tej samej nazwie joba. Bez drugiego recenzenta (jeden autor) chroni przed tym tylko samodyscyplina i ślad w historii. Materiał do 5.3.
-- **Push protection a próba GT-02.** Push protection działa na wzorce dostawców, a łatka GT-02 to losowa wartość bez prefiksu dostawcy, więc prawdopodobnie jej nie zablokuje. Gdyby blokowała, próba GT-02 nie dotarłaby do potoku w żadnym wariancie. Sprawdzone 2026-11-24 (E07-03, ADR-0044): push commita z łatką w postaci GT-02 nie został zablokowany (wzorce spoza dostawców wyłączone). Do powtórzenia po włączeniu wzorców spoza dostawców (S6) i w pilotażu z docelową łatką z E04.
+- **Push protection a próba GT-02.** Push protection działa na wzorce dostawców, a łatka GT-02 to losowa wartość bez prefiksu dostawcy, więc prawdopodobnie jej nie zablokuje. Gdyby blokowała, próba GT-02 nie dotarłaby do potoku w żadnym wariancie. Sprawdzone 2026-11-24 (E07-03, ADR-0044): push commita z łatką w postaci GT-02 nie został zablokowany (wzorce spoza dostawców wyłączone). Wzorców spoza dostawców nie da się włączyć w repozytorium na koncie osobistym (ADR-0044, S6), więc wynik obowiązuje; do powtórzenia w pilotażu z docelową łatką z E04.
 
 ## 5. Decyzje autora (wywiad 2026-11-20)
 
