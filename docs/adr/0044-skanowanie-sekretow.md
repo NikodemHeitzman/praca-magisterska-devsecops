@@ -53,7 +53,7 @@ Opcje i rekomendacje przygotował agent. Autor wybrał opcje i wskazał swoje po
 | S7 | Jeśli push protection zablokuje push łatki GT-02, próba idzie przez jawne obejście z powodem „used in tests”, zapisane w dzienniku; blokadę platformy zapisujemy osobno w danych jako wynik B03 | eksperyment mierzy potoki, ślad w logu platformy i dzienniku, realistyczny scenariusz (programista może obejść push protection) |
 | S8 | Nowy ADR (ten), ADR-0042 bez zmian | — |
 
-**Uwaga do S6.** Pytanie w wywiadzie zakładało, że wzorce spoza dostawców dają tylko alerty. Dokumentacja GitHuba mówi, że push protection obejmuje też tę kategorię (tabela „Capabilities by category” na stronie „Supported secret scanning patterns”, dostęp 2026-11-24), więc mogą blokować push. Wzorce tej kategorii to klucze prywatne, connection stringi (MongoDB, MySQL, PostgreSQL) i nagłówki HTTP Basic i Bearer. Żadna pozycja katalogu nie ma takiej postaci, więc na pomiar to nie wpływa. Dostępność tej funkcji dla publicznego repozytorium na koncie osobistym: TODO: zweryfikować przy `settings.sh apply`.
+**Uwaga do S6.** Pytanie w wywiadzie zakładało, że wzorce spoza dostawców dają tylko alerty. Dokumentacja GitHuba mówi, że push protection obejmuje też tę kategorię (tabela „Capabilities by category” na stronie „Supported secret scanning patterns”, dostęp 2026-11-24), więc mogą blokować push. Wzorce tej kategorii to klucze prywatne, connection stringi (MongoDB, MySQL, PostgreSQL) i nagłówki HTTP Basic i Bearer. Żadna pozycja katalogu nie ma takiej postaci, więc na pomiar to nie wpływa. Dostępność tej funkcji dla publicznego repozytorium na koncie osobistym: sprawdzona 2026-11-24, niedostępna (konsekwencje).
 
 **Uzasadnienie „zgodne z praktyką” (S1).** Oficjalna akcja `gitleaks/gitleaks-action` (wersja przypięta w `docs/narzedzia.md`, commit `e0c47f4`) na PR i pushu skanuje zakres commitów przez `--log-opts` (`src/gitleaks.js`, dostęp 2026-11-24).
 
@@ -80,10 +80,14 @@ Decyzje agenta (techniczne, w ramach decyzji autora):
   - **Push protection** (2026-11-24, wzorce spoza dostawców wyłączone): push commita z łatką GT-02 na gałąź `test/e07-03-gt02-negative` **nie został zablokowany**. Potwierdza to przypuszczenie z `docs/projekt-potoku.md` (4.6): losowa wartość bez prefiksu dostawcy nie pasuje do wzorców platformy. S7 nie było potrzebne.
   - **PR #19** (test negatywny, draft, zamknięty bez scalania): `secrets` blokuje z 1 zgłoszeniem `generic-api-key` w `app/ticketing/config.py` (commit `a297a60`). Łatka testowa ma postać GT-02 z decyzji z 2026-10-20, ale nie jest docelową łatką z E04.
 - Kolejne zadania:
-  - **E07-03 (po scaleniu):** dopisać `secrets` do `required_status_checks` w `infra/github/rulesets/main.json` i `variant-b.json`, włączyć wzorce spoza dostawców w `infra/github/settings.sh` (S6) i uruchomić `settings.sh apply`; powtórzyć sprawdzenie push protection z GT-02 po włączeniu,
+  - **E07-03 (po scaleniu):** dopisać `secrets` do `required_status_checks` w `infra/github/rulesets/main.json` i `variant-b.json`, włączyć wzorce spoza dostawców w `infra/github/settings.sh` (S6) i uruchomić `settings.sh apply`; powtórzyć sprawdzenie push protection z GT-02 po włączeniu. Wykonane 2026-11-24 (PR #20), wynik niżej,
   - **E07-04…E07-06:** joby `sast`, `sca`, `iac` w `devsecops-gates.yml`,
   - **E07-14:** scalić `devsecops-gates.yml` z `lint`, `test`, `build` w workflow wariantu B.
-- TODO: zweryfikować: dostępność wzorców spoza dostawców dla repozytorium na koncie osobistym; czy wzorce spoza dostawców blokują push łatki GT-02 (oczekiwanie: nie).
+- Sprawdzone po `settings.sh apply` (2026-11-24, PR #20):
+  - `secrets` jest wymaganym checkiem w rulesetach `main` i `exp-variant-b` (`settings.sh show`),
+  - **S6 jest niewykonalne:** `PATCH` z `secret_scanning_non_provider_patterns: enabled` zwraca `200 OK`, ale ustawienie zostaje `disabled`. Repozytorium należy do konta osobistego (`owner.type: User`), a dokumentacja GitHuba opisuje tę funkcję dla repozytoriów organizacji z GitHub Secret Protection. Decyzja autora z 2026-11-24: ustawienie usunięte z `infra/github/settings.sh`, żeby `show` zgadzało się z plikami (bez sztucznego dryfu). B03 obejmuje więc tylko wzorce dostawców i push protection,
+  - push protection nie było sprawdzane ponownie, bo konfiguracja platformy się nie zmieniła; aktualny jest wynik z PR #19 (GT-02 nie zablokowane),
+  - materiał do 5.3: część kontroli platformy GitHub zależy od planu i typu właściciela repozytorium, więc lekki potok na koncie osobistym ma węższe B03 niż w organizacji.
 
 ## Źródła
 

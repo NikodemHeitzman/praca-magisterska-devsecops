@@ -54,13 +54,12 @@ apply_ruleset() {
 }
 
 apply() {
-  # B03: secret scanning with push protection; non-provider (generic) patterns too, S6 in
-  # docs/adr/0044-skanowanie-sekretow.md.
+  # B03: secret scanning with push protection. Non-provider (generic) patterns are not set here:
+  # GitHub ignores them for a personal-account repository (S6, docs/adr/0044-skanowanie-sekretow.md).
   gh api --method PATCH "$api" --silent --input - <<'JSON'
 {"security_and_analysis": {
   "secret_scanning": {"status": "enabled"},
-  "secret_scanning_push_protection": {"status": "enabled"},
-  "secret_scanning_non_provider_patterns": {"status": "enabled"}}}
+  "secret_scanning_push_protection": {"status": "enabled"}}}
 JSON
   # B04: Dependabot alerts and security updates (version updates: .github/dependabot.yml), H6.
   gh api --method PUT "$api/vulnerability-alerts" --silent
