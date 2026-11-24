@@ -61,3 +61,4 @@ ADR (*Architecture Decision Record*) to krótki zapis jednej decyzji technicznej
 | [0041](0041-zamrozenie-wariantu-a.md) | Zamrożenie wariantu A: tag z adnotacją `pipeline-a-v1` na `main`, wersje w pliku YAML, zmiana przez nowy tag | przyjęty | 2026-11-20 |
 | [0042](0042-projekt-potoku-wariantu-b.md) | Projekt potoku DevSecOps (wariant B): etapy, miejsce kontroli, progi blokady, wyjątki, uruchamianie narzędzi | przyjęty | 2026-11-20 |
 | [0043](0043-utwardzenie-workflowow.md) | Utwardzenie workflowów i platformy GitHub: rulesety (bez obejść na `main`), wymuszenie SHA i lista akcji, Dependabot z karencją, lint workflowów | przyjęty | 2026-11-23 |
+| [0044](0044-skanowanie-sekretow.md) | Skanowanie sekretów: Gitleaks na commitach PR i pushu, domyślne reguły, wspólny plik bramek `devsecops-gates.yml`, doradczy hook pre-commit | przyjęty | 2026-11-24 |
