@@ -47,7 +47,7 @@ Opcje i rekomendacje przygotował agent. Autor wybrał opcje i wskazał swoje po
 | # | Decyzja | Powody autora |
 |---|---|---|
 | T1 | Zestaw rejestru `p/default` oraz reguły własne z `semgrep-rules/` | domyślny zestaw narzędzia, szerszy zasięg |
-| T2 | Job pobiera zestaw z rejestru do pliku i skanuje tym plikiem. Do artefaktu trafia tylko SHA-256 pliku i lista ID reguł (`reports/semgrep-ruleset.json`), bez treści reguł. Zmianę zestawu w trakcie serii wykrywa analiza i zapisuje w dzienniku | zgodne z licencją, mały koszt |
+| T2 | Job pobiera zestaw z rejestru do pliku i skanuje tym plikiem. Do artefaktu trafia tylko SHA-256 i lista ID reguł (`reports/semgrep-ruleset.json`), bez treści reguł. Po teście w CI suma jest kanoniczna, a ID reguł mają swoje sumy (decyzje agenta niżej). Zmianę zestawu w trakcie serii wykrywa analiza i zapisuje w dzienniku | zgodne z licencją, mały koszt |
 | T3 | Oba narzędzia skanują `app/` bez `app/tests/`. `semgrep-rules/` nigdy nie jest celem | testy nie trafiają do obrazu, krótsza lista wyjątków |
 | T4 | Semgrep 1.185.0 | aktualne łatki narzędzia, bez czekania na 1.186.0 |
 | T5 | Blokuje błąd fatalny: kod wyjścia narzędzia inny niż oczekiwany, brak albo nieczytelny raport. Błędy częściowego parsowania nie blokują, ale ich liczba trafia do podsumowania przebiegu i zostaje w raporcie | brak raportu nadal blokuje, ślad w danych |
@@ -63,6 +63,7 @@ Decyzje agenta (techniczne, w ramach decyzji autora i ADR-0042):
 - **plik zestawu rejestru w katalogu głównym repozytorium:** Semgrep dodaje do ID reguł z lokalnego pliku prefiks z jego katalogu (np. `tmp.rt.` dla `/tmp/rt/`), więc plik w katalogu głównym daje ID takie jak w rejestrze; reguły własne dostają stały prefiks `semgrep-rules.`. Plik nie leży w `app/` ani `reports/`, więc nie jest skanowany ani wysyłany do artefaktu,
 - **Semgrep bez `--error`** (zgłoszenia dają 0, każdy inny kod to błąd) i **Bandit z `--exit-zero`** (każdy niezerowy kod to błąd), zgodnie z zasadą „raport, potem osobny krok bramki” z ADR-0042,
 - **PyYAML** dopisany jawnie do `bandit.in`, bo skrypt bramki czyta listę wyjątków (jest i tak zależnością Bandita),
+- **suma kanoniczna zestawu (T2):** w CI dwa przebiegi odległe o 23 s (PR #22 i #23, 2026-11-24) dostały plik `p/default` o innej surowej sumie SHA-256 (`43b45d87…` i `9c76333a…`) przy tych samych 1074 ID reguł. Surowa suma nie pokazuje więc zmiany reguł. Artefakt zawiera sumę każdej sparsowanej reguły (klucze posortowane), sumę kanoniczną z nich i surową sumę tylko pomocniczo. Analiza porównuje sumę kanoniczną, a przy różnicy wskazuje zmienione reguły bez ich treści. Przyczyna różnicy bajtów: TODO: zweryfikować (przypuszczalnie różne węzły CDN; ponowne przebiegi i pobrania lokalne dały te same bajty),
 - **`--metrics=off`** i **`--disable-version-check`:** Semgrep nie wysyła danych do producenta i nie sprawdza nowej wersji w czasie pomiaru,
 - **Python runnera bez przypięcia** (`python3` obrazu `ubuntu-24.04`, w teście 3.12); wersja trafia do logu i do `variant-b.yaml` jako nieprzypięta.
 
@@ -70,6 +71,10 @@ Decyzje agenta (techniczne, w ramach decyzji autora i ADR-0042):
 
 - (+) Kroki B08 i B09 z `docs/projekt-potoku.md` są zrealizowane. Zamknięte TODO z ADR-0042: nazwy ważności Semgrepa, pewność B105, opcje `--disable-nosem` i `--ignore-nosec`, kody wyjścia Semgrepa i Bandita.
 - (+) Test lokalny na kopii aplikacji z łatkami próbnymi (2026-11-24, kroki joba odtworzone w kontenerze `python:3.12-slim`): bramka blokuje GT-02 (Bandit B105 i Semgrep `detected-generic-secret`), GT-06 i GT-14 (reguły własne) oraz GT-12 (`wildcard-cors`). Komentarze `# nosec` przy GT-02 i `# nosemgrep` przy GT-12 nie wyłączyły zgłoszeń. Łatki próbne mają postać z `docs/narzedzia.md`, ale nie są docelowymi łatkami z E04.
+- (+) Test w CI (2026-11-24):
+  - **PR #22** (czysta wersja): `sast` przechodzi (Semgrep 2 i Bandit 1 zgłoszenie, wszystkie na liście wyjątków; 1 błąd częściowego parsowania). Zakładka Security pokazuje analizy `semgrep` (Semgrep OSS 1.185.0) i `bandit` (Bandit 1.9.4). Python runnera 3.12.3,
+  - **PR #23** (test negatywny z łatkami próbnymi, zamknięty bez scalania): `sast` blokuje 5 zgłoszeń (Semgrep 4, Bandit 1), tak jak lokalnie; `secrets` blokuje GT-02. Check code scanningu `Semgrep OSS` też nie przechodzi (zgłoszenia `ERROR`), a `Bandit` przechodzi (poziomy `note` i `warning`); blokuje job `sast`,
+  - suma kanoniczna zestawu `p/default` w obu przebiegach po zmianie i lokalnie: `29893075…` (1074 reguły).
 - (+) GT-02 ma w wariancie B trzy detektory blokujące: Gitleaks, Bandit B105 i Semgrep `detected-generic-secret`. Regułę Semgrepa wnosi wybór `p/default` (T1); analiza z 2026-10-20 jej nie uwzględniała.
 - (+) Czysta wersja przechodzi z trzema wyjątkami (lista niżej), a ich uzasadnienia sprawdzi autor.
 - (−) Zestaw rejestru nie jest przypięty: aktualizacja rejestru w trakcie serii zmieni reguły (T2). Analiza porównuje SHA-256 z artefaktów przebiegów i zapisuje zmianę w dzienniku. Materiał do 5.3 (odtwarzalność).
@@ -85,7 +90,7 @@ Decyzje agenta (techniczne, w ramach decyzji autora i ADR-0042):
 - Czas skanu w teście lokalnym: Semgrep około 7 s, Bandit poniżej 1 s, bez instalacji i pobrania zestawu. Czas joba zmierzy seria (M4/M5).
 - Kolejne kroki:
   - **po scaleniu:** `sast` jako wymagany check w `infra/github/rulesets/main.json` i `variant-b.json` (zmiana w tym samym PR), potem `settings.sh apply` za zgodą autora,
-  - **test negatywny w CI:** PR z łatkami próbnymi (draft, bez scalania), sprawdzenie zakładki Security,
+  - **łatki z E04 a `lint`:** łatka próbna na PR #23 nie przeszła `ruff format` (job `lint`). Docelowe łatki muszą przejść `lint`, inaczej próba zatrzyma się przed bramkami bezpieczeństwa w obu wariantach (sprawdzić w pilotażu),
   - **E07-05, E07-06:** dopisują swoje wyjątki do `.github/gate-exceptions.yaml`,
   - **E07-14:** zamrożenie listy wyjątków i wersji z `variant-b.yaml`.
 

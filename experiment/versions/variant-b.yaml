@@ -60,8 +60,8 @@ narzedzia:
     job: sast
     reguly:
       rejestr: p/default  # pobierany w każdym przebiegu; licencja nie pozwala go przechowywać (ADR-0045, T1, T2)
-      rejestr_przypiete: false  # ślad: reports/semgrep-ruleset.json (SHA-256 i ID reguł) w artefakcie sast-reports
-      rejestr_obserwacja: {data: 2026-11-24, reguly: 1074, sha256: 43b45d8719a2f40ca83a0b88750ca4bd3583baa9b48380ef9d28d4c51bae966e}
+      rejestr_przypiete: false  # ślad: reports/semgrep-ruleset.json (suma kanoniczna i SHA-256 każdej reguły) w artefakcie sast-reports
+      rejestr_obserwacja: {data: 2026-11-24, reguly: 1074, sha256_kanoniczna: 2989307587dddfed3601cf2a67c8ea20a98b5feb0ee72cb642f2795f88db8a52}
       wlasne: semgrep-rules/  # GT-06, GT-14; ID z prefiksem semgrep-rules.
     opcje: [--metrics=off, --disable-version-check, --disable-nosem, --exclude app/tests]
     cel: app/
