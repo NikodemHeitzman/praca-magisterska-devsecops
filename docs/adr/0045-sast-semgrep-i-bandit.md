@@ -89,7 +89,7 @@ Decyzje agenta (techniczne, w ramach decyzji autora i ADR-0042):
   - uzasadnienia zatwierdził autor 2026-11-24; lista zamarza z progami (K5, E07-14).
 - Czas skanu w teście lokalnym: Semgrep około 7 s, Bandit poniżej 1 s, bez instalacji i pobrania zestawu. Czas joba zmierzy seria (M4/M5).
 - Kolejne kroki:
-  - **po scaleniu:** `sast` jako wymagany check w `infra/github/rulesets/main.json` i `variant-b.json` (zmiana w tym samym PR), potem `settings.sh apply` za zgodą autora,
+  - ~~**po scaleniu:** `sast` jako wymagany check, `settings.sh apply` za zgodą autora~~ wykonane 2026-11-24: PR #22 scalony (`c4dfd49`), `apply` zaktualizował rulesety `main`, `tags` i `exp-variant-b`; `show` potwierdza `sast` jako wymagany check w `main` i `exp-variant-b`. Pierwszy przebieg `devsecops-gates` na pushu do `main` (45423688051, `c4dfd49`): `secrets` i `sast` przechodzą,
   - **łatki z E04 a `lint`:** łatka próbna na PR #23 nie przeszła `ruff format` (job `lint`). Docelowe łatki muszą przejść `lint`, inaczej próba zatrzyma się przed bramkami bezpieczeństwa w obu wariantach (sprawdzić w pilotażu),
   - **E07-05, E07-06:** dopisują swoje wyjątki do `.github/gate-exceptions.yaml`,
   - **E07-14:** zamrożenie listy wyjątków i wersji z `variant-b.yaml`.
