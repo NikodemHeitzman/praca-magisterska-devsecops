@@ -1,0 +1,10 @@
+# Owners of the pipeline, its platform configuration and the infrastructure
+# (docs/adr/0043-utwardzenie-workflowow.md, H5; SSDF PO.2.1, SP 800-204D PRE-2*).
+# A trace of responsibility only: the rulesets do not require code owner review, because with a
+# single author it would block every pull request. Enable `require_code_owner_review` in
+# infra/github/rulesets/ once a second reviewer joins.
+*                @NikodemHeitzman
+/.github/        @NikodemHeitzman
+/infra/          @NikodemHeitzman
+/semgrep-rules/  @NikodemHeitzman
+/experiment/     @NikodemHeitzman

@@ -162,7 +162,7 @@ Elementy z listy kontrolnej, które celowo **nie** są krokami wariantu B (D11):
 | CICD-SEC-4 PPE | B02, B05, B16, B17 | GT-17 | PR może zmienić konfigurację bramki (I-PPE); bez drugiego recenzenta to ryzyko resztkowe (sekcja 4.6) |
 | CICD-SEC-5 PBAC | B05, B17 | GT-15 | |
 | CICD-SEC-6 Credential hygiene | B01, B03, B07, B19 | GT-02 | |
-| CICD-SEC-7 System config | B02, B03, B05 | — | konfiguracja platformy poza kontrolą wersji; spis w E07-02 |
+| CICD-SEC-7 System config | B02, B03, B05 | — | konfiguracja platformy w `infra/github/` i spis w [`ustawienia-github.md`](ustawienia-github.md) (ADR-0043); zmiany ręczne w interfejsie wykrywa tylko porównanie z `settings.sh show` |
 | CICD-SEC-8 3rd party | B04, B17; przypinanie do SHA (`AGENTS.md`, zasada 5) | GT-16 | zależności przechodnie akcji złożonych |
 | CICD-SEC-9 Artifact integrity | B21–B24 | — | provenance nie wykryje złośliwego kodu w zaufanym buildzie |
 | CICD-SEC-10 Logging | raporty i logi jako artefakty, CloudTrail (E08-01) | — | bez SIEM (lekki potok) |
