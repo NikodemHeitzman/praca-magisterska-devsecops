@@ -62,3 +62,4 @@ ADR (*Architecture Decision Record*) to krótki zapis jednej decyzji technicznej
 | [0042](0042-projekt-potoku-wariantu-b.md) | Projekt potoku DevSecOps (wariant B): etapy, miejsce kontroli, progi blokady, wyjątki, uruchamianie narzędzi | przyjęty | 2026-11-20 |
 | [0043](0043-utwardzenie-workflowow.md) | Utwardzenie workflowów i platformy GitHub: rulesety (bez obejść na `main`), wymuszenie SHA i lista akcji, Dependabot z karencją, lint workflowów | przyjęty | 2026-11-23 |
 | [0044](0044-skanowanie-sekretow.md) | Skanowanie sekretów: Gitleaks na commitach PR i pushu, domyślne reguły, wspólny plik bramek `devsecops-gates.yml`, doradczy hook pre-commit | przyjęty | 2026-11-24 |
+| [0045](0045-sast-semgrep-i-bandit.md) | SAST: Semgrep z zestawem `p/default` i regułami własnymi oraz Bandit, próg w osobnym skrypcie, wspólna lista wyjątków bramek | przyjęty | 2026-11-24 |

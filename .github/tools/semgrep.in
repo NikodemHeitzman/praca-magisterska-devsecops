@@ -1,0 +1,3 @@
+# Semgrep for the sast job (E07-04, ADR-0045). Compiled into semgrep.txt with hashes:
+#   uv pip compile semgrep.in -o semgrep.txt --generate-hashes --python-version 3.12 --python-platform linux --exclude-newer <7 days ago>
+semgrep==1.185.0

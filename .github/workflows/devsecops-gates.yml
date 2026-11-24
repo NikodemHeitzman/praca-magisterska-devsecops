@@ -27,6 +27,8 @@ concurrency:
 env:
   # Gitleaks 8.30.1 (same digest on ghcr.io and Docker Hub, multi-arch index)
   GITLEAKS_IMAGE: ghcr.io/gitleaks/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+  # Semgrep registry ruleset (T1). Fetched per run; only its SHA-256 and rule ids are kept (T2).
+  SEMGREP_RULESET: p/default
 
 jobs:
   # B07: secrets in the commits of this pull request or push (S1). Default Gitleaks rules;
@@ -116,3 +118,96 @@ jobs:
               reports/gitleaks.json
             exit 1
           fi
+
+  # B08, B09: SAST on the application code (ADR-0045). Semgrep with the registry ruleset (T1)
+  # and the custom rules for GT-06 and GT-14; Bandit. Scope: app/ without app/tests/ (T3);
+  # semgrep-rules/ holds intentionally vulnerable test files and is never a target.
+  # Tools from PyPI, exact versions with hashes (D9). In-code suppressions are disabled (D13).
+  sast:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write # upload-sarif
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install tools (hash-checked)
+        run: |
+          python3 --version
+          python3 -m venv "$RUNNER_TEMP/semgrep"
+          "$RUNNER_TEMP/semgrep/bin/pip" install --quiet --no-deps --require-hashes -r .github/tools/semgrep.txt
+          python3 -m venv "$RUNNER_TEMP/bandit"
+          "$RUNNER_TEMP/bandit/bin/pip" install --quiet --no-deps --require-hashes -r .github/tools/bandit.txt
+          "$RUNNER_TEMP/semgrep/bin/semgrep" --version
+          "$RUNNER_TEMP/bandit/bin/bandit" --version
+
+      # The registry ruleset is not stored: its license forbids redistribution (T2). The run keeps
+      # its SHA-256 and rule ids, so the analysis can tell whether the ruleset changed in a series.
+      - name: Fetch Semgrep registry ruleset
+        run: |
+          mkdir -p reports
+          curl --fail --silent --show-error --location --retry 3 \
+            "https://semgrep.dev/c/$SEMGREP_RULESET" -o registry-ruleset.yaml
+          "$RUNNER_TEMP/bandit/bin/python" - registry-ruleset.yaml <<'PY' >reports/semgrep-ruleset.json
+          import hashlib, json, os, sys, yaml
+          path = sys.argv[1]
+          data = open(path, "rb").read()
+          ids = sorted(r["id"] for r in yaml.safe_load(data)["rules"])
+          json.dump({"ruleset": os.environ["SEMGREP_RULESET"], "sha256": hashlib.sha256(data).hexdigest(),
+                     "rule_count": len(ids), "rule_ids": ids}, sys.stdout, indent=1)
+          PY
+          jq -r '"\(.ruleset): \(.rule_count) rules, sha256 \(.sha256)"' reports/semgrep-ruleset.json
+
+      # Without --error Semgrep exits 0 with findings; any other code is a tool failure (T5).
+      # Semgrep prefixes rule ids with the directory of a local config file, so the registry
+      # ruleset sits in the workspace root (plain registry ids, as in gate-exceptions.yaml) and the
+      # custom rules get the stable prefix "semgrep-rules.". The ruleset file is outside app/ and
+      # outside reports/, so it is neither scanned nor uploaded.
+      - name: Semgrep (JSON for M1, SARIF for code scanning)
+        run: |
+          "$RUNNER_TEMP/semgrep/bin/semgrep" scan \
+            --config registry-ruleset.yaml --config semgrep-rules/ \
+            --metrics=off --disable-version-check --disable-nosem \
+            --exclude app/tests \
+            --json-output reports/semgrep.json --sarif-output reports/semgrep.sarif \
+            --quiet app/ >/dev/null
+
+      # --exit-zero: findings do not fail this step, so a non-zero code is a tool failure (T5).
+      - name: Bandit (JSON for M1, SARIF for code scanning)
+        run: |
+          for format in json sarif; do
+            "$RUNNER_TEMP/bandit/bin/bandit" --recursive app/ --exclude app/tests \
+              --ignore-nosec --exit-zero --quiet --format "$format" --output "reports/bandit.$format"
+          done
+
+      - name: Upload reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: sast-reports
+          path: reports/
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Upload Semgrep SARIF to code scanning
+        if: ${{ !cancelled() && hashFiles('reports/semgrep.sarif') != '' }}
+        uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          sarif_file: reports/semgrep.sarif
+          category: semgrep
+
+      - name: Upload Bandit SARIF to code scanning
+        if: ${{ !cancelled() && hashFiles('reports/bandit.sarif') != '' }}
+        uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          sarif_file: reports/bandit.sarif
+          category: bandit
+
+      - name: Gate - Semgrep all but INFO, Bandit confidence MEDIUM+
+        run: |
+          "$RUNNER_TEMP/bandit/bin/python" .github/scripts/sast_gate.py \
+            --semgrep reports/semgrep.json --bandit reports/bandit.json \
+            --exceptions .github/gate-exceptions.yaml

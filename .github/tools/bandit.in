@@ -1,0 +1,6 @@
+# Bandit for the sast job (E07-04, ADR-0045); sarif extra for code scanning (T6).
+# PyYAML is a Bandit dependency, listed explicitly because the gate script reads the exceptions file with it.
+# Compiled into bandit.txt with hashes:
+#   uv pip compile bandit.in -o bandit.txt --generate-hashes --python-version 3.12 --python-platform linux --exclude-newer <7 days ago>
+bandit[sarif]==1.9.4
+pyyaml

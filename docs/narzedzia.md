@@ -23,8 +23,8 @@ Wersja najnowsza na dzień pobrania **nie jest** wersją przypiętą. Wersję pr
 
 | Narzędzie | Klasa | Rola (propozycja) | Wersja najnowsza | Data wydania | Licencja | Dokumentacja | Wydanie |
 |---|---|---|---|---|---|---|---|
-| Semgrep (CE) | SAST | Kod Pythona (GT-01, GT-03–06, GT-12, GT-14), TEST-1 | v1.181.0 | 2026-10-14 | LGPL-2.1 (silnik); reguły z rejestru: Semgrep Rules License v1.0, użycie tylko na własne potrzeby, bez rozpowszechniania, więc reguł nie kopiujemy do repozytorium (sprawdzone 2026-11-16) | https://docs.semgrep.dev/ | https://github.com/semgrep/semgrep/releases/tag/v1.181.0 |
-| Bandit | SAST (Python) | Kod Pythona (GT-01–04), TEST-1 | 1.9.4 | 2026-02-25 | Apache-2.0 | https://bandit.readthedocs.io/en/latest/ | https://github.com/PyCQA/bandit/releases/tag/1.9.4 |
+| Semgrep (CE) | SAST | Kod Pythona (GT-01, GT-03–06, GT-12, GT-14), TEST-1 | v1.181.0 (w potoku 1.185.0 z 2026-11-10, najnowsza po karencji 7 dni; z PyPI z hashami, ADR-0045) | 2026-10-14 | LGPL-2.1 (silnik); reguły z rejestru: Semgrep Rules License v1.0, użycie tylko na własne potrzeby, bez rozpowszechniania, więc reguł nie kopiujemy do repozytorium (sprawdzone 2026-11-16) | https://docs.semgrep.dev/ | https://github.com/semgrep/semgrep/releases/tag/v1.181.0 |
+| Bandit | SAST (Python) | Kod Pythona (GT-01–04), TEST-1 | 1.9.4 (w potoku, ADR-0045; nadal najnowsza 2026-11-24) | 2026-02-25 | Apache-2.0 | https://bandit.readthedocs.io/en/latest/ | https://github.com/PyCQA/bandit/releases/tag/1.9.4 |
 | pip-audit | SCA | Zależności Pythona (GT-07), TEST-2 | v2.10.1 | 2026-06-10 | Apache-2.0 | https://github.com/pypa/pip-audit | https://github.com/pypa/pip-audit/releases/tag/v2.10.1 |
 | Gitleaks | Sekrety | Sekrety w kodzie i historii (GT-02), COMMIT-REQ-1, DEPLOY-REQ-1 | v8.30.1 (w potoku, ADR-0044: obraz `ghcr.io/gitleaks/gitleaks` po digeście; nadal najnowsza 2026-11-24) | 2026-03-21 | MIT | https://github.com/gitleaks/gitleaks | https://github.com/gitleaks/gitleaks/releases/tag/v8.30.1 |
 | Checkov | IaC | Terraform i Dockerfile (GT-09, GT-10, GT-11), PRE-5* | 3.3.29 | 2026-10-13 | Apache-2.0 | https://www.checkov.io/ | https://github.com/bridgecrewio/checkov/releases/tag/3.3.29 |
@@ -119,6 +119,7 @@ Reguły z gałęzi głównej mogą się różnić od tych, które pobierze potok
 - **Semgrep `python.jwt.security.jwt-hardcode.jwt-python-hardcoded-secret`** (w `p/python` i `p/default`, nie było w katalogu) ma wzorzec `jwt.encode($_, "...", ...)`, czyli literał w wywołaniu. Stałej z innego modułu nie obejmie: Semgrep CE propaguje stałe tylko w obrębie pliku (dokumentacja Semgrep, *Constant propagation*, sprawdzone 2026-11-16).
 - **Wniosek:** wykrywalne, jeśli łatka ma postać `JWT_SECRET = "<losowa wartość bez słów ze stopwords>"` (zwykłe przypisanie). Pewność można podnieść ze średniej do wysokiej, gdy postać łatki zostanie tak ustalona.
 - **Potwierdzenie Gitleaksem (E07-03, 2026-11-24, ADR-0044):** stała `JWT_SECRET = "<40 losowych znaków alfanumerycznych>"` w `app/ticketing/config.py` daje zgłoszenie `generic-api-key` w Gitleaks 8.30.1 lokalnie i w CI (job `secrets`, PR #19). Bandit B105 i docelowa łatka z E04: do sprawdzenia w E07-04 i w pilotażu.
+- **Potwierdzenie w E07-04 (2026-11-24, ADR-0045):** ta sama postać łatki na kopii aplikacji daje Bandit B105 (ważność LOW, pewność MEDIUM, więc blokuje według D5) oraz Semgrep `generic.secrets.security.detected-generic-secret.detected-generic-secret` z `p/default` (ERROR). Tej reguły Semgrepa analiza z 2026-10-20 nie uwzględniała, bo dotyczyła `p/python`. Docelowa łatka z E04: do sprawdzenia w pilotażu.
 
 **GT-06, log injection (CWE-117).**
 
