@@ -198,9 +198,9 @@ Skutki reguły dla pozycji katalogu sprawdzamy po jej przyjęciu i zapisujemy w 
 | `sast` | Bandit | ważność `LOW` i wyżej przy pewności `MEDIUM` i wyżej (nieznana pewność też blokuje) | pewność `LOW` | B105 ma w Bandit 1.9.4 ważność LOW i pewność MEDIUM (`general_hardcoded_password.py`), więc blokuje. GT-02 ma trzy detektory blokujące: Gitleaks, Bandit B105 i Semgrep `detected-generic-secret` z `p/default` (łatka próbna, 2026-11-24, ADR-0045) |
 | `sca` | pip-audit | każda znana podatność spoza listy wyjątków | — | pip-audit 2.10.1 nie ma filtra ważności, a jego raport JSON nie podaje ważności (sprawdzone 2026-11-24). Baza OSV, tylko zależności runtime, Python 3.14 jak w aplikacji; próg stosuje `.github/scripts/sca_gate.py` na raporcie JSON (ADR-0046) |
 | `sca` | zgodność `pyproject.toml` ↔ `uv.lock` ↔ `requirements.txt` | każda różnica | — | kontrola integralności, nie wykrywanie: `uv lock --check` i porównanie z eksportem `uv.lock` (ADR-0046) |
-| `iac` | Checkov | każda nieudana kontrola spoza listy wyjątków | — | Checkov bez platformy nie podaje ważności |
+| `iac` | Checkov | każda nieudana kontrola spoza listy wyjątków, także wyciszona komentarzem `#checkov:skip` (D13) | — | Checkov bez platformy nie podaje ważności (pole `severity` puste w 3.4.5, sprawdzone 2026-11-24). Czysta wersja: 15 trafień na liście wyjątków (ADR-0047, I2) |
 | `iac` | Trivy config | `LOW` i wyżej | `UNKNOWN` | ten sam poziom surowości co Checkov na tych samych plikach (D5a); 8 trafień czystej wersji (E05-04) idzie na listę wyjątków (D6) |
-| `iac` | hadolint | poziom `error` | `warning`, `info`, `style` | D7. TODO: zweryfikować nazwy poziomów i opcję progu (`--failure-threshold`) w hadolint 2.15.1 |
+| `iac` | hadolint | poziom `error` | `warning`, `info`, `style` | D7. Poziomy i opcja `--failure-threshold` sprawdzone w 2.15.1 (2026-11-24, ADR-0047); bramka czyta raport JSON, komentarze `# hadolint ignore=` wyłączone. Czysta wersja: 0 zgłoszeń |
 | `workflow-lint` | actionlint | każdy błąd | — | |
 | `workflow-lint` | zizmor | wszystko poza poziomem informacyjnym | poziom informacyjny | TODO: zweryfikować skalę ważności i opcję `--min-severity` w przypiętej wersji |
 | skan obrazu | Trivy image | `MEDIUM` i wyżej **z dostępną poprawką** (`--ignore-unfixed`) | bez poprawki, `LOW`, `UNKNOWN` | D5a. W czystej wersji tylko 3 zgłoszenia mają poprawkę (E05-01, stan 2026-11-08), a 49 HIGH bez poprawki nie blokuje |
@@ -305,7 +305,7 @@ Zgłoszenia czystej wersji wynikające ze świadomych decyzji obsługuje lista w
 - **zgodne z Guideline:** wyjątek z uzasadnieniem, właścicielem i datą (`2-3-5 Security Gates`, `docs/notes/owasp-devsecops.md`, p. 1.5),
 - **jawnie widoczne:** każdy wyjątek jest w repozytorium z uzasadnieniem, więc recenzent widzi, co i dlaczego jest pominięte.
 
-Konsekwencja: przed zamrożeniem trzeba uruchomić wszystkie bramki na czystej wersji i spisać zgłoszenia (Trivy config: 8 trafień z E05-04; Gitleaks: 0 zgłoszeń w pełnej historii, 2026-11-24, ADR-0044; Semgrep i Bandit: 3 zgłoszenia, 2026-11-24, ADR-0045; pip-audit: 0 zgłoszeń, 2026-11-24, ADR-0046; reszta: TODO: zweryfikować w pilotażu). Każdy wyjątek musi wynikać z decyzji zapisanej wcześniej (ADR), a nie z chęci przejścia bramki.
+Konsekwencja: przed zamrożeniem trzeba uruchomić wszystkie bramki na czystej wersji i spisać zgłoszenia (Trivy config: 8 trafień z E05-04; Gitleaks: 0 zgłoszeń w pełnej historii, 2026-11-24, ADR-0044; Semgrep i Bandit: 3 zgłoszenia, 2026-11-24, ADR-0045; pip-audit: 0 zgłoszeń, 2026-11-24, ADR-0046; Checkov: 15, Trivy config: 8 (wszystkie przeszły na listę wyjątków), hadolint: 0, 2026-11-24, ADR-0047; reszta: TODO: zweryfikować w pilotażu). Każdy wyjątek musi wynikać z decyzji zapisanej wcześniej (ADR), a nie z chęci przejścia bramki.
 
 ### D7. hadolint jest bramką, `dependency-review-action` nie wchodzi do wariantu B (Q7)
 

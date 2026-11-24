@@ -1,7 +1,7 @@
 # DevSecOps gates (variant B, docs/projekt-potoku.md; decisions: docs/adr/0042-projekt-potoku-wariantu-b.md,
 # docs/adr/0044-skanowanie-sekretow.md).
 #
-# One shared file for the variant B gates that do not need the image (S4). E07-04...E07-06 add
+# One shared file for the variant B gates that do not need the image (S4). E07-04...E07-06 added
 # their jobs here; E07-14 merges this file with the shared jobs (lint, test, build) into the
 # variant B workflow. A copy of the shared jobs here would publish the image twice (H8).
 # No path filter: the gate jobs are required checks in the rulesets.
@@ -31,6 +31,10 @@ env:
   SEMGREP_RULESET: p/default
   # Python 3.14.10 slim (multi-arch index): the Python of the application, for the sca tools (Z3)
   PYTHON_IMAGE: python:3.14-slim@sha256:22eafb370920ad8b429e0aec3fff433e0669968519f5d60469d83729c138b28b
+  # Trivy 0.76.2 (same digest on ghcr.io and Docker Hub, multi-arch index); checks built into the binary
+  TRIVY_IMAGE: ghcr.io/aquasecurity/trivy@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+  # hadolint 2.15.1 (same digest on ghcr.io and Docker Hub, multi-arch index)
+  HADOLINT_IMAGE: ghcr.io/hadolint/hadolint@sha256:32dac94127fd60b7b7e3fbfc65e1383b9b5e25c9bfd7b8536de7a539fe68a12d
 
 jobs:
   # B07: secrets in the commits of this pull request or push (S1). Default Gitleaks rules;
@@ -315,3 +319,109 @@ jobs:
             "$PYTHON_IMAGE" /tools/venv/bin/python .github/scripts/sca_gate.py \
             --pip-audit reports/pip-audit.json --path app/requirements.txt \
             --exceptions .github/gate-exceptions.yaml
+
+  # B13, B14, B15: IaC scan (ADR-0047). Checkov and Trivy config on both Terraform layers
+  # (infra/terraform/work, infra/terraform/shared) and app/Dockerfile (I1); hadolint on
+  # app/Dockerfile. Checkov from PyPI with hashes, Trivy and hadolint from images by digest (D9).
+  # Full JSON and SARIF reports first, then the gate (iac_gate.py) applies the thresholds of
+  # ADR-0042 (D5, D5a, D7), the exceptions of gate-exceptions.yaml (D6), and blocks in-code
+  # suppressions (D13, I3) and scanner configuration files (I4).
+  iac:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write # upload-sarif (I5)
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install tools (hash-checked)
+        run: |
+          python3 --version
+          python3 -m venv "$RUNNER_TEMP/checkov"
+          "$RUNNER_TEMP/checkov/bin/pip" install --quiet --no-deps --require-hashes -r .github/tools/iac.txt
+          "$RUNNER_TEMP/checkov/bin/checkov" --version
+
+      - name: Pull tool images
+        run: |
+          docker pull --quiet "$TRIVY_IMAGE"
+          docker pull --quiet "$HADOLINT_IMAGE"
+
+      # One run for both targets: -d infra/terraform covers both layers, -d app finds the
+      # Dockerfile (the dockerfile framework only). --skip-download and --skip-results-upload: no
+      # calls to the Prisma Cloud platform. No --quiet: the JSON report keeps passed and skipped
+      # checks (M1, D13). Exit code 1 means failed checks and is expected; 2 is a tool error.
+      - name: Checkov (JSON for M1, SARIF for code scanning)
+        run: |
+          mkdir -p reports
+          "$RUNNER_TEMP/checkov/bin/checkov" -d infra/terraform -d app --framework terraform dockerfile \
+            --skip-download --skip-results-upload -o json -o sarif \
+            --output-file-path "$RUNNER_TEMP/checkov-out" >/dev/null || [ $? -eq 1 ]
+          mv "$RUNNER_TEMP/checkov-out/results_json.json" reports/checkov.json
+          mv "$RUNNER_TEMP/checkov-out/results_sarif.sarif" reports/checkov.sarif
+
+      # Trivy takes one target, so it scans a copy of the tracked IaC files kept at their repository
+      # paths: one report with repository-relative paths. Scanning the parent directory of the two
+      # layers in a working copy also picks up local .terraform/ directories; tracked files only
+      # avoid that. --config "" and --ignorefile "": no trivy.yaml or .trivyignore (I4).
+      # --skip-check-update: checks built into the pinned binary. Default exit code 0, so a
+      # non-zero code is a tool error.
+      - name: Trivy config (JSON for M1, SARIF for code scanning)
+        run: |
+          tree="$RUNNER_TEMP/iac-tree"
+          mkdir -p "$tree"
+          git ls-files -z infra/terraform app/Dockerfile | xargs -0 cp --parents -t "$tree"
+          for format in json sarif; do
+            docker run --rm -v "$tree:/scan:ro" -v "$PWD/reports:/reports" "$TRIVY_IMAGE" config \
+              --quiet --skip-check-update --skip-version-check --config "" --ignorefile "" \
+              --format "$format" --output "/reports/trivy-config.$format" /scan
+          done
+
+      # --no-fail: the report is written with any finding, so a non-zero code is a tool error.
+      # --disable-ignore-pragma: `# hadolint ignore=` comments are ignored (D13).
+      - name: hadolint (JSON for M1, SARIF for code scanning)
+        run: |
+          for format in json sarif; do
+            docker run --rm -v "$PWD:/repo:ro" -w /repo "$HADOLINT_IMAGE" hadolint \
+              --disable-ignore-pragma --no-fail --no-color -f "$format" app/Dockerfile \
+              >"reports/hadolint.$format"
+          done
+
+      - name: Upload reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: iac-reports
+          path: reports/
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Upload Checkov SARIF to code scanning
+        if: ${{ !cancelled() && hashFiles('reports/checkov.sarif') != '' }}
+        uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          sarif_file: reports/checkov.sarif
+          category: checkov
+
+      - name: Upload Trivy config SARIF to code scanning
+        if: ${{ !cancelled() && hashFiles('reports/trivy-config.sarif') != '' }}
+        uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          sarif_file: reports/trivy-config.sarif
+          category: trivy-config
+
+      - name: Upload hadolint SARIF to code scanning
+        if: ${{ !cancelled() && hashFiles('reports/hadolint.sarif') != '' }}
+        uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          sarif_file: reports/hadolint.sarif
+          category: hadolint
+
+      - name: Gate - Checkov any, Trivy LOW+, hadolint error
+        run: |
+          "$RUNNER_TEMP/checkov/bin/python" .github/scripts/iac_gate.py \
+            --checkov reports/checkov.json --trivy reports/trivy-config.json \
+            --hadolint reports/hadolint.json --exceptions .github/gate-exceptions.yaml \
+            --scan-path infra/terraform --scan-path app/Dockerfile

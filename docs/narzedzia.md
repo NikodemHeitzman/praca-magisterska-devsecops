@@ -27,16 +27,16 @@ Wersja najnowsza na dzień pobrania **nie jest** wersją przypiętą. Wersję pr
 | Bandit | SAST (Python) | Kod Pythona (GT-01–04), TEST-1 | 1.9.4 (w potoku, ADR-0045; nadal najnowsza 2026-11-24) | 2026-02-25 | Apache-2.0 | https://bandit.readthedocs.io/en/latest/ | https://github.com/PyCQA/bandit/releases/tag/1.9.4 |
 | pip-audit | SCA | Zależności Pythona (GT-07), TEST-2 | v2.10.1 | 2026-06-10 | Apache-2.0 | https://github.com/pypa/pip-audit | https://github.com/pypa/pip-audit/releases/tag/v2.10.1 |
 | Gitleaks | Sekrety | Sekrety w kodzie i historii (GT-02), COMMIT-REQ-1, DEPLOY-REQ-1 | v8.30.1 (w potoku, ADR-0044: obraz `ghcr.io/gitleaks/gitleaks` po digeście; nadal najnowsza 2026-11-24) | 2026-03-21 | MIT | https://github.com/gitleaks/gitleaks | https://github.com/gitleaks/gitleaks/releases/tag/v8.30.1 |
-| Checkov | IaC | Terraform i Dockerfile (GT-09, GT-10, GT-11), PRE-5* | 3.3.29 | 2026-10-13 | Apache-2.0 | https://www.checkov.io/ | https://github.com/bridgecrewio/checkov/releases/tag/3.3.29 |
-| Trivy | SCA obrazu, IaC, sekrety | Zależności (GT-07), obraz (GT-08), Dockerfile i Terraform (GT-09–11), DEPLOY-REQ-4, DEPLOY-REQ-5 | v0.76.0 | 2026-10-14 | Apache-2.0 | https://trivy.dev/docs/latest/guide/ | https://github.com/aquasecurity/trivy/releases/tag/v0.76.0 |
-| hadolint | Lint Dockerfile | Dockerfile (GT-09), PRE-5* | v2.15.1 | 2026-07-31 | GPL-3.0 | https://github.com/hadolint/hadolint | https://github.com/hadolint/hadolint/releases/tag/v2.15.1 |
+| Checkov | IaC | Terraform i Dockerfile (GT-09, GT-10, GT-11), PRE-5* | 3.3.29 (w potoku 3.4.5 z 2026-11-12, najnowsza po karencji 7 dni; z PyPI z hashami, ADR-0047) | 2026-10-13 | Apache-2.0 | https://www.checkov.io/ | https://github.com/bridgecrewio/checkov/releases/tag/3.3.29 |
+| Trivy | SCA obrazu, IaC, sekrety | Zależności (GT-07), obraz (GT-08), Dockerfile i Terraform (GT-09–11), DEPLOY-REQ-4, DEPLOY-REQ-5 | v0.76.0 (w potoku v0.76.2 z 2026-11-05: obraz `ghcr.io/aquasecurity/trivy` po digeście, ADR-0047) | 2026-10-14 | Apache-2.0 | https://trivy.dev/docs/latest/guide/ | https://github.com/aquasecurity/trivy/releases/tag/v0.76.0 |
+| hadolint | Lint Dockerfile | Dockerfile (GT-09), PRE-5* | v2.15.1 (w potoku, ADR-0047: obraz `ghcr.io/hadolint/hadolint` po digeście; nadal najnowsza 2026-11-24) | 2026-07-31 | GPL-3.0 | https://github.com/hadolint/hadolint | https://github.com/hadolint/hadolint/releases/tag/v2.15.1 |
 | Syft | SBOM | SBOM obrazu, TEST-2, BASE-4* | v1.54.1 | 2026-10-06 | Apache-2.0 | https://github.com/anchore/syft | https://github.com/anchore/syft/releases/tag/v1.54.1 |
 | Cosign | Podpisy | Podpis obrazu (alternatywa albo uzupełnienie atestacji GitHuba), ATT-1* | v3.1.3 | 2026-08-06 | Apache-2.0 | https://docs.sigstore.dev/cosign/ | https://github.com/sigstore/cosign/releases/tag/v3.1.3 |
 | OWASP ZAP | DAST | Baseline na kontenerze w runnerze (GT-01, GT-05, GT-12–14), TEST-1, audyt po wdrożeniu | v2.17.0 | 2025-12-15 | Apache-2.0 | https://www.zaproxy.org/docs/docker/baseline-scan/ | https://github.com/zaproxy/zaproxy/releases/tag/v2.17.0 |
 | actionlint | Lint workflow | Workflow GitHub Actions (GT-17), PRE-5*, DEPLOY-REQ-5 | v1.7.12 | 2026-03-30 | MIT | https://github.com/rhysd/actionlint | https://github.com/rhysd/actionlint/releases/tag/v1.7.12 |
 | zizmor | Audyt bezpieczeństwa workflow | Workflow (GT-15, GT-16, GT-17), PRE-5*, DEPLOY-REQ-5 | v1.32.0 (w potoku, ADR-0043; wcześniej w zestawieniu v1.31.1) | 2026-11-02 | MIT | https://docs.zizmor.sh/ | https://github.com/zizmorcore/zizmor/releases/tag/v1.32.0 |
 
-Wymagana wersja Pythona dla narzędzi instalowanych z PyPI (`requires_python`): Semgrep, Bandit i pip-audit `>=3.10`, Checkov `>=3.9`.
+Wymagana wersja Pythona dla narzędzi instalowanych z PyPI (`requires_python`): Semgrep, Bandit i pip-audit `>=3.10`, Checkov `>=3.9` (3.3.29; w 3.4.5 `>=3.10`).
 
 ## 2. Akcje GitHub (kandydaci)
 

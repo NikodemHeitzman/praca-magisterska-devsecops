@@ -64,3 +64,4 @@ ADR (*Architecture Decision Record*) to krótki zapis jednej decyzji technicznej
 | [0044](0044-skanowanie-sekretow.md) | Skanowanie sekretów: Gitleaks na commitach PR i pushu, domyślne reguły, wspólny plik bramek `devsecops-gates.yml`, doradczy hook pre-commit | przyjęty | 2026-11-24 |
 | [0045](0045-sast-semgrep-i-bandit.md) | SAST: Semgrep z zestawem `p/default` i regułami własnymi oraz Bandit, próg w osobnym skrypcie, wspólna lista wyjątków bramek | przyjęty | 2026-11-24 |
 | [0046](0046-sca-pip-audit-i-dependabot.md) | SCA: pip-audit z bazą OSV na zależnościach runtime, kontrola zgodności `uv.lock` i `requirements.txt`, Dependabot | przyjęty | 2026-11-24 |
+| [0047](0047-skanowanie-iac-checkov-trivy-hadolint.md) | Skanowanie IaC: Checkov, Trivy config i hadolint na obu warstwach Terraformu i Dockerfile | proponowany | 2026-11-24 |
