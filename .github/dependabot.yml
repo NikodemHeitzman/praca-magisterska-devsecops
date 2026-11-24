@@ -33,12 +33,17 @@ updates:
         patterns: ["*"]
 
   # Base images in app/Dockerfile (pinned by tag and digest).
+  # The uv image is ignored: its version must match UV_VERSION and UV_CHECKSUM in the workflows,
+  # and variant A is frozen (pipeline-a-v1, ADR-0041). uv is updated by hand in all places at once.
   - package-ecosystem: docker
     directory: /app
     schedule:
       interval: weekly
     cooldown:
       default-days: 7
+    ignore:
+      - dependency-name: astral-sh/uv # name used in Dependabot PR #14
+      - dependency-name: ghcr.io/astral-sh/uv
     groups:
       docker:
         patterns: ["*"]
