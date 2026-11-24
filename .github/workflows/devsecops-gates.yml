@@ -145,7 +145,10 @@ jobs:
           "$RUNNER_TEMP/bandit/bin/bandit" --version
 
       # The registry ruleset is not stored: its license forbids redistribution (T2). The run keeps
-      # its SHA-256 and rule ids, so the analysis can tell whether the ruleset changed in a series.
+      # hashes and rule ids, so the analysis can tell whether the ruleset changed in a series.
+      # The served bytes differ between runs with the same rules (CDN, PR #22 vs #23), so the
+      # comparison uses a canonical hash: one SHA-256 per parsed rule (keys sorted) and one over
+      # all of them. The raw file hash is kept for reference only.
       - name: Fetch Semgrep registry ruleset
         run: |
           mkdir -p reports
@@ -153,13 +156,18 @@ jobs:
             "https://semgrep.dev/c/$SEMGREP_RULESET" -o registry-ruleset.yaml
           "$RUNNER_TEMP/bandit/bin/python" - registry-ruleset.yaml <<'PY' >reports/semgrep-ruleset.json
           import hashlib, json, os, sys, yaml
-          path = sys.argv[1]
-          data = open(path, "rb").read()
-          ids = sorted(r["id"] for r in yaml.safe_load(data)["rules"])
-          json.dump({"ruleset": os.environ["SEMGREP_RULESET"], "sha256": hashlib.sha256(data).hexdigest(),
-                     "rule_count": len(ids), "rule_ids": ids}, sys.stdout, indent=1)
+          def sha(b): return hashlib.sha256(b).hexdigest()
+          def canon(o): return json.dumps(o, sort_keys=True, separators=(",", ":")).encode()
+          data = open(sys.argv[1], "rb").read()
+          rules = yaml.safe_load(data)["rules"]
+          per_rule = {r["id"]: sha(canon(r)) for r in rules}
+          assert len(per_rule) == len(rules), "duplicate rule ids"
+          json.dump({"ruleset": os.environ["SEMGREP_RULESET"], "rule_count": len(rules),
+                     "sha256_canonical": sha(canon(per_rule)), "sha256_raw": sha(data),
+                     "rule_sha256": dict(sorted(per_rule.items()))}, sys.stdout, indent=1)
           PY
-          jq -r '"\(.ruleset): \(.rule_count) rules, sha256 \(.sha256)"' reports/semgrep-ruleset.json
+          jq -r '"\(.ruleset): \(.rule_count) rules, canonical sha256 \(.sha256_canonical) (raw \(.sha256_raw))"' \
+            reports/semgrep-ruleset.json
 
       # Without --error Semgrep exits 0 with findings; any other code is a tool failure (T5).
       # Semgrep prefixes rule ids with the directory of a local config file, so the registry
