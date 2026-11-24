@@ -102,7 +102,7 @@ Decyzje agenta (techniczne, w ramach decyzji autora i ADR-0042):
 - (−) Format wyjątku nie ma jeszcze daty wygaśnięcia, której wymaga Z7. Pole i proces doda E07-11.
 - Dependabot (kryterium E07-05): alerty i security updates włączone w E07-02 (ADR-0043, H6), stan potwierdzony 2026-11-24 (Kontekst). To kontrola platformy (B04), poza pomiarem (ADR-0042, sekcja 4.4).
 - Kolejne kroki:
-  - **po scaleniu:** `sca` jako wymagany check, `settings.sh apply` za zgodą autora,
+  - ~~**po scaleniu:** `sca` jako wymagany check, `settings.sh apply` za zgodą autora~~ wykonane 2026-11-24: PR #25 scalony (`2772389`), `apply` zaktualizował rulesety `main`, `tags` i `exp-variant-b`; API potwierdza `sca` jako wymagany check w `main` i `exp-variant-b`. PR #26 zamknięty bez scalania. Przebieg na pushu do `main` (`devsecops-gates` 45432981791, `2772389`): `secrets`, `sast` i `sca` przechodzą; `baseline-ci` i `workflow-lint` też,
   - **E07-12:** zbiorczy raport musi usuwać duplikaty z raportu pip-audit,
   - **E07-14:** zamrożenie wersji z `variant-b.yaml`.
 
