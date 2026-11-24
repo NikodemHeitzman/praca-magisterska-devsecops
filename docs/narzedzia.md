@@ -34,7 +34,7 @@ Wersja najnowsza na dzień pobrania **nie jest** wersją przypiętą. Wersję pr
 | Cosign | Podpisy | Podpis obrazu (alternatywa albo uzupełnienie atestacji GitHuba), ATT-1* | v3.1.3 | 2026-08-06 | Apache-2.0 | https://docs.sigstore.dev/cosign/ | https://github.com/sigstore/cosign/releases/tag/v3.1.3 |
 | OWASP ZAP | DAST | Baseline na kontenerze w runnerze (GT-01, GT-05, GT-12–14), TEST-1, audyt po wdrożeniu | v2.17.0 | 2025-12-15 | Apache-2.0 | https://www.zaproxy.org/docs/docker/baseline-scan/ | https://github.com/zaproxy/zaproxy/releases/tag/v2.17.0 |
 | actionlint | Lint workflow | Workflow GitHub Actions (GT-17), PRE-5*, DEPLOY-REQ-5 | v1.7.12 | 2026-03-30 | MIT | https://github.com/rhysd/actionlint | https://github.com/rhysd/actionlint/releases/tag/v1.7.12 |
-| zizmor | Audyt bezpieczeństwa workflow | Workflow (GT-15, GT-16, GT-17), PRE-5*, DEPLOY-REQ-5 | v1.31.1 | 2026-10-15 | MIT | https://docs.zizmor.sh/ | https://github.com/zizmorcore/zizmor/releases/tag/v1.31.1 |
+| zizmor | Audyt bezpieczeństwa workflow | Workflow (GT-15, GT-16, GT-17), PRE-5*, DEPLOY-REQ-5 | v1.32.0 (w potoku, ADR-0043; wcześniej w zestawieniu v1.31.1) | 2026-11-02 | MIT | https://docs.zizmor.sh/ | https://github.com/zizmorcore/zizmor/releases/tag/v1.32.0 |
 
 Wymagana wersja Pythona dla narzędzi instalowanych z PyPI (`requires_python`): Semgrep, Bandit i pip-audit `>=3.10`, Checkov `>=3.9`.
 

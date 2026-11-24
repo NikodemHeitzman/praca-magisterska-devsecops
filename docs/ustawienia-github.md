@@ -25,7 +25,7 @@ Zmiana ustawienia: najpierw zmiana pliku w `infra/github/` w PR, po scaleniu `ap
 | Secret scanning i push protection | włączone | włączone | `settings.sh` | B03 | ADR-0042 |
 | Dependabot: alerty | włączone | wyłączone | `settings.sh` | B04 | H6 |
 | Dependabot: security updates | włączone | wyłączone | `settings.sh` | B04 | H6 |
-| Dependabot: aktualizacje wersji | `github-actions`, `uv`, `docker`, co tydzień, karencja 7 dni | brak pliku | `.github/dependabot.yml` | B04 | H6 |
+| Dependabot: aktualizacje wersji | `github-actions` i `docker` (bez obrazu uv), co tydzień, karencja 7 dni; Python ręcznie przez uv (od 2026-11-24) | brak pliku | `.github/dependabot.yml` | B04 | H6, zmiana 2026-11-24 (ADR-0043) |
 | Domyślne uprawnienia `GITHUB_TOKEN` | tylko odczyt, bez zatwierdzania PR | tak samo | `settings.sh` | B05 | ADR-0042 |
 | Zgoda na workflow z forków | wszyscy zewnętrzni kontrybutorzy | tylko pierwszy wkład | `settings.sh` | B05 | H9 |
 | Dozwolone akcje | akcje GitHuba i lista `allowed_patterns` (`astral-sh/setup-uv@*`) | wszystkie | `settings.sh` | B05 | H7 |

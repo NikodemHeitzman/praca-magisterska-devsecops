@@ -79,7 +79,8 @@ Decyzje agenta (techniczne, w ramach decyzji autora):
 - (+) Zamrożone tagi (`pipeline-a-v1`, `methodology-v1`) nie mogą zostać przesunięte ani usunięte.
 - (−) Każda nowa akcja firmy trzeciej wymaga dopisania do `allowed_patterns` w `infra/github/settings.sh` i ponownego `apply`.
 - (−) Obejście na `exp/variant-b` (H13) pozwala właścicielowi pushować bez checków. Na pushu bramek pilnuje atestacja (D3), ale samo obejście to ryzyko resztkowe (materiał do 5.3, razem z brakiem drugiego recenzenta).
-- (−) Dependabot aktualizuje `uv.lock`, ale nie `requirements.txt` (eksport z `uv.lock`). PR Dependabota trzeba uzupełnić o nowy eksport, inaczej kontrola zgodności z E07-05 go zablokuje.
+- (−) Dependabot nie utrzymuje razem `uv.lock` i `requirements.txt` (eksport z `uv.lock`). Pierwsza security update (PR #13, `dnspython` 2.9.2, 2026-11-23) zmieniła tylko `requirements.txt`, bo alert dotyczył też tego pliku jako manifestu pip. Tak samo zgrupowane aktualizacje wersji (PR #15, 12 pakietów). Decyzja autora z 2026-11-24 (zmiana H6): aktualizacje wersji Pythona wyłączone w `.github/dependabot.yml`, alerty i security updates zostają; PR-y Dependabota dla Pythona zamykamy, a zależności aktualizujemy ręcznie (`uv lock --upgrade-package` i nowy eksport) przed zamrożeniem czystej wersji.
+- (−) Ekosystem `docker` proponuje też nowy obraz uv (PR #14, 0.13.9), a wersja uv musi być ta sama w `app/Dockerfile` i w `UV_VERSION` workflowów, przy zamrożonym wariancie A. Decyzja autora z 2026-11-24: reguła `ignore` dla obrazu uv w `.github/dependabot.yml`; uv aktualizujemy ręcznie we wszystkich miejscach naraz, w A tylko przez nowy tag zamrożenia (ADR-0041).
 - Kolejne zadania:
   - **E07-03…E07-10:** każde zadanie dopisuje swój job do `required_status_checks` w `infra/github/rulesets/main.json` i `variant-b.json` i uruchamia `infra/github/settings.sh apply`,
   - **E07-14:** przenieść job `workflow-lint` do workflow wariantu B i usunąć `workflow-lint.yml`,
@@ -87,9 +88,9 @@ Decyzje agenta (techniczne, w ramach decyzji autora):
 - Sprawdzone po pierwszym `apply` (2026-11-23):
   - `actor_id: 5` to rola admina: API zwraca `current_user_can_bypass` = `always` dla `exp-variant-b` i `never` dla `main` i `tags`,
   - `patterns_allowed` zapisane (repozytorium jest publiczne),
-  - API dopisuje do reguły `pull_request` domyślny parametr `require_extra_approval_for_unattributed_changes: true`, a z reguły `update` dla tagów usuwa `update_allows_fetch_and_merge`. Pliki JSON zapisują stan zwrócony przez API.
+  - API dopisuje do reguły `pull_request` domyślny parametr `require_extra_approval_for_unattributed_changes: true`, a z reguły `update` dla tagów usuwa `update_allows_fetch_and_merge`. Pliki JSON zapisują stan zwrócony przez API. Parametr dotyczy PR-ów otwieranych przez Copilota bez przypisanej osoby i według dokumentacji nie działa przy zerowej liczbie wymaganych zatwierdzeń (strona „Available rules for rulesets”, dostęp 2026-11-24), więc w tym repozytorium nie ma skutku.
 - Test negatywny (PR #12, 2026-11-23, szczegóły w dzienniku): akcję przypiętą do tagu zatrzymały trzy warstwy: zizmor w `workflow-lint` (high), polityka platformy (`startup_failure` z adnotacją o SHA i liście) i ruleset (PR `BLOCKED`). Akcja przypięta do SHA, ale spoza listy, przeszła przez zizmora i zatrzymała ją tylko platforma (`startup_failure`).
-- TODO: zweryfikować: przyczynę `startup_failure` akcji spoza listy (brak adnotacji); znaczenie `require_extra_approval_for_unattributed_changes` przy zerowej liczbie zatwierdzeń; czy reguła `update` nie blokuje tworzenia nowych tagów (według dokumentacji tworzenie to osobna reguła `creation`; sprawdzić przy następnym tagu, np. zamrożeniu B).
+- TODO: zweryfikować: przyczynę `startup_failure` akcji spoza listy (brak adnotacji); czy reguła `update` nie blokuje tworzenia nowych tagów (według dokumentacji tworzenie to osobna reguła `creation`; sprawdzić przy następnym tagu, np. zamrożeniu B).
 
 ## Źródła
 
