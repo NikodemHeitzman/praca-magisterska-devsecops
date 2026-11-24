@@ -74,5 +74,6 @@ Na tej próbie precyzja reguły GT-06 wynosi 8/14. W eksperymencie liczą się f
 ## Uwagi dla potoku
 
 - Pliki testów zawierają celowo podatny kod. Skanery w potoku (Semgrep, Bandit, CodeQL) uruchamiamy na `app/` albo wykluczamy z nich `semgrep-rules/`. W przeciwnym razie testy reguł staną się zgłoszeniami w eksperymencie.
-- Wywołanie w wariancie B: `semgrep --config p/python --config semgrep-rules/ app/` (zestaw rejestru do ustalenia w E07).
+- Wywołanie w wariancie B (E07-04, ADR-0045): zestaw rejestru `p/default` pobrany do pliku w katalogu głównym repozytorium i `--config semgrep-rules/`, cel `app/` bez `app/tests/`, job `sast` w `.github/workflows/devsecops-gates.yml`. Semgrep dodaje do ID reguł z lokalnego pliku prefiks z katalogu pliku, więc reguły własne mają w raportach ID `semgrep-rules.python-log-injection` i `semgrep-rules.python-asgi-debug-enabled`.
+- Testy reguł przechodzą też w Semgrep 1.185.0 (Linux, 2026-11-24): 2/2 pliki.
 - Czas pisania i testowania reguł (koszt, RQ2): TODO: zweryfikować; decyzja autora z 2026-11-16: przedziały odtworzone z commitów i sesji, oznaczone jako przybliżone, poprawia autor.

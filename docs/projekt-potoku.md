@@ -177,7 +177,7 @@ Elementy z listy kontrolnej, które celowo **nie** są krokami wariantu B (D11):
    - brak pliku raportu, pusty albo niepoprawny raport → bramka nie przechodzi,
    - błąd narzędzia (kod wyjścia inny niż „są zgłoszenia”) → bramka nie przechodzi,
    - przekroczenie `timeout-minutes` → bramka nie przechodzi,
-   - kod wyjścia każdego narzędzia sprawdzony w dokumentacji przed zamrożeniem (TODO: zweryfikować dla każdego narzędzia z tabeli 4.2; sprawdzone: Gitleaks 2026-11-24, ADR-0044, zizmor i actionlint w ADR-0043).
+   - kod wyjścia każdego narzędzia sprawdzony w dokumentacji przed zamrożeniem (TODO: zweryfikować dla każdego narzędzia z tabeli 4.2; sprawdzone: Gitleaks 2026-11-24, ADR-0044, zizmor i actionlint w ADR-0043, Semgrep i Bandit 2026-11-24, ADR-0045).
 4. **Progi są stałe przez całą serię** (K5). Zmiana progu po starcie serii oznacza powtórzenie serii (`experiment/PROTOCOL.md`, sekcja 0).
 5. **Wersje narzędzi przypięte** (K4): akcje do SHA, obrazy do digestu, pakiety PyPI do dokładnej wersji. Wersje trafią do `experiment/versions/variant-b.yaml` w układzie pliku wariantu A.
 
@@ -194,8 +194,8 @@ Skutki reguły dla pozycji katalogu sprawdzamy po jej przyjęciu i zapisujemy w 
 | Bramka | Narzędzie | Co blokuje | Co tylko raportuje | Uwagi |
 |---|---|---|---|---|
 | `secrets` | Gitleaks | każde zgłoszenie | — | Gitleaks nie ma poziomów ważności. Skan commitów PR (`base..head`) albo pushu (`before..after`); `--exit-code 2` oddziela zgłoszenia od błędu narzędzia (kod 1); ADR-0044 |
-| `sast` | Semgrep | `ERROR` i `WARNING` | `INFO` | TODO: zweryfikować nazwy ważności w JSON/SARIF Semgrep 1.181.0 (starsze `ERROR`/`WARNING`/`INFO` czy nowsze `CRITICAL`/`HIGH`/`MEDIUM`/`LOW`); przy nowszych blokuje wszystko poza `INFO` |
-| `sast` | Bandit | ważność `LOW` i wyżej przy pewności `MEDIUM` i wyżej | pewność `LOW` | B105 (GT-02, ważność LOW) blokuje, więc GT-02 ma dwa detektory blokujące. TODO: zweryfikować pewność B105 w Bandit 1.9.4 i to, czy próg pewności nie odcina pozycji katalogu |
+| `sast` | Semgrep | wszystko poza `INFO`: `ERROR`, `WARNING`, a z nowej skali także `LOW`, `MEDIUM`, `HIGH`, `CRITICAL` i każda nieznana wartość | `INFO` | Skala w regułach rejestru jest mieszana (Semgrep 1.185.0, 2026-11-24: `p/default` ma reguły `ERROR`, `WARNING`, `INFO` i 11 reguł `MEDIUM`), a `--severity` zna tylko starą skalę, więc próg stosuje `.github/scripts/sast_gate.py` na raporcie JSON (ADR-0045, T7) |
+| `sast` | Bandit | ważność `LOW` i wyżej przy pewności `MEDIUM` i wyżej (nieznana pewność też blokuje) | pewność `LOW` | B105 ma w Bandit 1.9.4 ważność LOW i pewność MEDIUM (`general_hardcoded_password.py`), więc blokuje. GT-02 ma trzy detektory blokujące: Gitleaks, Bandit B105 i Semgrep `detected-generic-secret` z `p/default` (łatka próbna, 2026-11-24, ADR-0045) |
 | `sca` | pip-audit | każda znana podatność | — | pip-audit nie filtruje według ważności (TODO: zweryfikować w dokumentacji) |
 | `sca` | zgodność `requirements.txt` ↔ `uv.lock` | każda różnica | — | kontrola integralności, nie wykrywanie |
 | `iac` | Checkov | każda nieudana kontrola spoza listy wyjątków | — | Checkov bez platformy nie podaje ważności |
@@ -211,8 +211,8 @@ Skutki reguły dla pozycji katalogu sprawdzamy po jej przyjęciu i zapisujemy w 
 ### 4.3. Stan bazowy i wyjątki
 
 - **Czysta wersja musi przejść wszystkie bramki** (`experiment/PROTOCOL.md`, p. 2.3 i 3.3). Inaczej każda próba kończy się blokadą bez związku z pozycją (Z3).
-- **Wyjątki tylko przed serią** (D6): w plikach konfiguracji narzędzi w repozytorium, każdy z identyfikatorem reguły, zakresem (plik), uzasadnieniem i datą. Lista wyjątków jest częścią K5 i zamarza z progami. W czasie serii nowych wyjątków nie ma (TW2, `docs/notes/owasp-devsecops.md`, p. 1.5).
-- **Wyciszenia w kodzie są ignorowane** (D13): komentarze `# nosec` i `# nosemgrep` dodane w PR nie wyłączają bramki, bo PR mógłby sam wyciszyć zgłoszenie (I-PPE, CICD-SEC-4). TODO: zweryfikować opcje `--ignore-nosec` (Bandit) i `--disable-nosem` (Semgrep) w przypiętych wersjach.
+- **Wyjątki tylko przed serią** (D6): we wspólnym pliku `.github/gate-exceptions.yaml` (ADR-0045, T8), każdy z narzędziem, identyfikatorem reguły, zakresem (plik), uzasadnieniem i datą. Stosuje go krok bramki, więc pełne raporty narzędzi zostają w danych. Gitleaks ma własny mechanizm `.gitleaks.toml` (ADR-0044, S2), na razie bez wpisów. Lista wyjątków jest częścią K5 i zamarza z progami. W czasie serii nowych wyjątków nie ma (TW2, `docs/notes/owasp-devsecops.md`, p. 1.5).
+- **Wyciszenia w kodzie są ignorowane** (D13): komentarze `# nosec` i `# nosemgrep` dodane w PR nie wyłączają bramki, bo PR mógłby sam wyciszyć zgłoszenie (I-PPE, CICD-SEC-4). Opcje `--ignore-nosec` (Bandit 1.9.4) i `--disable-nosem` (Semgrep 1.185.0) istnieją i działają: łatka próbna z `# nosec` i `# nosemgrep` została zablokowana (2026-11-24, ADR-0045).
 
 ### 4.4. Co tylko ostrzega
 
@@ -305,7 +305,7 @@ Zgłoszenia czystej wersji wynikające ze świadomych decyzji obsługuje lista w
 - **zgodne z Guideline:** wyjątek z uzasadnieniem, właścicielem i datą (`2-3-5 Security Gates`, `docs/notes/owasp-devsecops.md`, p. 1.5),
 - **jawnie widoczne:** każdy wyjątek jest w repozytorium z uzasadnieniem, więc recenzent widzi, co i dlaczego jest pominięte.
 
-Konsekwencja: przed zamrożeniem trzeba uruchomić wszystkie bramki na czystej wersji i spisać zgłoszenia (Trivy config: 8 trafień z E05-04; Gitleaks: 0 zgłoszeń w pełnej historii, 2026-11-24, ADR-0044; reszta: TODO: zweryfikować w pilotażu). Każdy wyjątek musi wynikać z decyzji zapisanej wcześniej (ADR), a nie z chęci przejścia bramki.
+Konsekwencja: przed zamrożeniem trzeba uruchomić wszystkie bramki na czystej wersji i spisać zgłoszenia (Trivy config: 8 trafień z E05-04; Gitleaks: 0 zgłoszeń w pełnej historii, 2026-11-24, ADR-0044; Semgrep i Bandit: 3 zgłoszenia, 2026-11-24, ADR-0045; reszta: TODO: zweryfikować w pilotażu). Każdy wyjątek musi wynikać z decyzji zapisanej wcześniej (ADR), a nie z chęci przejścia bramki.
 
 ### D7. hadolint jest bramką, `dependency-review-action` nie wchodzi do wariantu B (Q7)
 
@@ -378,7 +378,7 @@ Bandit działa z `--ignore-nosec`, a Semgrep z `--disable-nosem`, więc komentar
 Konsekwencje:
 
 - PR nie może sam wyłączyć bramki komentarzem w kodzie (I-PPE, CICD-SEC-4), choć autor nie wskazał tego jako powodu,
-- TODO: zweryfikować nazwy opcji w przypiętych wersjach Bandit 1.9.4 i Semgrep 1.181.0,
+- nazwy opcji sprawdzone w przypiętych wersjach Bandit 1.9.4 i Semgrep 1.185.0 (2026-11-24, ADR-0045),
 - czysta wersja aplikacji nie może polegać na wyciszeniach; jej zgłoszenia idą na listę wyjątków (D6).
 
 ## 6. Pytania do autora (wywiad 2026-11-20, wszystkie rozstrzygnięte)

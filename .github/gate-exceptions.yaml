@@ -1,0 +1,47 @@
+# Exceptions of the variant B gates (ADR-0042, D6; ADR-0045, T8).
+#
+# The single place where a finding may be excluded from a gate. In-code suppressions
+# (`# nosec`, `# nosemgrep`) are ignored (D13). Tools still write full reports: the gate step
+# reads this file and skips only the listed findings, so excepted findings stay in the data (M1).
+#
+# The list holds findings of the clean application version only. It is frozen with the gate
+# configuration before the series (PROTOCOL.md, K5); a change during the series is a deviation
+# recorded in the research log.
+#
+# Fields (all required, the gate fails on an incomplete entry):
+#   tool    – tool name as used by the gate (semgrep, bandit)
+#   rule    – rule id exactly as in the tool's JSON report (Semgrep check_id, Bandit test_id)
+#   path    – file path relative to the repository root, as in the report
+#   reason  – why the finding is accepted in the clean version
+#   added   – date and task
+# A match is tool + rule + path (not the line), so an exception survives unrelated edits of the
+# file. It also hides a new finding of the same rule in the same file; no catalogue item expects
+# these rules in these files (experiment/ground-truth.yaml).
+
+exceptions:
+  - tool: bandit
+    rule: B108
+    path: app/ticketing/config.py
+    reason: >-
+      Approved by the author 2026-11-24. Default of ATTACHMENT_CACHE_DIR
+      (/tmp/ticketing-attachments, also set in app/compose.yaml). The application runs alone
+      in its container, so /tmp is not shared with other users or processes.
+    added: 2026-11-24 E07-04
+
+  - tool: semgrep
+    rule: package_managers.uv.uv-missing-dependency-cooldown.uv-missing-dependency-cooldown
+    path: app/pyproject.toml
+    reason: >-
+      Approved by the author 2026-11-24. Application dependencies are updated by hand
+      with uv lock (dependabot.yml); a resolver cooldown is not part of the clean version.
+    added: 2026-11-24 E07-04
+
+  - tool: semgrep
+    rule: python.django.security.django-no-csrf-token.django-no-csrf-token
+    path: app/ticketing/templates/login.html
+    reason: >-
+      Approved by the author 2026-11-24. Django rule applied to a Jinja template of a
+      FastAPI application. The API authenticates with bearer tokens in the Authorization
+      header, not cookies (app/ticketing/main.py), so a cross-site form post carries no
+      credentials.
+    added: 2026-11-24 E07-04

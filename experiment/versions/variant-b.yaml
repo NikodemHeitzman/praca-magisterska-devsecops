@@ -17,9 +17,9 @@ data_zamrozenia: null
 workflow:
   - plik: .github/workflows/devsecops-gates.yml
     nazwa: devsecops-gates
-    joby: [secrets]  # E07-04…E07-06 dopisują sast, sca, iac (ADR-0044, S4)
+    joby: [secrets, sast]  # E07-05, E07-06 dopisują sca, iac (ADR-0044, S4)
     mierzony: true
-    adr: [ADR-0042, ADR-0044]
+    adr: [ADR-0042, ADR-0044, ADR-0045]
   - plik: .github/workflows/workflow-lint.yml
     nazwa: workflow-lint
     joby: [workflow-lint]
@@ -31,17 +31,17 @@ akcje:
     wersja: v7.0.1
     sha: 3d3c42e5aac5ba805825da76410c181273ba90b1
     przypiete: true
-    joby: [secrets, workflow-lint]
+    joby: [secrets, sast, workflow-lint]
   - nazwa: actions/upload-artifact
     wersja: v7.0.2
     sha: cf430e030ddbb5b0abf93d22962f4752f3646cd9
     przypiete: true
-    joby: [secrets, workflow-lint]
+    joby: [secrets, sast, workflow-lint]
   - nazwa: github/codeql-action/upload-sarif
     wersja: v4.39.3
     sha: 33d7b85da1a04171e211befe2c739303b9a4c066
     przypiete: true
-    joby: [secrets]
+    joby: [secrets, sast]
     uwaga: v4.39.4 (2026-11-20) pominięta, bo nie przeszła karencji 7 dni (ADR-0043 H6, ADR-0044)
 
 narzedzia:
@@ -53,6 +53,31 @@ narzedzia:
     reguly: domyślne  # bez .gitleaks.toml; czysta wersja bez zgłoszeń (ADR-0044, S2)
     opcje: [--redact, --ignore-gitleaks-allow, --exit-code 2]
     zakres: commity PR (base..head) albo pushu (before..after)  # ADR-0044, S1
+  semgrep:
+    wersja: 1.185.0
+    zrodlo: PyPI, .github/tools/semgrep.txt (wszystkie zależności z hashami, pip --require-hashes)
+    przypiete: true
+    job: sast
+    reguly:
+      rejestr: p/default  # pobierany w każdym przebiegu; licencja nie pozwala go przechowywać (ADR-0045, T1, T2)
+      rejestr_przypiete: false  # ślad: reports/semgrep-ruleset.json (suma kanoniczna i SHA-256 każdej reguły) w artefakcie sast-reports
+      rejestr_obserwacja: {data: 2026-11-24, reguly: 1074, sha256_kanoniczna: 2989307587dddfed3601cf2a67c8ea20a98b5feb0ee72cb642f2795f88db8a52}
+      wlasne: semgrep-rules/  # GT-06, GT-14; ID z prefiksem semgrep-rules.
+    opcje: [--metrics=off, --disable-version-check, --disable-nosem, --exclude app/tests]
+    cel: app/
+    prog: wszystko poza INFO, nieznana ważność blokuje (ADR-0045, T7)
+  bandit:
+    wersja: 1.9.4
+    zrodlo: PyPI, .github/tools/bandit.txt (bandit[sarif], PyYAML dla skryptu bramki; z hashami)
+    przypiete: true
+    job: sast
+    opcje: [--recursive, --exclude app/tests, --ignore-nosec, --exit-zero]
+    cel: app/
+    prog: ważność LOW+ przy pewności MEDIUM+, nieznana pewność blokuje (ADR-0042 D5)
+  python_runnera:
+    wersja: 3.12  # python3 obrazu ubuntu-24.04; w teście lokalnym 3.12.16
+    przypiete: false
+    job: sast
   actionlint:
     wersja: 1.7.12
     obraz: rhysd/actionlint@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
@@ -74,4 +99,10 @@ poza_pomiarem:
     tryb: doradczo  # B01, ADR-0044 S5
 
 # Wyjątki czystej wersji (D6): lista zamarza z progami (K5).
-wyjatki: []  # Gitleaks: brak (2026-11-24, ADR-0044)
+wyjatki:
+  plik: .github/gate-exceptions.yaml  # wspólny dla bramek (ADR-0045, T8)
+  gitleaks: []  # brak, mechanizm .gitleaks.toml (2026-11-24, ADR-0044)
+  sast:  # czysta wersja, 2026-11-24 (ADR-0045)
+    - {narzedzie: bandit, regula: B108, plik: app/ticketing/config.py}
+    - {narzedzie: semgrep, regula: package_managers.uv.uv-missing-dependency-cooldown.uv-missing-dependency-cooldown, plik: app/pyproject.toml}
+    - {narzedzie: semgrep, regula: python.django.security.django-no-csrf-token.django-no-csrf-token, plik: app/ticketing/templates/login.html}
