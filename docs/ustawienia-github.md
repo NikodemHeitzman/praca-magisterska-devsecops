@@ -19,7 +19,7 @@ Zmiana ustawienia: najpierw zmiana pliku w `infra/github/` w PR, po scaleniu `ap
 
 | Ustawienie | Wartość docelowa | Przed E07-02 (2026-11-23) | Gdzie zapisane | Krok | Decyzja |
 |---|---|---|---|---|---|
-| Ruleset `main` | PR wymagany (0 zatwierdzeń), wymagane checki `lint`, `test`, `build`, `workflow-lint`, `secrets` (od E07-03) z GitHub Actions, blokada force push i usunięcia, bez obejść | brak | `rulesets/main.json` | B02 | H1–H3, H11 |
+| Ruleset `main` | PR wymagany (0 zatwierdzeń), wymagane checki `lint`, `test`, `build`, `workflow-lint`, `secrets` (od E07-03), `sast` (od E07-04), `sca` (od E07-05), `iac` (od E07-06) z GitHub Actions, blokada force push i usunięcia, bez obejść | brak | `rulesets/main.json` | B02 | H1–H3, H11 |
 | Ruleset `exp-variant-b` | jak `main`, a do tego obejście dla roli admina (`always`) i `do_not_enforce_on_create` | brak | `rulesets/variant-b.json` | B02 | H1, H3, H13 |
 | Ruleset `tags` | wszystkie tagi: zakaz usunięcia, force push i przesunięcia | brak | `rulesets/tags.json` | (odtwarzalność) | H11 |
 | Secret scanning i push protection | włączone | włączone | `settings.sh` | B03 | ADR-0042 |

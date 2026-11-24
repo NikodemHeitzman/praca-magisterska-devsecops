@@ -17,9 +17,9 @@ data_zamrozenia: null
 workflow:
   - plik: .github/workflows/devsecops-gates.yml
     nazwa: devsecops-gates
-    joby: [secrets, sast, sca]  # E07-06 dopisuje iac (ADR-0044, S4)
+    joby: [secrets, sast, sca, iac]  # komplet jobów bez obrazu (ADR-0044, S4)
     mierzony: true
-    adr: [ADR-0042, ADR-0044, ADR-0045, ADR-0046]
+    adr: [ADR-0042, ADR-0044, ADR-0045, ADR-0046, ADR-0047]
   - plik: .github/workflows/workflow-lint.yml
     nazwa: workflow-lint
     joby: [workflow-lint]
@@ -31,17 +31,17 @@ akcje:
     wersja: v7.0.1
     sha: 3d3c42e5aac5ba805825da76410c181273ba90b1
     przypiete: true
-    joby: [secrets, sast, sca, workflow-lint]
+    joby: [secrets, sast, sca, iac, workflow-lint]
   - nazwa: actions/upload-artifact
     wersja: v7.0.2
     sha: cf430e030ddbb5b0abf93d22962f4752f3646cd9
     przypiete: true
-    joby: [secrets, sast, sca, workflow-lint]
+    joby: [secrets, sast, sca, iac, workflow-lint]
   - nazwa: github/codeql-action/upload-sarif
     wersja: v4.39.3
     sha: 33d7b85da1a04171e211befe2c739303b9a4c066
     przypiete: true
-    joby: [secrets, sast]
+    joby: [secrets, sast, iac]
     uwaga: v4.39.4 (2026-11-20) pominięta, bo nie przeszła karencji 7 dni (ADR-0043 H6, ADR-0044)
 
 narzedzia:
@@ -99,7 +99,33 @@ narzedzia:
   python_runnera:
     wersja: 3.12  # python3 obrazu ubuntu-24.04; w teście lokalnym 3.12.16
     przypiete: false
-    job: sast
+    job: [sast, iac]
+  checkov:
+    wersja: 3.4.5
+    zrodlo: PyPI, .github/tools/iac.txt (checkov, PyYAML dla skryptu bramki; 96 pakietów z hashami)
+    przypiete: true
+    job: iac
+    reguly: wbudowane w wersję  # bez platformy Prisma Cloud (--skip-download), bez ważności
+    opcje: [-d infra/terraform, -d app, --framework terraform dockerfile, --skip-download, --skip-results-upload, -o json, -o sarif]
+    cel: [infra/terraform/work, infra/terraform/shared, app/Dockerfile]  # ADR-0047, I1
+    prog: każda nieudana kontrola, także #checkov:skip (D5, D13)
+  trivy_config:
+    wersja: 0.76.2
+    obraz: ghcr.io/aquasecurity/trivy@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+    przypiete: true
+    job: iac
+    reguly: wbudowane w binarkę (--skip-check-update, decyzja autora z 2026-11-16)
+    opcje: [config, --skip-check-update, --skip-version-check, --config "", --ignorefile ""]
+    cel: kopia śledzonych plików infra/terraform i app/Dockerfile ze ścieżkami repozytorium (ADR-0047)
+    prog: LOW i wyżej (D5a); komentarz trivy:ignore blokuje (I3)
+  hadolint:
+    wersja: 2.15.1
+    obraz: ghcr.io/hadolint/hadolint@sha256:32dac94127fd60b7b7e3fbfc65e1383b9b5e25c9bfd7b8536de7a539fe68a12d
+    przypiete: true
+    job: iac
+    opcje: [--disable-ignore-pragma, --no-fail]
+    cel: app/Dockerfile
+    prog: poziom error (D7)
   actionlint:
     wersja: 1.7.12
     obraz: rhysd/actionlint@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
@@ -128,6 +154,32 @@ wyjatki:
   plik: .github/gate-exceptions.yaml  # wspólny dla bramek (ADR-0045, T8)
   gitleaks: []  # brak, mechanizm .gitleaks.toml (2026-11-24, ADR-0044)
   sca: []  # czysta wersja bez zgłoszeń pip-audit (2026-11-24, ADR-0046)
+  iac:  # czysta wersja, 2026-11-24 (ADR-0047, I2): 22 wpisy, 23 trafienia (AWS-0104 dwa razy w jednym pliku)
+    trivy_config:
+      - {regula: AWS-0132, plik: infra/terraform/shared/state.tf}
+      - {regula: AWS-0132, plik: infra/terraform/work/storage.tf}
+      - {regula: AWS-0089, plik: infra/terraform/shared/state.tf}
+      - {regula: AWS-0089, plik: infra/terraform/work/storage.tf}
+      - {regula: AWS-0090, plik: infra/terraform/work/storage.tf}
+      - {regula: AWS-0178, plik: infra/terraform/work/network.tf}
+      - {regula: AWS-0104, plik: infra/terraform/work/security.tf}
+    checkov:
+      - {regula: CKV_AWS_145, plik: infra/terraform/shared/state.tf}
+      - {regula: CKV_AWS_145, plik: infra/terraform/work/storage.tf}
+      - {regula: CKV_AWS_18, plik: infra/terraform/shared/state.tf}
+      - {regula: CKV_AWS_18, plik: infra/terraform/work/storage.tf}
+      - {regula: CKV_AWS_21, plik: infra/terraform/work/storage.tf}
+      - {regula: CKV2_AWS_11, plik: infra/terraform/work/network.tf}
+      - {regula: CKV_AWS_144, plik: infra/terraform/shared/state.tf}
+      - {regula: CKV_AWS_144, plik: infra/terraform/work/storage.tf}
+      - {regula: CKV2_AWS_62, plik: infra/terraform/shared/state.tf}
+      - {regula: CKV2_AWS_62, plik: infra/terraform/work/storage.tf}
+      - {regula: CKV2_AWS_61, plik: infra/terraform/work/storage.tf}
+      - {regula: CKV_AWS_88, plik: infra/terraform/work/ec2.tf}
+      - {regula: CKV_AWS_126, plik: infra/terraform/work/ec2.tf}
+      - {regula: CKV_AWS_260, plik: infra/terraform/work/security.tf}
+      - {regula: CKV_AWS_297, plik: infra/terraform/work/cleanup.tf}
+    hadolint: []
   sast:  # czysta wersja, 2026-11-24 (ADR-0045)
     - {narzedzie: bandit, regula: B108, plik: app/ticketing/config.py}
     - {narzedzie: semgrep, regula: package_managers.uv.uv-missing-dependency-cooldown.uv-missing-dependency-cooldown, plik: app/pyproject.toml}

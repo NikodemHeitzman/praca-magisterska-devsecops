@@ -9,9 +9,11 @@
 # recorded in the research log.
 #
 # Fields (all required, the gate fails on an incomplete entry):
-#   tool    – tool name as used by the gate (semgrep, bandit, pip-audit)
-#   rule    – rule id exactly as in the tool's JSON report (Semgrep check_id, Bandit test_id);
-#             for pip-audit the vulnerability id or any of its aliases (PYSEC, GHSA, CVE)
+#   tool    – tool name as used by the gate (semgrep, bandit, pip-audit, checkov, trivy-config,
+#             hadolint)
+#   rule    – rule id exactly as in the tool's JSON report (Semgrep check_id, Bandit test_id,
+#             Checkov check_id, Trivy config ID, hadolint code); for pip-audit the vulnerability
+#             id or any of its aliases (PYSEC, GHSA, CVE)
 #   path    – file path relative to the repository root, as in the report (pip-audit: the
 #             audited requirements file, app/requirements.txt)
 #   reason  – why the finding is accepted in the clean version
@@ -47,3 +49,160 @@ exceptions:
       header, not cookies (app/ticketing/main.py), so a cross-site form post carries no
       credentials.
     added: 2026-11-24 E07-04
+
+  # IaC (E07-06, ADR-0047): clean version, both Terraform layers and app/Dockerfile.
+  # Trivy config
+  - tool: trivy-config
+    rule: AWS-0132
+    path: infra/terraform/shared/state.tf
+    reason: >-
+      Approved by the author 2026-11-24. SSE-S3 instead of a customer managed KMS key: cost and simplicity; the data are fictitious and ephemeral (infra/terraform/README.md).
+    added: 2026-11-24 E07-06
+
+  - tool: trivy-config
+    rule: AWS-0132
+    path: infra/terraform/work/storage.tf
+    reason: >-
+      Approved by the author 2026-11-24. SSE-S3 instead of a customer managed KMS key: cost and simplicity; the data are fictitious and ephemeral (infra/terraform/README.md).
+    added: 2026-11-24 E07-06
+
+  - tool: trivy-config
+    rule: AWS-0089
+    path: infra/terraform/shared/state.tf
+    reason: >-
+      Approved by the author 2026-11-24. No S3 server access logs: CloudTrail records the API calls (E08-01).
+    added: 2026-11-24 E07-06
+
+  - tool: trivy-config
+    rule: AWS-0089
+    path: infra/terraform/work/storage.tf
+    reason: >-
+      Approved by the author 2026-11-24. No S3 server access logs: CloudTrail records the API calls (E08-01).
+    added: 2026-11-24 E07-06
+
+  - tool: trivy-config
+    rule: AWS-0090
+    path: infra/terraform/work/storage.tf
+    reason: >-
+      Approved by the author 2026-11-24. No versioning of the attachments bucket: the data are ephemeral and the bucket is removed by terraform destroy.
+    added: 2026-11-24 E07-06
+
+  - tool: trivy-config
+    rule: AWS-0178
+    path: infra/terraform/work/network.tf
+    reason: >-
+      Approved by the author 2026-11-24. No VPC Flow Logs: cost of CloudWatch; to be reconsidered in E08.
+    added: 2026-11-24 E07-06
+
+  - tool: trivy-config
+    rule: AWS-0104
+    path: infra/terraform/work/security.tf
+    reason: >-
+      Approved by the author 2026-11-24. Egress on 80 and 443 to 0.0.0.0/0: the addresses of the Ubuntu mirrors, SSM, ghcr.io and S3 are not fixed and cannot be narrowed without NAT or a proxy (ADR-0024). One entry covers both rules (80 and 443); ingress rules are other check ids, so GT-10 is not hidden.
+    added: 2026-11-24 E07-06
+
+  # Checkov
+  - tool: checkov
+    rule: CKV_AWS_145
+    path: infra/terraform/shared/state.tf
+    reason: >-
+      Approved by the author 2026-11-24. SSE-S3 instead of a customer managed KMS key: cost and simplicity; the data are fictitious and ephemeral (infra/terraform/README.md).
+    added: 2026-11-24 E07-06
+
+  - tool: checkov
+    rule: CKV_AWS_145
+    path: infra/terraform/work/storage.tf
+    reason: >-
+      Approved by the author 2026-11-24. SSE-S3 instead of a customer managed KMS key: cost and simplicity; the data are fictitious and ephemeral (infra/terraform/README.md).
+    added: 2026-11-24 E07-06
+
+  - tool: checkov
+    rule: CKV_AWS_18
+    path: infra/terraform/shared/state.tf
+    reason: >-
+      Approved by the author 2026-11-24. No S3 server access logs: CloudTrail records the API calls (E08-01).
+    added: 2026-11-24 E07-06
+
+  - tool: checkov
+    rule: CKV_AWS_18
+    path: infra/terraform/work/storage.tf
+    reason: >-
+      Approved by the author 2026-11-24. No S3 server access logs: CloudTrail records the API calls (E08-01).
+    added: 2026-11-24 E07-06
+
+  - tool: checkov
+    rule: CKV_AWS_21
+    path: infra/terraform/work/storage.tf
+    reason: >-
+      Approved by the author 2026-11-24. No versioning of the attachments bucket: the data are ephemeral and the bucket is removed by terraform destroy.
+    added: 2026-11-24 E07-06
+
+  - tool: checkov
+    rule: CKV2_AWS_11
+    path: infra/terraform/work/network.tf
+    reason: >-
+      Approved by the author 2026-11-24. No VPC Flow Logs: cost of CloudWatch; to be reconsidered in E08.
+    added: 2026-11-24 E07-06
+
+  - tool: checkov
+    rule: CKV_AWS_144
+    path: infra/terraform/shared/state.tf
+    reason: >-
+      Approved by the author 2026-11-24. No cross-region replication of the state bucket: the account SCP allows only eu-north-1 in the EU (ADR-0030), and a second bucket costs; the state is versioned.
+    added: 2026-11-24 E07-06
+
+  - tool: checkov
+    rule: CKV_AWS_144
+    path: infra/terraform/work/storage.tf
+    reason: >-
+      Approved by the author 2026-11-24. No cross-region replication of the attachments bucket: the account SCP allows only eu-north-1 in the EU (ADR-0030), a second bucket costs, and the data are ephemeral.
+    added: 2026-11-24 E07-06
+
+  - tool: checkov
+    rule: CKV2_AWS_62
+    path: infra/terraform/shared/state.tf
+    reason: >-
+      Approved by the author 2026-11-24. No S3 event notifications: a notification target costs, and the data are fictitious and ephemeral.
+    added: 2026-11-24 E07-06
+
+  - tool: checkov
+    rule: CKV2_AWS_62
+    path: infra/terraform/work/storage.tf
+    reason: >-
+      Approved by the author 2026-11-24. No S3 event notifications: a notification target costs, and the data are fictitious and ephemeral.
+    added: 2026-11-24 E07-06
+
+  - tool: checkov
+    rule: CKV2_AWS_61
+    path: infra/terraform/work/storage.tf
+    reason: >-
+      Approved by the author 2026-11-24. No lifecycle configuration of the attachments bucket: the bucket exists only during a work session and is removed by terraform destroy.
+    added: 2026-11-24 E07-06
+
+  - tool: checkov
+    rule: CKV_AWS_88
+    path: infra/terraform/work/ec2.tf
+    reason: >-
+      Approved by the author 2026-11-24. Public IPv4 address of the instance: no NAT gateway and no load balancer because of cost (ADR-0024); the security group admits only HTTP.
+    added: 2026-11-24 E07-06
+
+  - tool: checkov
+    rule: CKV_AWS_126
+    path: infra/terraform/work/ec2.tf
+    reason: >-
+      Approved by the author 2026-11-24. No detailed monitoring: it is a paid feature, and logs and alarms are decided in E08-02.
+    added: 2026-11-24 E07-06
+
+  - tool: checkov
+    rule: CKV_AWS_260
+    path: infra/terraform/work/security.tf
+    reason: >-
+      Approved by the author 2026-11-24. Ingress on port 80 from 0.0.0.0/0: the application is served over HTTP only, HTTPS is out of scope (ADR-0024). Port 22 is another check id, so GT-10 is not hidden.
+    added: 2026-11-24 E07-06
+
+  - tool: checkov
+    rule: CKV_AWS_297
+    path: infra/terraform/work/cleanup.tf
+    reason: >-
+      Approved by the author 2026-11-24. Cleanup schedule without a customer managed KMS key: it holds only an instance id and a role ARN (no sensitive data), and a customer key adds cost and a key policy (ADR-0034).
+    added: 2026-11-24 E07-06

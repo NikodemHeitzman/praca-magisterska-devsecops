@@ -1,0 +1,6 @@
+# Checkov for the iac job (E07-06, ADR-0047), installed with the runner Python like the sast tools.
+# PyYAML for the gate script (it reads .github/gate-exceptions.yaml); Checkov depends on it too.
+# Compiled into iac.txt with hashes:
+#   uv pip compile iac.in -o iac.txt --generate-hashes --python-version 3.12 --python-platform linux --exclude-newer <7 days ago>
+checkov==3.4.5
+pyyaml
