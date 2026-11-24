@@ -88,6 +88,9 @@ Decyzje agenta (techniczne, w ramach decyzji autora i ADR-0042):
   | brak raportu po 3 próbach | — | kod 1 | — |
   | raport brakujący, nieczytelny, pusty, z `skip_reason` | — | — | kod 2 |
 
+- (+) Test w CI (2026-11-24):
+  - **PR #25** (czysta wersja, `7b36a23`): `sca` przechodzi w 27 s (instalacja narzędzi 8 s, pip-audit 6 s). 38 pakietów, 0 podatności, `requirements.txt` zgodny z eksportem. Python 3.14.10, pip-audit 2.10.1, uv 0.13.6. Pozostałe checki zielone,
+  - **PR #26** (test negatywny z łatką GT-07, zamknięty bez scalania): `sca` blokuje 5 podatności jinja2 3.1.2 (10 wpisów w raporcie), tak jak lokalnie. Kontrola zgodności przechodzi, bo łatka zmienia `pyproject.toml`, `uv.lock` i eksport razem. Pozostałe checki, także `lint` i `test`, przechodzą. Artefakt `sca-reports` jest w obu przebiegach.
 - (+) Scenariusz „`requirements.txt` nieaktualny” pokazuje, czemu B11 jest potrzebne. Gdy łatka zmienia `uv.lock`, a nie eksport, pip-audit nie widzi podatnej wersji, a obraz ją instaluje.
 - (+) Czysta wersja przechodzi bez wyjątków SCA.
 - (−) Baza OSV zmienia się w czasie i nie da się jej zamrozić. Podatność opublikowana w trakcie serii zmieni wynik czystej wersji (Z7). Ślad zostaje w raportach JSON w artefaktach przebiegów. Materiał do 5.3 (odtwarzalność).
