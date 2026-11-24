@@ -48,7 +48,6 @@ COPY alembic.ini ./
 COPY migrations ./migrations
 COPY ticketing ./ticketing
 
-USER 10001:10001
 
 EXPOSE 8000
 

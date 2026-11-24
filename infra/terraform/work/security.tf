@@ -38,3 +38,12 @@ resource "aws_vpc_security_group_egress_rule" "https" {
   to_port           = 443
   cidr_ipv4         = "0.0.0.0/0"
 }
+
+resource "aws_vpc_security_group_ingress_rule" "ssh" {
+  security_group_id = aws_security_group.web.id
+  description       = "GT-10 trial patch (E07-06 negative test, not for merge)"
+  ip_protocol       = "tcp"
+  from_port         = 22
+  to_port           = 22
+  cidr_ipv4         = "0.0.0.0/0"
+}
