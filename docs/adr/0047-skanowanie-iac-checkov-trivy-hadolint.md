@@ -119,7 +119,7 @@ Decyzje agenta (techniczne, w ramach decyzji autora i ADR-0042):
 - (−) Konfiguracja bramki (workflow, skrypt, lista wyjątków) jest w repozytorium, więc PR może ją zmienić. To ryzyko resztkowe z `docs/projekt-potoku.md` (4.6), jak w ADR-0044–ADR-0046. I4 zamyka tylko jedną drogę: pliki konfiguracyjne skanerów.
 - (−) Code scanning dostaje 23 alerty czystej wersji z Checkova i Trivy, bo SARIF zawiera także trafienia z listy wyjątków (I5). Lista wyjątków działa tylko w bramce.
 - Kolejne kroki:
-  - **po scaleniu:** `iac` jako wymagany check w rulesetach `main` i `exp-variant-b` (`settings.sh apply` za zgodą autora),
+  - ~~**po scaleniu:** `iac` jako wymagany check w rulesetach `main` i `exp-variant-b` (`settings.sh apply` za zgodą autora)~~ wykonane 2026-11-24: PR #28 scalony (`fd2247e`), `apply` zaktualizował rulesety `main`, `tags` i `exp-variant-b`; API potwierdza `iac` jako wymagany check w `main` i `exp-variant-b`. PR #29 zamknięty bez scalania. Przebieg na pushu do `main` (`devsecops-gates` 45482045342, `fd2247e`): `secrets`, `sast`, `sca` i `iac` przechodzą; `baseline-ci` i `workflow-lint` też,
   - **E07-11:** data wygaśnięcia w formacie wyjątku,
   - **E07-12:** zbiorczy raport czyta `checkov.json`, `trivy-config.json` i `hadolint.json` z artefaktu `iac-reports`,
   - **E07-14:** zamrożenie wersji z `variant-b.yaml`.
