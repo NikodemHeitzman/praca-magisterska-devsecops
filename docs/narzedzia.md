@@ -26,7 +26,7 @@ Wersja najnowsza na dzień pobrania **nie jest** wersją przypiętą. Wersję pr
 | Semgrep (CE) | SAST | Kod Pythona (GT-01, GT-03–06, GT-12, GT-14), TEST-1 | v1.181.0 | 2026-10-14 | LGPL-2.1 (silnik); reguły z rejestru: Semgrep Rules License v1.0, użycie tylko na własne potrzeby, bez rozpowszechniania, więc reguł nie kopiujemy do repozytorium (sprawdzone 2026-11-16) | https://docs.semgrep.dev/ | https://github.com/semgrep/semgrep/releases/tag/v1.181.0 |
 | Bandit | SAST (Python) | Kod Pythona (GT-01–04), TEST-1 | 1.9.4 | 2026-02-25 | Apache-2.0 | https://bandit.readthedocs.io/en/latest/ | https://github.com/PyCQA/bandit/releases/tag/1.9.4 |
 | pip-audit | SCA | Zależności Pythona (GT-07), TEST-2 | v2.10.1 | 2026-06-10 | Apache-2.0 | https://github.com/pypa/pip-audit | https://github.com/pypa/pip-audit/releases/tag/v2.10.1 |
-| Gitleaks | Sekrety | Sekrety w kodzie i historii (GT-02), COMMIT-REQ-1, DEPLOY-REQ-1 | v8.30.1 | 2026-03-21 | MIT | https://github.com/gitleaks/gitleaks | https://github.com/gitleaks/gitleaks/releases/tag/v8.30.1 |
+| Gitleaks | Sekrety | Sekrety w kodzie i historii (GT-02), COMMIT-REQ-1, DEPLOY-REQ-1 | v8.30.1 (w potoku, ADR-0044: obraz `ghcr.io/gitleaks/gitleaks` po digeście; nadal najnowsza 2026-11-24) | 2026-03-21 | MIT | https://github.com/gitleaks/gitleaks | https://github.com/gitleaks/gitleaks/releases/tag/v8.30.1 |
 | Checkov | IaC | Terraform i Dockerfile (GT-09, GT-10, GT-11), PRE-5* | 3.3.29 | 2026-10-13 | Apache-2.0 | https://www.checkov.io/ | https://github.com/bridgecrewio/checkov/releases/tag/3.3.29 |
 | Trivy | SCA obrazu, IaC, sekrety | Zależności (GT-07), obraz (GT-08), Dockerfile i Terraform (GT-09–11), DEPLOY-REQ-4, DEPLOY-REQ-5 | v0.76.0 | 2026-10-14 | Apache-2.0 | https://trivy.dev/docs/latest/guide/ | https://github.com/aquasecurity/trivy/releases/tag/v0.76.0 |
 | hadolint | Lint Dockerfile | Dockerfile (GT-09), PRE-5* | v2.15.1 | 2026-07-31 | GPL-3.0 | https://github.com/hadolint/hadolint | https://github.com/hadolint/hadolint/releases/tag/v2.15.1 |
@@ -54,7 +54,7 @@ Akcje przypinamy do pełnego SHA commita (`AGENTS.md`, konwencja 5). Tabela poda
 | `docker/login-action` | v4.6.0 | `dbcb813823bdd20940b903addbd779551569679f` | 2026-07-29 | logowanie do rejestru |
 | `aws-actions/configure-aws-credentials` | v6.3.0 | `e1253824e5c10ff9df46874f81ed3ec929e19cfd` | 2026-09-15 | OIDC do AWS; nieużywana, bo SCP konta blokuje dostawcę OIDC (ADR-0032) |
 | `aws-actions/amazon-ecr-login` | v2.1.7 | `03f1aad4c6c7ffd436567f42f9384779290529bd` | 2026-08-19 | logowanie do ECR (jeśli rejestrem będzie ECR) |
-| `github/codeql-action` (`upload-sarif`) | v4.39.0 | `6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee` | 2026-10-15 | wyniki SARIF w zakładce Security |
+| `github/codeql-action` (`upload-sarif`) | v4.39.0 | `6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee` | 2026-10-15 | wyniki SARIF w zakładce Security. W potoku v4.39.3 (`33d7b85da1a04171e211befe2c739303b9a4c066`, 2026-11-04), bo v4.39.4 z 2026-11-20 nie przeszła karencji 7 dni (ADR-0044) |
 | `actions/dependency-review-action` | v5.0.0 | `a1d282b36b6f3519aa1f3fc636f609c47dddb294` | 2026-05-08 | DEPLOY-REQ-2 |
 | `actions/attest-build-provenance` | v4.2.2 | `4d101475d8b20a2381f78447822ac1eab6504dd8` | 2026-08-06 | provenance (SLSA, E02-05) |
 | `actions/attest-sbom` | v4.1.0 | `c604332985a26aa8cf1bdc465b92731239ec6b9e` | 2026-03-18 | atestacja SBOM. README v4.1.0: akcja wycofywana na rzecz `actions/attest` (działa jako nakładka na nią). SBOM w formacie SPDX albo CycloneDX JSON, do 16 MB |
@@ -118,6 +118,7 @@ Reguły z gałęzi głównej mogą się różnić od tych, które pobierze potok
 - **Bandit B105 (`hardcoded_password_string`).** Nazwa zmiennej musi zawierać człon `password`, `pass`, `pwd`, `token` albo `secret` (lub `secrete`), oddzielony podkreślnikiem albo na całą nazwę, np. `JWT_SECRET` albo `SECRET_KEY`. `JWT_KEY` nie pasuje. Reguła obsługuje tylko zwykłe przypisanie (`ast.Assign`). Przypisanie z adnotacją typu (`jwt_secret: str = "…"`, typowe dla klas ustawień pydantic) nie jest sprawdzane: w Bandit 1.9.4 nie ma obsługi `ast.AnnAssign`.
 - **Semgrep `python.jwt.security.jwt-hardcode.jwt-python-hardcoded-secret`** (w `p/python` i `p/default`, nie było w katalogu) ma wzorzec `jwt.encode($_, "...", ...)`, czyli literał w wywołaniu. Stałej z innego modułu nie obejmie: Semgrep CE propaguje stałe tylko w obrębie pliku (dokumentacja Semgrep, *Constant propagation*, sprawdzone 2026-11-16).
 - **Wniosek:** wykrywalne, jeśli łatka ma postać `JWT_SECRET = "<losowa wartość bez słów ze stopwords>"` (zwykłe przypisanie). Pewność można podnieść ze średniej do wysokiej, gdy postać łatki zostanie tak ustalona.
+- **Potwierdzenie Gitleaksem (E07-03, 2026-11-24, ADR-0044):** stała `JWT_SECRET = "<40 losowych znaków alfanumerycznych>"` w `app/ticketing/config.py` daje zgłoszenie `generic-api-key` w Gitleaks 8.30.1 lokalnie i w CI (job `secrets`, PR #19). Bandit B105 i docelowa łatka z E04: do sprawdzenia w E07-04 i w pilotażu.
 
 **GT-06, log injection (CWE-117).**
 
