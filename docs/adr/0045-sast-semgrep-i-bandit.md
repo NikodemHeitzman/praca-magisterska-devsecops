@@ -86,7 +86,7 @@ Decyzje agenta (techniczne, w ramach decyzji autora i ADR-0042):
   - Bandit B108 w `app/ticketing/config.py` (domyślny katalog podręczny `/tmp/ticketing-attachments`),
   - Semgrep `uv-missing-dependency-cooldown` w `app/pyproject.toml`,
   - Semgrep `django-no-csrf-token` w `app/ticketing/templates/login.html`.
-  - TODO: zweryfikować uzasadnienia (autor) przed zamrożeniem listy (K5).
+  - uzasadnienia zatwierdził autor 2026-11-24; lista zamarza z progami (K5, E07-14).
 - Czas skanu w teście lokalnym: Semgrep około 7 s, Bandit poniżej 1 s, bez instalacji i pobrania zestawu. Czas joba zmierzy seria (M4/M5).
 - Kolejne kroki:
   - **po scaleniu:** `sast` jako wymagany check w `infra/github/rulesets/main.json` i `variant-b.json` (zmiana w tym samym PR), potem `settings.sh apply` za zgodą autora,
