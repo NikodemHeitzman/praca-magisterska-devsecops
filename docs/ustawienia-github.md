@@ -19,10 +19,11 @@ Zmiana ustawienia: najpierw zmiana pliku w `infra/github/` w PR, po scaleniu `ap
 
 | Ustawienie | Wartość docelowa | Przed E07-02 (2026-11-23) | Gdzie zapisane | Krok | Decyzja |
 |---|---|---|---|---|---|
-| Ruleset `main` | PR wymagany (0 zatwierdzeń), wymagane checki `lint`, `test`, `build`, `workflow-lint` z GitHub Actions, blokada force push i usunięcia, bez obejść | brak | `rulesets/main.json` | B02 | H1–H3, H11 |
+| Ruleset `main` | PR wymagany (0 zatwierdzeń), wymagane checki `lint`, `test`, `build`, `workflow-lint`, `secrets` (od E07-03) z GitHub Actions, blokada force push i usunięcia, bez obejść | brak | `rulesets/main.json` | B02 | H1–H3, H11 |
 | Ruleset `exp-variant-b` | jak `main`, a do tego obejście dla roli admina (`always`) i `do_not_enforce_on_create` | brak | `rulesets/variant-b.json` | B02 | H1, H3, H13 |
 | Ruleset `tags` | wszystkie tagi: zakaz usunięcia, force push i przesunięcia | brak | `rulesets/tags.json` | (odtwarzalność) | H11 |
 | Secret scanning i push protection | włączone | włączone | `settings.sh` | B03 | ADR-0042 |
+| Secret scanning: wzorce spoza dostawców (*non-provider patterns*) | włączone (od E07-03); obejmuje je też push protection | wyłączone | `settings.sh` | B03 | ADR-0044, S6 |
 | Dependabot: alerty | włączone | wyłączone | `settings.sh` | B04 | H6 |
 | Dependabot: security updates | włączone | wyłączone | `settings.sh` | B04 | H6 |
 | Dependabot: aktualizacje wersji | `github-actions` i `docker` (bez obrazu uv), co tydzień, karencja 7 dni; Python ręcznie przez uv (od 2026-11-24) | brak pliku | `.github/dependabot.yml` | B04 | H6, zmiana 2026-11-24 (ADR-0043) |
