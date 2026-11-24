@@ -1,0 +1,19 @@
+# Pre-commit hooks (variant B, step B01 in docs/projekt-potoku.md; decision S5 in
+# docs/adr/0044-skanowanie-sekretow.md).
+#
+# Advisory only and outside the experiment: every contributor enables it on their own machine,
+# and the blocking check is the `secrets` job in CI (.github/workflows/devsecops-gates.yml).
+# It stops a secret before the commit exists, so it never reaches the public history.
+#
+# Enable once per clone:
+#   pipx install pre-commit   (or: uv tool install pre-commit)
+#   pre-commit install
+# Skip once (the CI gate still runs): SKIP=gitleaks git commit ...
+#
+# Same Gitleaks version as the CI gate; `rev` pinned to the commit of tag v8.30.1.
+# The `gitleaks` hook builds Gitleaks with Go through pre-commit, so Docker is not needed.
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: 83d9cd684c87d95d656c1458ef04895a7f1cbd8e # v8.30.1
+    hooks:
+      - id: gitleaks

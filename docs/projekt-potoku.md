@@ -177,7 +177,7 @@ Elementy z listy kontrolnej, które celowo **nie** są krokami wariantu B (D11):
    - brak pliku raportu, pusty albo niepoprawny raport → bramka nie przechodzi,
    - błąd narzędzia (kod wyjścia inny niż „są zgłoszenia”) → bramka nie przechodzi,
    - przekroczenie `timeout-minutes` → bramka nie przechodzi,
-   - kod wyjścia każdego narzędzia sprawdzony w dokumentacji przed zamrożeniem (TODO: zweryfikować dla każdego narzędzia z tabeli 4.2).
+   - kod wyjścia każdego narzędzia sprawdzony w dokumentacji przed zamrożeniem (TODO: zweryfikować dla każdego narzędzia z tabeli 4.2; sprawdzone: Gitleaks 2026-11-24, ADR-0044, zizmor i actionlint w ADR-0043).
 4. **Progi są stałe przez całą serię** (K5). Zmiana progu po starcie serii oznacza powtórzenie serii (`experiment/PROTOCOL.md`, sekcja 0).
 5. **Wersje narzędzi przypięte** (K4): akcje do SHA, obrazy do digestu, pakiety PyPI do dokładnej wersji. Wersje trafią do `experiment/versions/variant-b.yaml` w układzie pliku wariantu A.
 
@@ -193,7 +193,7 @@ Skutki reguły dla pozycji katalogu sprawdzamy po jej przyjęciu i zapisujemy w 
 
 | Bramka | Narzędzie | Co blokuje | Co tylko raportuje | Uwagi |
 |---|---|---|---|---|
-| `secrets` | Gitleaks | każde zgłoszenie | — | Gitleaks nie ma poziomów ważności |
+| `secrets` | Gitleaks | każde zgłoszenie | — | Gitleaks nie ma poziomów ważności. Skan commitów PR (`base..head`) albo pushu (`before..after`); `--exit-code 2` oddziela zgłoszenia od błędu narzędzia (kod 1); ADR-0044 |
 | `sast` | Semgrep | `ERROR` i `WARNING` | `INFO` | TODO: zweryfikować nazwy ważności w JSON/SARIF Semgrep 1.181.0 (starsze `ERROR`/`WARNING`/`INFO` czy nowsze `CRITICAL`/`HIGH`/`MEDIUM`/`LOW`); przy nowszych blokuje wszystko poza `INFO` |
 | `sast` | Bandit | ważność `LOW` i wyżej przy pewności `MEDIUM` i wyżej | pewność `LOW` | B105 (GT-02, ważność LOW) blokuje, więc GT-02 ma dwa detektory blokujące. TODO: zweryfikować pewność B105 w Bandit 1.9.4 i to, czy próg pewności nie odcina pozycji katalogu |
 | `sca` | pip-audit | każda znana podatność | — | pip-audit nie filtruje według ważności (TODO: zweryfikować w dokumentacji) |
@@ -228,7 +228,7 @@ Guideline zaleca organizacjom zaczynać od ostrzeżeń i stopniowo zaostrzać pr
 ### 4.6. Ryzyko resztkowe polityki
 
 - **Zmiana bramki w samym PR.** Pliki konfiguracji skanerów i workflow są w repozytorium. PR może zmienić próg albo zastąpić krok bramki poleceniem `exit 0` przy tej samej nazwie joba. Bez drugiego recenzenta (jeden autor) chroni przed tym tylko samodyscyplina i ślad w historii. Materiał do 5.3.
-- **Push protection a próba GT-02.** Push protection działa na wzorce dostawców, a łatka GT-02 to losowa wartość bez prefiksu dostawcy, więc prawdopodobnie jej nie zablokuje. Gdyby blokowała, próba GT-02 nie dotarłaby do potoku w żadnym wariancie (TODO: zweryfikować w pilotażu).
+- **Push protection a próba GT-02.** Push protection działa na wzorce dostawców, a łatka GT-02 to losowa wartość bez prefiksu dostawcy, więc prawdopodobnie jej nie zablokuje. Gdyby blokowała, próba GT-02 nie dotarłaby do potoku w żadnym wariancie. Sprawdzone 2026-11-24 (E07-03, ADR-0044): push commita z łatką w postaci GT-02 nie został zablokowany (wzorce spoza dostawców wyłączone). Do powtórzenia po włączeniu wzorców spoza dostawców (S6) i w pilotażu z docelową łatką z E04.
 
 ## 5. Decyzje autora (wywiad 2026-11-20)
 
@@ -305,7 +305,7 @@ Zgłoszenia czystej wersji wynikające ze świadomych decyzji obsługuje lista w
 - **zgodne z Guideline:** wyjątek z uzasadnieniem, właścicielem i datą (`2-3-5 Security Gates`, `docs/notes/owasp-devsecops.md`, p. 1.5),
 - **jawnie widoczne:** każdy wyjątek jest w repozytorium z uzasadnieniem, więc recenzent widzi, co i dlaczego jest pominięte.
 
-Konsekwencja: przed zamrożeniem trzeba uruchomić wszystkie bramki na czystej wersji i spisać zgłoszenia (Trivy config: 8 trafień z E05-04; reszta: TODO: zweryfikować w pilotażu). Każdy wyjątek musi wynikać z decyzji zapisanej wcześniej (ADR), a nie z chęci przejścia bramki.
+Konsekwencja: przed zamrożeniem trzeba uruchomić wszystkie bramki na czystej wersji i spisać zgłoszenia (Trivy config: 8 trafień z E05-04; Gitleaks: 0 zgłoszeń w pełnej historii, 2026-11-24, ADR-0044; reszta: TODO: zweryfikować w pilotażu). Każdy wyjątek musi wynikać z decyzji zapisanej wcześniej (ADR), a nie z chęci przejścia bramki.
 
 ### D7. hadolint jest bramką, `dependency-review-action` nie wchodzi do wariantu B (Q7)
 
@@ -337,7 +337,7 @@ Konsekwencje:
 
 - kolumna akcji w `docs/narzedzia.md` (p. 2) jest dla wariantu B w większości nieaktualna; lista akcji używanych w B trafi do `experiment/versions/variant-b.yaml`,
 - digesty obrazów narzędzi i wersje PyPI trzeba zapisać przy zamrożeniu (K4); Trivy pobiera bazę podatności i paczkę `trivy-checks` w czasie działania, więc ich wersje też trzeba zapisać (E02-10),
-- TODO: zweryfikować, czy dla każdego narzędzia istnieje oficjalny obraz z publikowanymi digestami (dla zizmora i actionlinta sprawdzono w E06-05, gdzie uruchomiono je w Dockerze przez digest).
+- TODO: zweryfikować, czy dla każdego narzędzia istnieje oficjalny obraz z publikowanymi digestami (dla zizmora i actionlinta sprawdzono w E06-05, gdzie uruchomiono je w Dockerze przez digest; dla Gitleaksa w E07-03, ADR-0044: `ghcr.io/gitleaks/gitleaks`, ten sam digest na GHCR i Docker Hub).
 
 ### D10. Uzupełnienia mapowania SSDF jako interpretacja autora (Q10)
 

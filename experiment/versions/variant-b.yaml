@@ -1,0 +1,77 @@
+# Wersje wariantu B (potok DevSecOps)
+#
+# WERSJA ROBOCZA: plik rośnie z zadaniami E07-02…E07-13 i zamarza w E07-14 (tag pipeline-b-v1),
+# tak jak variant-a.yaml w ADR-0041. Układ pól jak w variant-a.yaml, żeby różnice A/B było widać
+# w diffie (K2). Części wspólne z A (runner, uv, zależności, obrazy aplikacji, publikacja) zostaną
+# przeniesione przy zamrożeniu, kiedy workflow B obejmie joby lint, test i build.
+#
+# Pola:
+#   przypiete: true  – wersja wymuszona przez repozytorium (SHA, digest, suma kontrolna, lockfile)
+#   przypiete: false – wersja zależna od środowiska; podana wartość to obserwacja z przebiegu kontrolnego
+
+wariant: B
+wersja: robocza  # pipeline-b-v1 w E07-14
+tag: null
+data_zamrozenia: null
+
+workflow:
+  - plik: .github/workflows/devsecops-gates.yml
+    nazwa: devsecops-gates
+    joby: [secrets]  # E07-04…E07-06 dopisują sast, sca, iac (ADR-0044, S4)
+    mierzony: true
+    adr: [ADR-0042, ADR-0044]
+  - plik: .github/workflows/workflow-lint.yml
+    nazwa: workflow-lint
+    joby: [workflow-lint]
+    mierzony: true
+    adr: [ADR-0042, ADR-0043]  # do przeniesienia do workflow B w E07-14 (H8)
+
+akcje:
+  - nazwa: actions/checkout
+    wersja: v7.0.1
+    sha: 3d3c42e5aac5ba805825da76410c181273ba90b1
+    przypiete: true
+    joby: [secrets, workflow-lint]
+  - nazwa: actions/upload-artifact
+    wersja: v7.0.2
+    sha: cf430e030ddbb5b0abf93d22962f4752f3646cd9
+    przypiete: true
+    joby: [secrets, workflow-lint]
+  - nazwa: github/codeql-action/upload-sarif
+    wersja: v4.39.3
+    sha: 33d7b85da1a04171e211befe2c739303b9a4c066
+    przypiete: true
+    joby: [secrets]
+    uwaga: v4.39.4 (2026-11-20) pominięta, bo nie przeszła karencji 7 dni (ADR-0043 H6, ADR-0044)
+
+narzedzia:
+  gitleaks:
+    wersja: 8.30.1
+    obraz: ghcr.io/gitleaks/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+    przypiete: true
+    job: secrets
+    reguly: domyślne  # bez .gitleaks.toml; czysta wersja bez zgłoszeń (ADR-0044, S2)
+    opcje: [--redact, --ignore-gitleaks-allow, --exit-code 2]
+    zakres: commity PR (base..head) albo pushu (before..after)  # ADR-0044, S1
+  actionlint:
+    wersja: 1.7.12
+    obraz: rhysd/actionlint@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
+    przypiete: true
+    job: workflow-lint
+  zizmor:
+    wersja: 1.32.0
+    obraz: ghcr.io/zizmorcore/zizmor@sha256:3014cc8f68f663935f69b3c3e0e41f5ce102b268d97db13db0f62208747f860d
+    przypiete: true
+    job: workflow-lint
+    opcje: [--persona regular, --min-severity low]  # tryb online z tokenem joba (ADR-0043)
+
+# Kontrole poza potokiem i poza pomiarem (ADR-0042, sekcja 4.4).
+poza_pomiarem:
+  - nazwa: hook pre-commit gitleaks
+    plik: .pre-commit-config.yaml
+    wersja: 8.30.1
+    rev: 83d9cd684c87d95d656c1458ef04895a7f1cbd8e  # commit tagu v8.30.1
+    tryb: doradczo  # B01, ADR-0044 S5
+
+# Wyjątki czystej wersji (D6): lista zamarza z progami (K5).
+wyjatki: []  # Gitleaks: brak (2026-11-24, ADR-0044)
