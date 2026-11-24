@@ -177,7 +177,7 @@ Elementy z listy kontrolnej, które celowo **nie** są krokami wariantu B (D11):
    - brak pliku raportu, pusty albo niepoprawny raport → bramka nie przechodzi,
    - błąd narzędzia (kod wyjścia inny niż „są zgłoszenia”) → bramka nie przechodzi,
    - przekroczenie `timeout-minutes` → bramka nie przechodzi,
-   - kod wyjścia każdego narzędzia sprawdzony w dokumentacji przed zamrożeniem (TODO: zweryfikować dla każdego narzędzia z tabeli 4.2; sprawdzone: Gitleaks 2026-11-24, ADR-0044, zizmor i actionlint w ADR-0043, Semgrep i Bandit 2026-11-24, ADR-0045).
+   - kod wyjścia każdego narzędzia sprawdzony w dokumentacji przed zamrożeniem (TODO: zweryfikować dla każdego narzędzia z tabeli 4.2; sprawdzone: Gitleaks 2026-11-24, ADR-0044, zizmor i actionlint w ADR-0043, Semgrep i Bandit 2026-11-24, ADR-0045, pip-audit 2026-11-24, ADR-0046: kod 1 także przy błędzie, więc bramka sprawdza raport, a nie kod wyjścia).
 4. **Progi są stałe przez całą serię** (K5). Zmiana progu po starcie serii oznacza powtórzenie serii (`experiment/PROTOCOL.md`, sekcja 0).
 5. **Wersje narzędzi przypięte** (K4): akcje do SHA, obrazy do digestu, pakiety PyPI do dokładnej wersji. Wersje trafią do `experiment/versions/variant-b.yaml` w układzie pliku wariantu A.
 
@@ -196,8 +196,8 @@ Skutki reguły dla pozycji katalogu sprawdzamy po jej przyjęciu i zapisujemy w 
 | `secrets` | Gitleaks | każde zgłoszenie | — | Gitleaks nie ma poziomów ważności. Skan commitów PR (`base..head`) albo pushu (`before..after`); `--exit-code 2` oddziela zgłoszenia od błędu narzędzia (kod 1); ADR-0044 |
 | `sast` | Semgrep | wszystko poza `INFO`: `ERROR`, `WARNING`, a z nowej skali także `LOW`, `MEDIUM`, `HIGH`, `CRITICAL` i każda nieznana wartość | `INFO` | Skala w regułach rejestru jest mieszana (Semgrep 1.185.0, 2026-11-24: `p/default` ma reguły `ERROR`, `WARNING`, `INFO` i 11 reguł `MEDIUM`), a `--severity` zna tylko starą skalę, więc próg stosuje `.github/scripts/sast_gate.py` na raporcie JSON (ADR-0045, T7) |
 | `sast` | Bandit | ważność `LOW` i wyżej przy pewności `MEDIUM` i wyżej (nieznana pewność też blokuje) | pewność `LOW` | B105 ma w Bandit 1.9.4 ważność LOW i pewność MEDIUM (`general_hardcoded_password.py`), więc blokuje. GT-02 ma trzy detektory blokujące: Gitleaks, Bandit B105 i Semgrep `detected-generic-secret` z `p/default` (łatka próbna, 2026-11-24, ADR-0045) |
-| `sca` | pip-audit | każda znana podatność | — | pip-audit nie filtruje według ważności (TODO: zweryfikować w dokumentacji) |
-| `sca` | zgodność `requirements.txt` ↔ `uv.lock` | każda różnica | — | kontrola integralności, nie wykrywanie |
+| `sca` | pip-audit | każda znana podatność spoza listy wyjątków | — | pip-audit 2.10.1 nie ma filtra ważności, a jego raport JSON nie podaje ważności (sprawdzone 2026-11-24). Baza OSV, tylko zależności runtime, Python 3.14 jak w aplikacji; próg stosuje `.github/scripts/sca_gate.py` na raporcie JSON (ADR-0046) |
+| `sca` | zgodność `pyproject.toml` ↔ `uv.lock` ↔ `requirements.txt` | każda różnica | — | kontrola integralności, nie wykrywanie: `uv lock --check` i porównanie z eksportem `uv.lock` (ADR-0046) |
 | `iac` | Checkov | każda nieudana kontrola spoza listy wyjątków | — | Checkov bez platformy nie podaje ważności |
 | `iac` | Trivy config | `LOW` i wyżej | `UNKNOWN` | ten sam poziom surowości co Checkov na tych samych plikach (D5a); 8 trafień czystej wersji (E05-04) idzie na listę wyjątków (D6) |
 | `iac` | hadolint | poziom `error` | `warning`, `info`, `style` | D7. TODO: zweryfikować nazwy poziomów i opcję progu (`--failure-threshold`) w hadolint 2.15.1 |
@@ -305,7 +305,7 @@ Zgłoszenia czystej wersji wynikające ze świadomych decyzji obsługuje lista w
 - **zgodne z Guideline:** wyjątek z uzasadnieniem, właścicielem i datą (`2-3-5 Security Gates`, `docs/notes/owasp-devsecops.md`, p. 1.5),
 - **jawnie widoczne:** każdy wyjątek jest w repozytorium z uzasadnieniem, więc recenzent widzi, co i dlaczego jest pominięte.
 
-Konsekwencja: przed zamrożeniem trzeba uruchomić wszystkie bramki na czystej wersji i spisać zgłoszenia (Trivy config: 8 trafień z E05-04; Gitleaks: 0 zgłoszeń w pełnej historii, 2026-11-24, ADR-0044; Semgrep i Bandit: 3 zgłoszenia, 2026-11-24, ADR-0045; reszta: TODO: zweryfikować w pilotażu). Każdy wyjątek musi wynikać z decyzji zapisanej wcześniej (ADR), a nie z chęci przejścia bramki.
+Konsekwencja: przed zamrożeniem trzeba uruchomić wszystkie bramki na czystej wersji i spisać zgłoszenia (Trivy config: 8 trafień z E05-04; Gitleaks: 0 zgłoszeń w pełnej historii, 2026-11-24, ADR-0044; Semgrep i Bandit: 3 zgłoszenia, 2026-11-24, ADR-0045; pip-audit: 0 zgłoszeń, 2026-11-24, ADR-0046; reszta: TODO: zweryfikować w pilotażu). Każdy wyjątek musi wynikać z decyzji zapisanej wcześniej (ADR), a nie z chęci przejścia bramki.
 
 ### D7. hadolint jest bramką, `dependency-review-action` nie wchodzi do wariantu B (Q7)
 

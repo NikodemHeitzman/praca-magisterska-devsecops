@@ -1,0 +1,9 @@
+# Tools of the sca job (E07-05, ADR-0046), installed in python:3.14-slim, the Python of the
+# application (Z3): pip-audit evaluates requirement markers for its own interpreter.
+# uv for the lockfile consistency check (Z5); the same version as pyproject.toml required-version.
+# PyYAML for the gate script (it reads .github/gate-exceptions.yaml).
+# Compiled into sca.txt with hashes:
+#   uv pip compile sca.in -o sca.txt --generate-hashes --python-version 3.14 --python-platform linux --exclude-newer <7 days ago>
+pip-audit==2.10.1
+uv==0.13.6
+pyyaml

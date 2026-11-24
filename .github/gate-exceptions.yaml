@@ -9,9 +9,11 @@
 # recorded in the research log.
 #
 # Fields (all required, the gate fails on an incomplete entry):
-#   tool    – tool name as used by the gate (semgrep, bandit)
-#   rule    – rule id exactly as in the tool's JSON report (Semgrep check_id, Bandit test_id)
-#   path    – file path relative to the repository root, as in the report
+#   tool    – tool name as used by the gate (semgrep, bandit, pip-audit)
+#   rule    – rule id exactly as in the tool's JSON report (Semgrep check_id, Bandit test_id);
+#             for pip-audit the vulnerability id or any of its aliases (PYSEC, GHSA, CVE)
+#   path    – file path relative to the repository root, as in the report (pip-audit: the
+#             audited requirements file, app/requirements.txt)
 #   reason  – why the finding is accepted in the clean version
 #   added   – date and task
 # A match is tool + rule + path (not the line), so an exception survives unrelated edits of the
