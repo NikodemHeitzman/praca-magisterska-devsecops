@@ -55,7 +55,7 @@ Wybrano **Docker Compose z jednorazowymi usługami `migrate` i `seed` oraz `.env
   - Kubernetes (kind, minikube) jest poza zakresem pracy (AGENTS.md) i nadmiarowy przy trzech kontenerach.
 - **Jednorazowe usługi `migrate` i `seed`:** jedno polecenie do gotowej aplikacji. `docker compose up` daje aplikację z danymi bez pamiętania kolejności kroków.
 - **`.env` tworzony przez workflow:** żadnych sekretów w repozytorium, także testowych haseł i klucza JWT.
-- **Wartości losowe przy każdym przebiegu:** wybór autora. Powód: TODO: zweryfikować z autorem.
+- **Wartości losowe przy każdym przebiegu:** wybór autora. Powód (autor, 2026-11-16): w CI nie ma żadnych stałych sekretów, które mogłyby wyciec albo wymagałyby ochrony i rotacji.
 
 Decyzja nie zmienia ADR-0022: migracje nadal nie należą do obrazu ani do procesu aplikacji. Zmienia się tylko sposób ich wywołania lokalnie i w CI, z ręcznego `docker compose run` na usługę w compose.
 
@@ -77,12 +77,12 @@ Postać `compose.yaml` i skryptu (decyzje agenta przy implementacji):
 - (+) Bez `app/.env` compose kończy się czytelnym błędem (`required variable POSTGRES_PASSWORD is missing a value`), a nie startem z przewidywalnym sekretem.
 - (+) Każdy przebieg CI ma inne hasła i klucz JWT. Skaner sekretów nie ma w repozytorium testowych wartości do zgłoszenia.
 - (−) Hasła kont startowych są znane tylko w jobie. Skan DAST (E07) musi je czytać z wygenerowanego `app/.env` w tym samym jobie.
-- (−) `seed` przy każdym `up` ustawia hasła kont startowych na wartości z `.env`. Lokalnie to zamierzone. Czy compose z `seed` będzie też wdrożeniem na EC2 (E05-03, E05-07), czy w AWS konta startowe mają powstawać inaczej: TODO: zweryfikować.
+- (−) `seed` przy każdym `up` ustawia hasła kont startowych na wartości z `.env`. Lokalnie to zamierzone. W AWS konta startowe tworzy ta sama usługa `seed` (`app/compose.aws.yaml`) z hasłami z `.env`, które `user-data.sh` losuje przy pierwszym starcie instancji (ADR-0031, ADR-0033).
 - (−) `docker compose ps -a` pokazuje zakończone kontenery `migrate` i `seed`. To stan oczekiwany, nie błąd.
 - Bez zmian zostaje uwaga z ADR-0022: `migrate` używa tego samego użytkownika bazy co aplikacja.
 - Workflow E06 i E07: przed `docker compose up` krok `sh scripts/ci-env.sh` w katalogu `app/`.
 
 ## Źródła
 
-- Dokumentacja Docker Compose (`depends_on`, `condition: service_completed_successfully`, `--wait`, fragmenty `x-`): źródło spoza rejestru `Zrodla/`, TODO: zweryfikować, czy rejestrować.
+- Dokumentacja Docker Compose (`depends_on`, `condition: service_completed_successfully`, `--wait`, fragmenty `x-`): źródło spoza rejestru `Zrodla/` (rejestrowane dopiero przy cytowaniu w tekście pracy, zob. `README.md`, zasada 8).
 - Rozdział o Docker Compose i pliku `.env` w notatkach z książek (`docs/notes/ksiazki.md`): do ewentualnego cytowania w 4.2, TODO: zweryfikować.

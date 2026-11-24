@@ -320,7 +320,7 @@ Nie. Provenance twierdzi tylko, że artefakt zbudowano, a nie że go opublikowan
 
 **Dlaczego praca nie ocenia ścieżki Source?** (`source-requirements#source-summary`; analiza agenta)
 
-- Od L1 system kontroli wersji MUSI wydawać *Source VSA*, a bez niego rewizja ma L0. GitHub nie wydaje VSA natywnie (stan wymaga sprawdzenia, TODO).
+- Od L1 system kontroli wersji MUSI wydawać *Source VSA*, a bez niego rewizja ma L0. GitHub nie wydaje VSA natywnie (nie znaleziono w dokumentacji ani changelogu, sprawdzone 2026-11-16).
 - L4 wymaga dwóch recenzentów, więc w projekcie jednoosobowym jest nieosiągalny.
 - Pytania badawcze dotyczą buildu i artefaktu.
 

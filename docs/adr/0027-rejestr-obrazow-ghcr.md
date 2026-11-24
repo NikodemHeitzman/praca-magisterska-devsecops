@@ -35,10 +35,10 @@ Wybrano **GHCR z publicznym pakietem**. Powody autora:
 - (−) Publiczne są też obrazy z celowo wprowadzonymi podatnościami (warianty z katalogu GT). To aplikacja badawcza bez sekretów w obrazie, ale trzeba to opisać w 5.3.
 - (−) Wbudowanego skanu ECR nie ma. Skan obrazu robi Trivy w potoku (`docs/narzedzia.md`).
 - (−) Instancja pobiera obraz z `ghcr.io` przez internet, a dostępność wdrożenia zależy od GitHuba. Bezpłatność Container registry jest opisana jako „obecna”, a GitHub zapowiada zmiany z miesięcznym wyprzedzeniem.
-- Pakiet trzeba ustawić jako publiczny po pierwszym wypchnięciu (domyślna widoczność: TODO: zweryfikować w E06).
+- Pakiet trzeba ustawić jako publiczny po pierwszym wypchnięciu (według dokumentacji pakiet przy pierwszej publikacji jest prywatny i nie dziedziczy widoczności repozytorium; test opisany w ADR-0033 pokazał jednak anonimowy odczyt, rozbieżność jest tam).
 
 ## Źródła
 
-Źródła spoza rejestru `Zrodla/` (TODO: zweryfikować, czy rejestrować):
+Źródła spoza rejestru `Zrodla/` (rejestrowane dopiero przy cytowaniu w tekście pracy, zob. `README.md`, zasada 8):
 
 - GitHub Docs, *GitHub Packages billing*: https://docs.github.com/en/billing/concepts/product-billing/github-packages (sprawdzone 2026-11-11)

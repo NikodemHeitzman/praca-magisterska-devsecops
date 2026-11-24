@@ -62,7 +62,7 @@ Porównania wariantów z ADR-0024 (Fargate, RDS, App Runner) nie przeliczano. Wy
 
 ## Źródła
 
-Źródła spoza rejestru `Zrodla/` (TODO: zweryfikować, czy rejestrować):
+Źródła spoza rejestru `Zrodla/` (rejestrowane dopiero przy cytowaniu w tekście pracy, zob. `README.md`, zasada 8):
 
 - AWS, *AWS Regions for your projects*: https://docs.aws.amazon.com/accounts/latest/reference/project-regions.html (sprawdzone 2026-11-11)
 - AWS, *Activate advanced AWS features*: https://docs.aws.amazon.com/accounts/latest/reference/activate-advanced-features.html (sprawdzone 2026-11-11)

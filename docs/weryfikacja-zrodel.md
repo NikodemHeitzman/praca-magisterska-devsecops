@@ -34,7 +34,7 @@ Najważniejsze ustalenia:
 
 1. **Żadne źródło naukowe nie okazało się zmyślone.** Wszystkie 7 artykułów ma DOI w Crossref, a tytuły zgadzają się co do słowa.
 2. **Rajapakse i in.: rok 2022, nie 2021.** Wersja online ukazała się w 2021 r., ale artykuł należy do tomu 141 z 2022 r.
-3. **Dwa artykuły pochodzą od wydawców o wątpliwej renomie.** Abiona i in. (2024, GSC Online Press) oraz Gupta (2022, Seventh Sense Research Group) to krótkie teksty (7 i 5 stron) u wydawców, którzy publikują masowo i bardzo szybko. Przed cytowaniem trzeba sprawdzić indeksację czasopism w Scopus i w wykazie czasopism punktowanych MNiSW. TODO: zweryfikować. Do czasu sprawdzenia pozostają źródłami uzupełniającymi. Jako przegląd literatury znacznie mocniejszy jest [@Rajapakse2022].
+3. **Dwa artykuły pochodzą od wydawców o wątpliwej renomie.** Abiona i in. (2024, GSC Online Press) oraz Gupta (2022, Seventh Sense Research Group) to krótkie teksty (7 i 5 stron) u wydawców, którzy publikują masowo i bardzo szybko. Sprawdzenie z 2026-11-16: oba czasopisma są poza wykazem MNiSW 2024, a wydawca IJCTT (Seventh Sense Research Group) jest na liście Bealla; indeksacji w Scopus nie udało się sprawdzić bezpośrednio. Decyzja autora z 2026-11-16: oba artykuły usuwamy z tekstu pracy. Jako przegląd literatury znacznie mocniejszy jest [@Rajapakse2022].
 4. **Strona projektu „NIST DevSecOps” już nie istnieje pod starym adresem.** `csrc.nist.gov/projects/devsecops` przekierowuje do projektu NCCoE „Software Supply Chain and DevOps Security Practices”. Zamiast strony projektu lepiej cytować jego publikację. Wersja robocza NIST SP 1800-44 z lipca 2025 r. została w marcu 2026 r. wycofana i zastąpiona „żywym dokumentem” pod adresem `pages.nist.gov/nccoe-devsecops`.
 5. **Standardy mają nowsze wersje, niż sugeruje propozycja:**
    - SSDF: obowiązuje wersja 1.1 (SP 800-218, 2022), a wersja 1.2 (SP 800-218 Rev. 1) jest od grudnia 2025 r. wersją roboczą,
@@ -63,8 +63,8 @@ Wszystkie są wydane przez O'Reilly Media. Autor pracy ma egzemplarze, więc rok
 
 Uwagi:
 
-- (3) Open Library podaje rok 2022, księgarnie podają czerwiec 2023. Przyjęto 2023. TODO: zweryfikować na stronie redakcyjnej.
-- (6) Źródła podają różne ISBN wydania drukowanego (978-1-098-10915-8 albo 978-1-098-10914-1). TODO: zweryfikować na egzemplarzu.
+- (3) Open Library podaje rok 2022, księgarnie podają czerwiec 2023. Przyjęto 2023 (O'Reilly i księgarnie: maj 2023, ISBN 978-1-098-13391-7; sprawdzone 2026-11-16, strony redakcyjnej nie widziano).
+- (6) Źródła podają różne ISBN wydania drukowanego (978-1-098-10915-8 albo 978-1-098-10914-1). Druk: 978-1-098-10915-8; 9781098109141 to identyfikator strony O'Reilly Learning, a nie ISBN (sprawdzone 2026-11-16).
 - (8) Pierwsze wydanie (2018) miało trzech autorów. Drugie ma czterech, a pierwszym autorem jest Oswalt, nie Edelman.
 
 ### Standardy i strony projektów
@@ -99,8 +99,8 @@ Uwagi:
 
 Uwagi:
 
-- (16, 18) Jakość wydawców: patrz „Najważniejsze ustalenia”, pkt 3. TODO: zweryfikować indeksację.
-- (20) Czasopismo wydaje WSB w Poznaniu, ale autor jest z WSB w Warszawie. Opisy metody są niespójne: wyniki wyszukiwania mówią o ankiecie wśród ekspertów, a strona czasopisma o przeglądzie literatury i analizie przypadków. Zakresu stron nie ustalono. TODO: zweryfikować w PDF.
+- (16, 18) Jakość wydawców: patrz „Najważniejsze ustalenia”, pkt 3 (sprawdzone 2026-11-16, usunięte z tekstu pracy).
+- (20) Czasopismo wydaje WSB w Poznaniu, ale autor jest z WSB w Warszawie. Opisy metody są niespójne: wyniki wyszukiwania mówią o ankiecie wśród ekspertów, a strona czasopisma o przeglądzie literatury i analizie przypadków. Według PDF (sprawdzone 2026-11-16): s. 77–90, metoda mieszana (przegląd literatury i internetowa ankieta ekspertów, bez podanej liczby respondentów).
 - (21) Krótki (4 strony) artykuł konferencyjny jednego autora. Przydatny w dyskusji o akceptowanych podatnościach (5.3), nie jako podstawa teoretyczna.
 
 ### Teksty branżowe i blogi
@@ -116,9 +116,5 @@ Według definicji zadania blogi mogą być tylko źródłami uzupełniającymi.
 ## Co dalej
 
 - Nowe źródła mają notatki w rejestrze (`Zrodla\` w vaulcie) z polem `metadane_sprawdzone: 2026-10-01`. Wyjątkiem są blogi z rekomendacją „nie cytować”.
-- Otwarte kwestie z oznaczeniem TODO:
-  - indeksacja WJAETS i IJCTT,
-  - zakres stron i metoda u Janczewskiego,
-  - ISBN Ansible,
-  - rok wydania Learning Git.
+- Kwestie oznaczone wcześniej TODO (indeksacja WJAETS i IJCTT, strony i metoda u Janczewskiego, ISBN Ansible, rok Learning Git) rozstrzygnięto 2026-11-16, zob. wyżej i `docs/weryfikacja-todo-2026-11-16.md`.
 - Brakująca literatura (luka do uzupełnienia w E02-07 i E02-08): propozycja ma niewiele recenzowanych badań empirycznych o skuteczności skanerów w potokach CI/CD i o bezpieczeństwie GitHub Actions. Warto przeszukać IEEE Xplore, ACM DL i Scopus (np. prace o zatrutym wykonaniu potoku i o bezpieczeństwie workflowów GitHub Actions).

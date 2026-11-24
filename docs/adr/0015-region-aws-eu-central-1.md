@@ -31,7 +31,7 @@ Wybrano **`eu-central-1`**. Powody autora:
 - autor dobrze się czuje w tym regionie,
 - prościej wybrać `eu-central-1` niż analizować położenie geograficzne i opóźnienia do kilku regionów europejskich,
 - dane zostają w UE,
-- według autora to region polecany przez AWS. <!-- TODO: zweryfikować; nie znaleziono źródła AWS, które poleca konkretny region (wytyczne AWS podają kryteria, nie region) -->
+- według autora to region polecany przez AWS. <!-- Nie potwierdzono: AWS nie poleca konkretnego regionu, tylko podaje kryteria wyboru (zgodność z przepisami, opóźnienie, koszt, dostępność usług; blog AWS Architecture z 2021-09-20, sprawdzone 2026-11-16). Zdanie zostaje jako zapis pierwotnego powodu autora. -->
 
 Pierwsze dwa powody są subiektywne. W projekcie jednoosobowym bez wymogów co do lokalizacji danych i opóźnień wybór regionu ma mały wpływ na wyniki eksperymentu.
 
@@ -39,7 +39,7 @@ Pierwsze dwa powody są subiektywne. W projekcie jednoosobowym bez wymogów co d
 
 `eu-west-1` rozważano po sprawdzeniu, który region europejski dostaje nowości pierwszy. AWS nie publikuje takiej kolejności. W przykładowych ogłoszeniach z 2026 r. (CloudWatch Query Studio, Bedrock AgentCore Evaluations) na liście regionów startowych była Irlandia, a nie Frankfurt. Projekt nie korzysta z nowych usług, więc ten czynnik nie przeważył.
 
-Pierwotne powody autora („najpopularniejszy region w Europie”, „najmniej awarii”, „najszybciej dostaje zmiany”, „lepsze wsparcie”) wycofano 2026-10-30, bo nie znaleziono dla nich źródeł. Sprawdzenie pokazało, że nowości dostaje wcześniej Irlandia, a poziom wsparcia zależy od planu wsparcia AWS, nie od regionu (TODO: zweryfikować w dokumentacji AWS Support). Drugie podejście („najbliższy region dla Polski”) też wycofano, bo Sztokholm (`eu-north-1`) leży od Warszawy podobnie daleko, a odległości nie mierzono.
+Pierwotne powody autora („najpopularniejszy region w Europie”, „najmniej awarii”, „najszybciej dostaje zmiany”, „lepsze wsparcie”) wycofano 2026-10-30, bo nie znaleziono dla nich źródeł. Sprawdzenie pokazało, że nowości dostaje wcześniej Irlandia, a poziom wsparcia zależy od planu wsparcia AWS, nie od regionu (potwierdzone 2026-11-16 na stronie planów AWS Support: plany nie zależą od regionu, wyjątkiem jest GovCloud). Drugie podejście („najbliższy region dla Polski”) też wycofano, bo Sztokholm (`eu-north-1`) leży od Warszawy podobnie daleko, a odległości nie mierzono.
 
 ## Konsekwencje
 
@@ -50,7 +50,7 @@ Pierwotne powody autora („najpopularniejszy region w Europie”, „najmniej a
 
 ## Źródła
 
-Źródła spoza rejestru `Zrodla/` (TODO: zweryfikować, czy rejestrować), sprawdzone 2026-10-30:
+Źródła spoza rejestru `Zrodla/` (rejestrowane dopiero przy cytowaniu w tekście pracy, zob. `README.md`, zasada 8), sprawdzone 2026-10-30:
 
 - AWS, *Document history for AWS Regions and Availability Zones*, https://docs.aws.amazon.com/global-infrastructure/latest/regions/doc-history.html (daty uruchomienia regionów: `eu-west-1` 2008, `eu-central-1` 2014).
 - AWS, *AWS Observability ICYMI: Jan–May 2026*, https://aws.amazon.com/blogs/mt/aws-observability-icymi-jan-may-2026/ (regiony startowe CloudWatch Query Studio).

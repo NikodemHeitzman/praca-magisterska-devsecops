@@ -36,8 +36,8 @@ Dodatki z definicji zadania: mypy, hook pre-commit.
 Wybrano **ruff z regułami `E`, `W`, `F`, `I`, `B`, `UP`, `SIM`, bez reguł `S`**, bez mypy i bez hooka pre-commit. Powody autora:
 
 - **Jedno narzędzie:** ruff zastępuje linter, sortowanie importów i formatter jedną konfiguracją w `pyproject.toml`.
-- **Szybkość w CI:** krótszy job lint to krótszy mierzony czas potoku. Wielkość zysku względem flake8 + black + isort: TODO: zweryfikować (nie mierzono).
-- **Popularność:** ruff jest dziś częstym wyborem w nowych projektach Pythona. TODO: zweryfikować (brak źródła).
+- **Szybkość w CI:** krótszy job lint to krótszy mierzony czas potoku. Wielkości zysku w tym projekcie nie mierzono. Producent deklaruje „10-100x faster” niż Flake8 i Black (README ruff), a dla formattera ponad 30 razy względem Black (blog Astral, 2023-10-24). Porównania z isort nie znaleziono (sprawdzone 2026-11-16).
+- **Popularność:** ruff jest dziś częstym wyborem w projektach Pythona: około 408,5 mln pobrań z PyPI w ostatnim miesiącu (pypistats, odczyt 2026-11-16), a README wymienia m.in. FastAPI, Pandas i SciPy. Ankieta PSF i JetBrains z 2024 r. nie pyta o lintery.
 - **Spójność z uv:** ten sam producent (Astral) co uv. Ruff instaluje się jako zależność grupy `dev`, a wersję blokuje `uv.lock`.
 - **Bez reguł `S` — trafność eksperymentu:** lint działa w obu wariantach. Reguły `S` wykrywałyby część pozycji katalogu (np. zakodowany sekret w GT-02, `eval()` w GT-04). Wariant A miałby wtedy kontrolę bezpieczeństwa, a nie powinien jej mieć.
 - **Bez hooka pre-commit:** hooka nie da się traktować jak kontroli, bo programista pominie go opcją `--no-verify`, a autorytatywną warstwą jest CI ([`docs/notes/owasp-devsecops.md`](../notes/owasp-devsecops.md), p. 6). Do tego prostota: w projekcie jednoosobowym lint i tak działa w CI i ręcznie.
@@ -46,7 +46,7 @@ Wybrano **ruff z regułami `E`, `W`, `F`, `I`, `B`, `UP`, `SIM`, bez reguł `S`*
 Decyzje agenta w konfiguracji, zaakceptowane przez autora 2026-10-30 bez osobnego powodu:
 
 - `line-length = 100`. Kod był pisany pod linie około 100 znaków. Przy 100 formatter zmienił 9 plików, a przy domyślnych 88 zmieniłby 18.
-- `target-version = "py313"`, mimo `requires-python = ">=3.14"`. Przy `py314` formatter ruff 0.17.3 zamienia `except (A, B):` na składnię z PEP 758 (`except A, B:`), a pyupgrade (UP037) usuwa cudzysłowy z odwołań w przód w modelach SQLAlchemy. Czy parsery skanerów SAST (Semgrep, Bandit) obsługują już składnię z PEP 758: TODO: zweryfikować. Niższy cel to środek ostrożności, który kosztuje tyle, że ruff nie proponuje składni dostępnej dopiero od 3.14.
+- `target-version = "py313"`, mimo `requires-python = ">=3.14"`. Przy `py314` formatter ruff 0.17.3 zamienia `except (A, B):` na składnię z PEP 758 (`except A, B:`), a pyupgrade (UP037) usuwa cudzysłowy z odwołań w przód w modelach SQLAlchemy. Stan na 2026-11-16: Semgrep od 1.179.0 parsuje `except A, B:` jako krotkę (wcześniejsze wersje gubiły drugi typ bez ostrzeżenia), ale otwarty błąd semgrep/semgrep#12079 zgłasza częściowe parsowanie w plikach z instrukcją `match`, przy kodzie wyjścia 0. Bandit parsuje kod modułem `ast` interpretera, więc na Pythonie 3.14 tę składnię obsługuje. Niższy cel to środek ostrożności, który kosztuje tyle, że ruff nie proponuje składni dostępnej dopiero od 3.14.
 
 ## Konsekwencje
 
@@ -60,4 +60,4 @@ Decyzje agenta w konfiguracji, zaakceptowane przez autora 2026-10-30 bez osobneg
 
 - Konfiguracja i wyniki uruchomienia ruff 0.17.3 na kodzie aplikacji, 2026-10-30 (dziennik).
 - PyPI JSON API, `https://pypi.org/pypi/ruff/json` (wersja 0.17.3 z 2026-10-27, sprawdzone 2026-10-30).
-- Źródła spoza rejestru `Zrodla/`: TODO: zweryfikować, czy rejestrować.
+- Źródła spoza rejestru `Zrodla/` (rejestrowane dopiero przy cytowaniu w tekście pracy, zob. `README.md`, zasada 8).

@@ -11,7 +11,7 @@ ADR-0016 przyjął, że potok GitHub Actions uwierzytelnia się do AWS przez OID
 
 - `AccessDenied` dla `iam:CreateOpenIDConnectProvider` „with an explicit deny in a service control policy”. Komunikat wskazuje SCP organizacji zarządzanej przez AWS, do której należy konto-projekt z ADR-0020 (to samo źródło ograniczeń co `RegionFloor` w ADR-0030).
 - Dokumentacja AWS publikuje SCP planu darmowego i planu płatnego dla kont-projektów. Obie mają instrukcję `DenyIAMRestrictedActions`, która odrzuca m.in. `iam:*Provider*`, czyli tworzenie dostawców tożsamości OIDC i SAML. Według tej samej dokumentacji ograniczenia znosi tylko aktywacja zaawansowanych funkcji („activate advanced features”). Jak ustalono w ADR-0030, wymaga ona planu płatnego, usuwa limit wydatków i jest nieodwracalna.
-- Która instrukcja SCP odrzuciła żądanie, wynika z porównania z opublikowaną treścią SCP, a nie ze zdekodowanego komunikatu (TODO: zweryfikować przez `GetRequestAuthorizationDetails` z identyfikatorem autoryzacji z komunikatu błędu).
+- Która instrukcja SCP odrzuciła żądanie, wynika z porównania z opublikowaną treścią SCP, a nie ze zdekodowanego komunikatu (weryfikacja przez `GetRequestAuthorizationDetails` jest już niemożliwa, bo szczegóły autoryzacji są przechowywane 24 h; dokumentacja IAM, sprawdzone 2026-11-16).
 
 W AWS nic nie powstało: rola zależy od ARN dostawcy, więc Terraform jej nie tworzył. Bez dostawcy OIDC GitHub Actions nie może przyjąć roli w tym koncie.
 
@@ -101,7 +101,7 @@ Fakty sprawdzone 2026-11-11:
 
 ## Źródła
 
-Źródła spoza rejestru `Zrodla/` (TODO: zweryfikować, czy rejestrować):
+Źródła spoza rejestru `Zrodla/` (rejestrowane dopiero przy cytowaniu w tekście pracy, zob. `README.md`, zasada 8):
 
 - AWS, *Managed policies for your organization* (SCP i RCP kont-projektów, instrukcja `DenyIAMRestrictedActions`): https://docs.aws.amazon.com/accounts/latest/reference/scps-and-rcps-for-projects.html (sprawdzone 2026-11-11)
 - AWS, *Supported AWS services for Sign up for AWS (new)*: https://docs.aws.amazon.com/accounts/latest/reference/supported-services-sign-up-new.html (sprawdzone 2026-11-11)
@@ -111,4 +111,4 @@ Fakty sprawdzone 2026-11-11:
 - GitHub Docs, *OpenID Connect reference* (format `sub`, niezmienne ID): https://docs.github.com/en/actions/reference/security/oidc (sprawdzone 2026-11-11)
 - GitHub Changelog, *Immutable subject claims for GitHub Actions OIDC tokens* (2026-04-23, wpis później zmieniany): https://github.blog/changelog/2026-04-23-immutable-subject-claims-for-github-actions-oidc-tokens
 - `aws-actions/configure-aws-credentials` v6.3.0, `action.yml` (domyślny czas sesji, maskowanie ID konta)
-- Ochrona poświadczeń potoku w NIST SP 800-204D: TODO: zweryfikować numer rekomendacji [@NIST-SP800-204D]
+- Ochrona poświadczeń potoku: SP 800-204D nie ma osobnej rekomendacji; najbliżej są PULL-PUSH-REQ-3 (sek. 5.1.2, s. 18) i sek. 5.3 pkt 4 (s. 22) [@NIST-SP800-204D]

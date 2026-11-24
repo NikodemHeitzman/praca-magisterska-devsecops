@@ -4,7 +4,7 @@
 - **Zadanie:** E02-05 (tablica zadań). Używane w rozdz. 3 i 4.3, w hipotezie H3b i metryce M8 (`docs/metodyka.md`).
 - **Wersja i status:** v1.2 ma status *Approved*, czyli stabilny (strona slsa.dev/spec/v1.2/, `spec-stages`). Ogłoszono ją 2025-11-24. Według ogłoszenia jest wstecznie zgodna z v1.1. Notatki oparto na tekście z gałęzi `releases/v1.2` repozytorium `slsa-framework/slsa` (commit `ae7fc76`, 2026-04-14, poprawki redakcyjne po wydaniu; tag `v1.2` to `19e4e2f`). Gałąź `main` zawiera już *Working Draft* następnej wersji. Ten szkic opisuje m.in. ścieżki Build Environment i Dependency i nie jest tu cytowany.
 - **Jak wskazywać miejsca:** specyfikacja jest serwisem HTML bez numerów stron. Miejsca podaję jako `strona#kotwica`, np. `build-requirements#isolated` oznacza https://slsa.dev/spec/v1.2/build-requirements#isolated.
-- **Stan lektury:** TODO: autor potwierdza. Notatki przygotował agent (Claude Code) na podstawie tekstu specyfikacji. Pytania kontrolne są w `docs/notes/slsa-pytania.md`.
+- **Stan lektury:** autor przeczytał opracowanie (potwierdzenie autora z 2026-11-16). Notatki przygotował agent (Claude Code) na podstawie tekstu specyfikacji. Pytania kontrolne są w `docs/notes/slsa-pytania.md`.
 
 ## Jak czytać ten plik
 
@@ -171,7 +171,7 @@ Kolumny „Realizacja” i „Dowód” to **propozycje agenta**, nie decyzje. D
   - L2: ciągła, niezmienna historia i *Source Provenance* dla każdej rewizji,
   - L3: ciągłe egzekwowanie kontroli technicznych na chronionych referencjach,
   - L4: przegląd przez dwie zaufane osoby.
-- Już od L1 system kontroli wersji MUSI wydawać *Source VSA* (`source-requirements#source-summary`). Bez VSA rewizja ma Source L0. GitHub nie wydaje VSA natywnie. Specyfikacja jako przykład podaje narzędzie `slsa-source-poc` (`verifying-source`). Czy GitHub ma dziś natywne wsparcie: TODO: zweryfikować.
+- Już od L1 system kontroli wersji MUSI wydawać *Source VSA* (`source-requirements#source-summary`). Bez VSA rewizja ma Source L0. GitHub nie wydaje VSA natywnie. Specyfikacja jako przykład podaje narzędzie `slsa-source-poc` (`verifying-source`). Natywnego wsparcia GitHuba nie znaleziono w dokumentacji ani changelogu (sprawdzone 2026-11-16).
 - **Wniosek:** ścieżka Source jest poza zakresem oceny (M8 dotyczy tylko Build). Source L4 jest nieosiągalny w projekcie jednoosobowym, bo wymaga dwóch recenzentów. Do pracy (3.x) wystarczy wzmianka, że ścieżka istnieje, i uzasadnienie, dlaczego jej nie oceniamy.
 
 ---
@@ -185,7 +185,7 @@ Oznaczenia: P = producent, PB = platforma budowania, K = konsument (weryfikator)
 | SLSA-0 | Najlepsze praktyki bezpieczeństwa (dostęp, komunikacja, sekrety, aktualizacje) | P, PB | MUST | ✓ | ✓ | ✓ | `build-requirements#security-best-practices` | n/d | Sprawdza się pośrednio przez listę kontrolną M7 (800-204D, CICD-SEC) | odsyłacz do M7 |
 | SLSA-P1 | Wybór platformy zdolnej do docelowego poziomu | P | MUST | ✓ | ✓ | ✓ | `#choose-an-appropriate-build-platform` | tak (L2 według GitHuba, L3 z reusable workflow) | GitHub Actions, runnery hostowane | ADR potoku, dokumentacja GitHuba |
 | SLSA-P2 | Spójny proces buildu, na podstawie którego weryfikator może ustalić oczekiwania | P | MUST | ✓ | ✓ | ✓ | `#follow-a-consistent-build-process` | nie (zależy od producenta) | Jeden workflow wydania, wyzwalany z `main` lub tagu | plik workflow, `externalParameters.workflow` w provenance |
-| SLSA-P3 | Dystrybucja provenance do konsumentów | P | MUST | ✓ | ✓ | ✓ | `#distribute-provenance`, `distributing-provenance` | częściowo (API atestacji GitHuba, Rekor dla repozytoriów publicznych) | Dodatkowo `push-to-registry: true` (atestacja w rejestrze OCI obok obrazu) | wpis w API atestacji, wpis w Rekorze, referrer w rejestrze (ECR: TODO: zweryfikować) |
+| SLSA-P3 | Dystrybucja provenance do konsumentów | P | MUST | ✓ | ✓ | ✓ | `#distribute-provenance`, `distributing-provenance` | częściowo (API atestacji GitHuba, Rekor dla repozytoriów publicznych) | Dodatkowo `push-to-registry: true` (atestacja w rejestrze OCI obok obrazu) | wpis w API atestacji, wpis w Rekorze, referrer w rejestrze (ECR obsługuje OCI 1.1 i referrers od 2024-06; projekt używa GHCR, ADR-0027) |
 | SLSA-B1 | Provenance istnieje, identyfikuje artefakt digestem i opisuje proces | PB | MUST | ✓ | ✓ | ✓ | `#provenance-exists` | tak | `actions/attest` z `subject-digest` obrazu | `gh attestation verify` (domyślnie wymaga predykatu SLSA v1) |
 | SLSA-B2 | Provenance autentyczne: podpis, generowane przez płaszczyznę sterowania, dane z platformy | PB | MUST (podpis: SHOULD) | | ✓ | ✓ | `#provenance-authentic` | tak (Sigstore, certyfikat Fulcio z tożsamością workflow z tokenu OIDC; dane predykatu z podpisanych claimów OIDC) | bez zmian | weryfikacja podpisu i certyfikatu przez `gh attestation verify` |
 | SLSA-B3 | Provenance niepodrabialne: sekret podpisujący niedostępny dla kroków użytkownika; każde pole generowane lub sprawdzane przez platformę; parametry zewnętrzne w pełni wyliczone | PB | MUST | | | ✓ | `#provenance-unforgeable` | **nie w jednym jobie** (sekcja 3.3) | Osobny job (i najlepiej reusable workflow) do atestacji, bez `id-token: write` w jobie buildu; wydanie bez `inputs` i `vars` | struktura workflow, `builder.id` = reusable workflow, test negatywny |
@@ -193,7 +193,7 @@ Oznaczenia: P = producent, PB = platforma budowania, K = konsument (weryfikator)
 | SLSA-B5a | Build nie ma dostępu do sekretów platformy (klucz podpisu provenance) | PB | MUST | | | ✓ | `#isolated` | jak SLSA-B3 | jak SLSA-B3 | jak SLSA-B3 |
 | SLSA-B5b | Buildy równoległe nie wpływają na siebie | PB | MUST | | | ✓ | `#isolated` | tak, z wyjątkiem runnerów jednoprocesorowych (kontener na współdzielonej VM) | etykieta runnera z osobną VM | etykieta `runs-on` w workflow |
 | SLSA-B5c | Efemeryczne środowisko dla każdego buildu | PB | MUST | | | ✓ | `#isolated` | tak (nowa VM na każdy job, z tym samym wyjątkiem) | jak wyżej | dokumentacja GitHuba, `runs-on` |
-| SLSA-B5d | Brak zatrucia cache: wynik identyczny z cache i bez niego | PB | MUST | | | ✓ | `#isolated`, `threats#e-build-process` | niepewne, zależy od użycia `actions/cache` i cache BuildKit `type=gha` (TODO: zweryfikować zasady zakresu cache) | build wydania bez cache albo uzasadnienie zakresu cache | workflow bez `cache-from`/`actions/cache` w jobie wydania |
+| SLSA-B5d | Brak zatrucia cache: wynik identyczny z cache i bez niego | PB | MUST | | | ✓ | `#isolated`, `threats#e-build-process` | niepewne, zależy od użycia `actions/cache` i cache BuildKit `type=gha` (zasady: odczyt z gałęzi własnej, bazowej i domyślnej, zapis do gałęzi domyślnej tylko ze zdarzeń zaufanych; BuildKit `type=gha` podlega tym samym ograniczeniom; sprawdzone 2026-11-16) | build wydania bez cache albo uzasadnienie zakresu cache | workflow bez `cache-from`/`actions/cache` w jobie wydania |
 | SLSA-B5e | Brak usług pozwalających na zdalny wpływ, chyba że ujęte w `externalParameters` | PB | MUST | | | ✓ | `#isolated` | tak, przy braku narzędzi debugowania typu SSH w jobie | żadnych akcji zdalnego dostępu do runnera | przegląd workflow (zizmor/actionlint) |
 | SLSA-K1 | Konsument sprawdza autentyczność provenance | K | wymóg L2 (`build-track-basics`) | | ✓ | ✓ | `build-track-basics#build-l2` | nie (trzeba wywołać) | `gh attestation verify oci://…@sha256:…` w jobie deploy, *fail closed* | log joba, test negatywny (E07-09) |
 | SLSA-K2 | Sprawdzenie oczekiwań: builder, repozytorium, `buildType`, `externalParameters`; odrzucanie nierozpoznanych parametrów | K | SHOULD | ✓ | ✓ | ✓ | `verifying-artifacts#step-2-check-expectations` | częściowo (`--repo`, `--signer-workflow`, `--source-ref`; `gh` nie odrzuca nierozpoznanych parametrów) | flagi `--repo`, `--signer-workflow`, `--source-ref refs/heads/main`; ewentualnie kontrola JSON z `--format json` | polecenie weryfikacji i jego wynik |
@@ -237,14 +237,14 @@ Oznaczenia: P = producent, PB = platforma budowania, K = konsument (weryfikator)
   - L3 zakłada, że płaszczyzna sterowania jest poza kontrolą najemcy (`terminology#build-model`).
   - W `slsa-github-generator` rolę zaufanego buildera pełni reusable workflow utrzymywany przez osobny projekt.
   - Tutaj autor pisze i workflow wywołujący, i reusable workflow, więc rozdział „najemca – platforma” jest umowny. Argument GitHuba („współdzielony przez wiele repozytoriów organizacji, sprawdzony”) ma tu słabsze oparcie.
-  - Twierdzenie „L3” będzie więc twierdzeniem „L3 według interpretacji GitHuba, z zastrzeżeniem”. TODO: zweryfikować, czy w literaturze lub dyskusjach SLSA (issues `slsa-framework/slsa`) jest stanowisko w tej sprawie.
+  - Twierdzenie „L3” będzie więc twierdzeniem „L3 według interpretacji GitHuba, z zastrzeżeniem”. Oficjalnego stanowiska SLSA nie ma; maintainerzy w issues #986 i #1063 dopuszczają deklarację L3 przez producenta, jeśli spełnia wymagania, a GitHub Docs przypisują atestacjom L2, a reusable workflow L3 (sprawdzone 2026-11-16).
 - **`slsa-github-generator`:** według README (stan 2026-10-28) projekt „nie jest już aktywnie utrzymywany”. Ostatnie wydanie to v2.1.0 z lutego 2025. Projekt sam zaleca artifact attestations GitHuba. Generator odpada więc jako ścieżka do L3 (wymóg aktualności narzędzi, AGENTS.md).
 - **Minimalny projekt L3 (propozycja do E07-09):**
   1. Build obrazu w osobnym jobie **bez** `id-token: write`, wynik to digest (wyjście joba).
   2. Atestacja w osobnym jobie reusable workflow (np. `.github/workflows/attest.yml`, `on: workflow_call`) z `id-token: write` i `attestations: write`. Przyjmuje tylko nazwę i digest obrazu.
   3. Workflow wydania bez `workflow_dispatch.inputs` i bez `vars` wpływających na build (SLSA-B3, kompletność).
   4. Brak cache w jobie wydania albo udokumentowany zakres cache (SLSA-B5d).
-  5. Runnery z osobną VM, bez etykiet jednoprocesorowych (SLSA-B5b, -B5c; TODO: zweryfikować etykiety w „GitHub-hosted runners reference”).
+  5. Runnery z osobną VM, bez etykiet jednoprocesorowych (SLSA-B5b, -B5c; jednoprocesorowa etykieta `ubuntu-slim` działa w kontenerze na współdzielonej VM, a `ubuntu-24.04` to osobna VM; sprawdzone 2026-11-16).
   6. Weryfikacja przed deployem:
 
      `gh attestation verify oci://<rejestr>/<obraz>@sha256:<digest> --repo <właściciel>/praca-magisterska-devsecops --signer-workflow <właściciel>/praca-magisterska-devsecops/.github/workflows/attest.yml --source-ref refs/heads/main --deny-self-hosted-runners`
@@ -317,12 +317,12 @@ Oznaczenia: P = producent, PB = platforma budowania, K = konsument (weryfikator)
 ## 7. Otwarte kwestie
 
 - [x] Decyzja autora: wariant A (2026-10-28). H3b i M8 w `metodyka.md` zaktualizowane.
-- [ ] TODO: zweryfikować zasady zakresu cache GitHub Actions i cache BuildKit `type=gha` pod kątem SLSA-B5d.
-- [ ] TODO: zweryfikować etykiety runnerów jednoprocesorowych w „GitHub-hosted runners reference”.
-- [ ] TODO: zweryfikować, czy ECR obsługuje atestacje jako artefakty OCI powiązane z obrazem (`push-to-registry`). Zależy od wyboru rejestru.
-- [ ] TODO: zweryfikować, czy jest publiczne stanowisko SLSA w sprawie L3 przy reusable workflow pisanym przez samego producenta.
+- [x] Zakres cache GitHub Actions i BuildKit `type=gha`: zob. SLSA-B5d (2026-11-16).
+- [x] Runnery jednoprocesorowe: `ubuntu-slim` (kontener na współdzielonej VM) (2026-11-16).
+- [x] ECR obsługuje OCI 1.1 i referrers; rejestrem projektu jest GHCR (ADR-0027) (2026-11-16).
+- [x] Brak oficjalnego stanowiska SLSA; wypowiedzi maintainerów w issues #986 i #1063 (2026-11-16).
 - [ ] Wybór między `actions/attest-build-provenance` a `actions/attest` w potoku (E07-09). Dokumentacja zaleca `actions/attest`.
-- [ ] Ścieżka Source: tylko wzmianka w rozdz. 3. Natywne wsparcie GitHuba: TODO: zweryfikować.
+- [ ] Ścieżka Source: tylko wzmianka w rozdz. 3. Natywnego wsparcia GitHuba nie znaleziono (2026-11-16).
 
 ## Źródła użyte w notatce
 

@@ -11,6 +11,8 @@ ADR (*Architecture Decision Record*) to krótki zapis jednej decyzji technicznej
 5. **Nie edytuj treści przyjętego ADR.** Gdy decyzja się zmienia, napisz nowy ADR, a w starym zmień tylko status na `zastąpiony przez NNNN`. Historia zmian zdania jest materiałem do pracy.
 6. **Uzasadnienia muszą być prawdziwe.** Nie dopisuj powodów, których nie było, ani źródeł z pamięci. Czego nie wiadomo, oznacz `TODO: zweryfikować`. Źródła cytuj kluczem z rejestru źródeł (`[@KLUCZ]`).
 7. **Wpis w dzienniku** ([`../log/`](../log/)) z dnia decyzji zawiera link do ADR.
+8. **Źródła spoza rejestru.** Dokumentację techniczną (AWS, GitHub, Docker, narzędzia) podawaj w ADR jako adres z datą sprawdzenia. Notatkę w rejestrze `Zrodla/` zakładamy dopiero wtedy, gdy źródło trafia do tekstu pracy (decyzja autora z 2026-11-16).
+9. **Uzupełnianie faktów.** Zamknięcie `TODO: zweryfikować` sprawdzonym faktem albo zapis decyzji, która była otwarta, nie jest zmianą decyzji z zasady 5. Dopisz datę sprawdzenia i źródło.
 
 ## Indeks
 

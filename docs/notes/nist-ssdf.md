@@ -131,7 +131,7 @@ Uwaga: RV wychodzi poza moment wydania. Potok nie kończy się na wdrożeniu: RV
   - 4e(vii) (SBOM) → PS.3.2,
   - 4e(viii) (ujawnianie podatności) → RV.1.1–RV.3.3,
   - 4e(ix) (ogólna zgodność) → wszystkie praktyki, przy podejściu opartym na ryzyku.
-- **Dla pracy:** wystarczy jedno zdanie w 3.1 o kontekście powstania SSDF. Treści EO 14028 nie trzeba omawiać. Treść podpunktów 4e jest poza SSDF, więc nie opisujemy ich z pamięci (TODO: zweryfikować w tekście EO, jeśli będą potrzebne).
+- **Dla pracy:** wystarczy jedno zdanie w 3.1 o kontekście powstania SSDF. Treści EO 14028 nie trzeba omawiać. Treść podpunktów 4e jest poza SSDF, więc nie opisujemy ich z pamięci (sprawdzone 2026-11-16 w tekście EO 14028: sek. 4(e) ma 10 punktów, m.in. bezpieczne środowiska buildu, automatyczne skanowanie podatności, SBOM, pochodzenie komponentów i atestację zgodności).
 
 ### Historia zmian (dok. 27, PDF 36)
 
@@ -226,7 +226,7 @@ Wniosek wstępny: potok w całości albo częściowo realizuje 31 z 42 zadań. G
 2. **RV.1–RV.3 uznano w SP 800-204D za politykę organizacji**, niezwiązaną z CI/CD. RV.1.2 (przykład 1) zakłada jednak, że łańcuch narzędzi cyklicznie analizuje i testuje wspierane wydania, a RV.1.1 (przykład 3) automatycznie przegląda SBOM pod kątem nowych podatności. To zadania dla potoku (cykliczny workflow). Proponowana interpretacja: polityka RV jest organizacyjna, ale jej wykonanie technicznie należy do potoku.
 3. **Sekrety.** Ani SSDF, ani mapowanie w SP 800-204D nie mają osobnego zadania o sekretach. W SSDF najbliżej są PO.5.1 (ochrona środowisk, uwierzytelnianie) i PS.1.1 (najmniejsze uprawnienia do kodu). Dla skanowania sekretów (COMMIT-REQ-1) można więc przyjąć PS.1.1 jako interpretację. Do decyzji autora.
 4. **Podpisy i atestacje.** SSDF daje dla nich miejsce w PS.2.1 i PS.3, a SP 800-204D w dodatku A nie mapuje ATT-2* i ATT-3* na żadną praktykę. Proponowane uzupełnienie: ATT-2* → PS.2.1, ATT-3* → PS.3.1 (przykład 2: dane do weryfikacji przechowywane osobno lub podpisane).
-5. **DEPLOY-REQ-5** (otwarte z E02-02): przegląd skryptów buildu pod kątem złośliwego kodu odpowiada w SSDF zadaniu PO.3.2 (bezpieczne utrzymanie narzędzi) i częściowo PW.7.2 (eksperci szukający tylnych furtek, przykład 2). Skan obrazu przed wypchnięciem odpowiada PW.4.4 i PW.8.2. Nie rozstrzyga to, co dokładnie wpisano w tabeli 2 SP 800-204D. TODO: zweryfikować w PDF SP 800-204D, dok. 27.
+5. **DEPLOY-REQ-5** (otwarte z E02-02): przegląd skryptów buildu pod kątem złośliwego kodu odpowiada w SSDF zadaniu PO.3.2 (bezpieczne utrzymanie narzędzi) i częściowo PW.7.2 (eksperci szukający tylnych furtek, przykład 2). Skan obrazu przed wypchnięciem odpowiada PW.4.4 i PW.8.2. Tabela 2 SP 800-204D (s. 26–27, sprawdzone w PDF 2026-11-16) przypisuje DEPLOY-REQ-5 tylko do PO.1, więc powyższe odpowiedniki są interpretacją agenta, nie zapisem NIST.
 
 ---
 
@@ -238,7 +238,7 @@ Obserwacje agenta. Autor potwierdza je przed użyciem w tekście.
 2. **Poziom ogólności.** SSDF nie mówi, jak coś zrobić, a przykłady są poglądowe. Dwie osoby mogą różnie ocenić, czy zadanie jest spełnione. Kompensata: dla każdego zadania wskazać konkretny dowód (job, plik konfiguracji, raport).
 3. **Projekt jednoosobowy.** Zadania z przeglądem przez drugą osobę (PS.1.1 przykład 4, PW.2.1, PW.7.2 przykład 1) i zadania organizacyjne (PO.2) nie dają się spełnić dosłownie. To samo ograniczenie co w SP 800-204D (PP-AUTH*).
 4. **Python i kontenery a przykłady kompilatorowe.** PW.6 jest pisane z myślą o językach kompilowanych (ASLR, ostrzeżenia kompilatora). Dla Pythona i Dockera jego sens to kontrola środowiska i narzędzi buildu (Dockerfile, BuildKit, obraz bazowy).
-5. **Wiek dokumentu.** Wersja 1.1 pochodzi z 2022 r. Nie zna GitHub artifact attestations ani dojrzałego SLSA. Wersja 1.2 jest od grudnia 2025 r. wstępnym projektem. Kierunku jej zmian agent nie analizował (TODO: zweryfikować, jeśli potrzebne do 3.1).
+5. **Wiek dokumentu.** Wersja 1.1 pochodzi z 2022 r. Nie zna GitHub artifact attestations ani dojrzałego SLSA. Wersja 1.2 jest od grudnia 2025 r. wstępnym projektem. Stan na 2026-11-16: nadal Initial Public Draft (SP 800-218r1, 2025-12-17); według prezentacji NIST z 2026-05-20 dochodzą praktyki PO.6 (ciągłe doskonalenie) i PW.10 (niezawodne aktualizacje).
 6. **Definicja „artefaktu”** w SSDF (dowód) różni się od używanej w CI/CD (produkt buildu). W tekście pracy trzeba to rozróżnić.
 
 ---
@@ -249,5 +249,5 @@ Obserwacje agenta. Autor potwierdza je przed użyciem w tekście.
 - [ ] Autor czyta w oryginale przynajmniej dok. 1–4 (PDF 10–13), zanim napisze 3.1.
 - [ ] Autor przegląda ocenę `P`/`Cz`/`O`/`N` w sekcji 2 (najpóźniej przy E07-01).
 - [x] Decyzja: mapowanie listy kontrolnej według definicji SSDF (SAST → PW.7, SCA → PW.4.4, DAST → PW.8; sekcja 3 p. 1) zamiast mapowania z SP 800-204D. Decyzja autora z 2026-10-06.
-- [ ] TODO: zweryfikować DEPLOY-REQ-5 w tabeli 2 SP 800-204D (dok. 27).
+- [x] DEPLOY-REQ-5 w tabeli 2 SP 800-204D: tylko PO.1 (sprawdzone 2026-11-16).
 - [ ] Przed złożeniem pracy sprawdzić status SSDF 1.2 (SP 800-218 Rev. 1).

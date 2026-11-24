@@ -23,7 +23,7 @@ Wersja najnowsza na dzień pobrania **nie jest** wersją przypiętą. Wersję pr
 
 | Narzędzie | Klasa | Rola (propozycja) | Wersja najnowsza | Data wydania | Licencja | Dokumentacja | Wydanie |
 |---|---|---|---|---|---|---|---|
-| Semgrep (CE) | SAST | Kod Pythona (GT-01, GT-03–06, GT-12, GT-14), TEST-1 | v1.181.0 | 2026-10-14 | LGPL-2.1 (silnik; licencja reguł: TODO: zweryfikować) | https://docs.semgrep.dev/ | https://github.com/semgrep/semgrep/releases/tag/v1.181.0 |
+| Semgrep (CE) | SAST | Kod Pythona (GT-01, GT-03–06, GT-12, GT-14), TEST-1 | v1.181.0 | 2026-10-14 | LGPL-2.1 (silnik); reguły z rejestru: Semgrep Rules License v1.0, użycie tylko na własne potrzeby, bez rozpowszechniania, więc reguł nie kopiujemy do repozytorium (sprawdzone 2026-11-16) | https://docs.semgrep.dev/ | https://github.com/semgrep/semgrep/releases/tag/v1.181.0 |
 | Bandit | SAST (Python) | Kod Pythona (GT-01–04), TEST-1 | 1.9.4 | 2026-02-25 | Apache-2.0 | https://bandit.readthedocs.io/en/latest/ | https://github.com/PyCQA/bandit/releases/tag/1.9.4 |
 | pip-audit | SCA | Zależności Pythona (GT-07), TEST-2 | v2.10.1 | 2026-06-10 | Apache-2.0 | https://github.com/pypa/pip-audit | https://github.com/pypa/pip-audit/releases/tag/v2.10.1 |
 | Gitleaks | Sekrety | Sekrety w kodzie i historii (GT-02), COMMIT-REQ-1, DEPLOY-REQ-1 | v8.30.1 | 2026-03-21 | MIT | https://github.com/gitleaks/gitleaks | https://github.com/gitleaks/gitleaks/releases/tag/v8.30.1 |
@@ -54,7 +54,7 @@ Akcje przypinamy do pełnego SHA commita (`AGENTS.md`, konwencja 5). Tabela poda
 | `docker/login-action` | v4.6.0 | `dbcb813823bdd20940b903addbd779551569679f` | 2026-07-29 | logowanie do rejestru |
 | `aws-actions/configure-aws-credentials` | v6.3.0 | `e1253824e5c10ff9df46874f81ed3ec929e19cfd` | 2026-09-15 | OIDC do AWS; nieużywana, bo SCP konta blokuje dostawcę OIDC (ADR-0032) |
 | `aws-actions/amazon-ecr-login` | v2.1.7 | `03f1aad4c6c7ffd436567f42f9384779290529bd` | 2026-08-19 | logowanie do ECR (jeśli rejestrem będzie ECR) |
-| `github/codeql-action` (`upload-sarif`) | v4.39.0 | `6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee` | TODO: zweryfikować | wyniki SARIF w zakładce Security |
+| `github/codeql-action` (`upload-sarif`) | v4.39.0 | `6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee` | 2026-10-15 | wyniki SARIF w zakładce Security |
 | `actions/dependency-review-action` | v5.0.0 | `a1d282b36b6f3519aa1f3fc636f609c47dddb294` | 2026-05-08 | DEPLOY-REQ-2 |
 | `actions/attest-build-provenance` | v4.2.2 | `4d101475d8b20a2381f78447822ac1eab6504dd8` | 2026-08-06 | provenance (SLSA, E02-05) |
 | `actions/attest-sbom` | v4.1.0 | `c604332985a26aa8cf1bdc465b92731239ec6b9e` | 2026-03-18 | atestacja SBOM. README v4.1.0: akcja wycofywana na rzecz `actions/attest` (działa jako nakładka na nią). SBOM w formacie SPDX albo CycloneDX JSON, do 16 MB |
@@ -64,8 +64,8 @@ Akcje przypinamy do pełnego SHA commita (`AGENTS.md`, konwencja 5). Tabela poda
 | `aquasecurity/setup-trivy` | v0.3.1 | `81e514348e19b6112ce2a7e3ecbafe19c1e1f567` | 2026-06-03 | instalacja Trivy w przypiętej wersji |
 | `zaproxy/action-baseline` | v0.15.0 | `de8ad967d3548d44ef623df22cf95c3b0baf8b25` | 2025-10-24 | ZAP baseline |
 | `zaproxy/action-full-scan` | v0.13.0 | `3c58388149901b9a03b7718852c5ba889646c27c` | 2025-10-24 | ZAP z aktywnym skanowaniem (jeśli potrzebne) |
-| `gitleaks/gitleaks-action` | v3.0.0 | `e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e` | 2026-05-30 | Gitleaks (warunki licencji akcji: TODO: zweryfikować) |
-| `bridgecrewio/checkov-action` | v12.3134.0 | `6f26dc90000b74feb589a906cdfae540f5119895` | TODO: zweryfikować | Checkov |
+| `gitleaks/gitleaks-action` | v3.0.0 | `e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e` | 2026-05-30 | Gitleaks (klucz `GITLEAKS_LICENSE` wymagany tylko dla organizacji, nie dla kont osobistych; README akcji, sprawdzone 2026-11-16) |
+| `bridgecrewio/checkov-action` | v12.3134.0 | `6f26dc90000b74feb589a906cdfae540f5119895` | 2026-10-13 | Checkov |
 | `hadolint/hadolint-action` | v3.5.0 | `06be81baf89a55ffd0e24b8f04a4185738dd3387` | 2026-08-24 | hadolint |
 | `sigstore/cosign-installer` | v4.1.2 | `6f9f17788090df1f26f669e9d70d6ae9567deba6` | 2026-05-07 | instalacja Cosign |
 | `pypa/gh-action-pip-audit` | v1.1.0 | `1220774d901786e6f652ae159f7b6bc8fea6d266` | 2024-08-08 | pip-audit |
@@ -73,7 +73,7 @@ Akcje przypinamy do pełnego SHA commita (`AGENTS.md`, konwencja 5). Tabela poda
 | `hashicorp/setup-terraform` | v4.0.1 | `dfe3c3f87815947d99a8997f908cb6525fc44e9e` | 2026-05-12 | Terraform w potoku |
 | `step-security/harden-runner` | v2.22.1 | `ccd8616d44fd3846e67624a50d5aad6d37bf2d25` | 2026-10-08 | kontrola ruchu wychodzącego z runnera (PRE-1*, otwarte w `nist-800-204d.md`) |
 
-Każde narzędzie można też uruchomić bez akcji zewnętrznej (instalacja z PyPI albo oficjalny obraz z digestem). To zmniejsza liczbę akcji firm trzecich w łańcuchu dostaw. Wybór między akcją a bezpośrednim uruchomieniem: bezpośrednie uruchomienie (ADR-0042, D9).
+Każde narzędzie można też uruchomić bez akcji zewnętrznej (instalacja z PyPI albo oficjalny obraz z digestem). To zmniejsza liczbę akcji firm trzecich w łańcuchu dostaw. Decyzja autora z 2026-11-16: skanery uruchamiamy bezpośrednio (CLI z przypiętą wersją albo oficjalny obraz po digeście), nie przez akcje firm trzecich (`experiment/PROTOCOL.md`, P2); potwierdzona w projekcie potoku (ADR-0042, D9).
 
 ## 3. Dokumentacja platform
 
@@ -108,7 +108,7 @@ Sprawdzono 2026-10-18 w kodzie źródłowym reguł, a nie w opisach: dla każdej
 | `zaproxy/zaproxy`, `docker/zap-baseline.py` | v2.17.0 (`8a1bff31`) |
 | `encode/starlette`, `middleware/cors.py`, `middleware/errors.py` | 1.9.0, gałąź główna (`1840c9dd`) |
 
-Reguły z gałęzi głównej mogą się różnić od tych, które pobierze potok. Trivy pobiera paczkę reguł (`trivy-checks`) w czasie działania, a obraz ZAP ma własne wersje dodatków. TODO: zweryfikować wersje reguł w obrazie i paczce przy P1.
+Reguły z gałęzi głównej mogą się różnić od tych, które pobierze potok. Trivy pobiera paczkę reguł (`trivy-checks`) w czasie działania, a obraz ZAP ma własne wersje dodatków. Decyzja autora z 2026-11-16: Trivy działa z `--skip-check-update`, czyli z regułami wbudowanymi w przypiętą binarkę (domyślne repozytorium paczki to pływający tag głównej wersji). Wersje dodatków ZAP podaje `zap.sh -suppinfo`; zapis obu wersji w manifeście przy P1.
 
 ### 4.1 Wyniki dla pozycji
 
@@ -116,7 +116,7 @@ Reguły z gałęzi głównej mogą się różnić od tych, które pobierze potok
 
 - **Gitleaks `generic-api-key`.** Reguła łapie przypisanie, w którym nazwa zawiera m.in. `key`, `secret` albo `token`, a wartość ma 10–150 znaków `[\w.=-]` i entropię co najmniej 3,5. Wynik odrzucają *stopwords*, jeśli wystąpią w samej wartości. Na liście są m.in. `demo`, `example`, `fake`, `sample` i `testing`. Fikcyjna wartość w rodzaju `fake-jwt-key-…` nie zostanie więc zgłoszona.
 - **Bandit B105 (`hardcoded_password_string`).** Nazwa zmiennej musi zawierać człon `password`, `pass`, `pwd`, `token` albo `secret` (lub `secrete`), oddzielony podkreślnikiem albo na całą nazwę, np. `JWT_SECRET` albo `SECRET_KEY`. `JWT_KEY` nie pasuje. Reguła obsługuje tylko zwykłe przypisanie (`ast.Assign`). Przypisanie z adnotacją typu (`jwt_secret: str = "…"`, typowe dla klas ustawień pydantic) nie jest sprawdzane: w Bandit 1.9.4 nie ma obsługi `ast.AnnAssign`.
-- **Semgrep `python.jwt.security.jwt-hardcode.jwt-python-hardcoded-secret`** (w `p/python` i `p/default`, nie było w katalogu) ma wzorzec `jwt.encode($_, "...", ...)`, czyli literał w wywołaniu. Czy obejmie stałą zdefiniowaną w innym module: TODO: zweryfikować w pilotażu.
+- **Semgrep `python.jwt.security.jwt-hardcode.jwt-python-hardcoded-secret`** (w `p/python` i `p/default`, nie było w katalogu) ma wzorzec `jwt.encode($_, "...", ...)`, czyli literał w wywołaniu. Stałej z innego modułu nie obejmie: Semgrep CE propaguje stałe tylko w obrębie pliku (dokumentacja Semgrep, *Constant propagation*, sprawdzone 2026-11-16).
 - **Wniosek:** wykrywalne, jeśli łatka ma postać `JWT_SECRET = "<losowa wartość bez słów ze stopwords>"` (zwykłe przypisanie). Pewność można podnieść ze średniej do wysokiej, gdy postać łatki zostanie tak ustalona.
 
 **GT-06, log injection (CWE-117).**
@@ -135,8 +135,8 @@ Reguły z gałęzi głównej mogą się różnić od tych, które pobierze potok
 **GT-12, CORS z `*`.**
 
 - **Semgrep `python.fastapi.security.wildcard-cors.wildcard-cors`** (w `p/python`, `p/default` i `p/fastapi`) to reguła typu *taint*: lista z `"*"` trafia do `allow_origins` w wywołaniu `$APP.add_middleware(CORSMiddleware, allow_origins=..., ...)`. Inna postać, np. `FastAPI(middleware=[Middleware(CORSMiddleware, ...)])`, nie pasuje do wzorca.
-- **ZAP `10098` (Cross-Domain Misconfiguration, pasywna)** zgłasza odpowiedź z `Access-Control-Allow-Origin: *`. Starlette dodaje nagłówki CORS **tylko wtedy, gdy żądanie ma nagłówek `Origin`**. Przy `allow_credentials=True` odsyła konkretne źródło zamiast `*`, więc reguła 10098 się nie uruchomi. Pająk ZAP zwykle nie wysyła nagłówka `Origin` (TODO: zweryfikować w pilotażu).
-- **Wniosek:** wykrywalne na etapie PR przez Semgrep, jeśli łatka używa `app.add_middleware(CORSMiddleware, allow_origins=["*"])`. ZAP baseline prawdopodobnie tego nie zobaczy bez dodania nagłówka `Origin` do żądań (np. regułą *replacer* w konfiguracji ZAP, TODO: zweryfikować).
+- **ZAP `10098` (Cross-Domain Misconfiguration, pasywna)** zgłasza odpowiedź z `Access-Control-Allow-Origin: *`. Starlette dodaje nagłówki CORS **tylko wtedy, gdy żądanie ma nagłówek `Origin`**. Przy `allow_credentials=True` odsyła konkretne źródło zamiast `*`, więc reguła 10098 się nie uruchomi. Pająk ZAP nie wysyła nagłówka `Origin`: ustawia tylko `Referer` i własny User-Agent (kod dodatku spider, sprawdzone 2026-11-16).
+- **Wniosek:** wykrywalne na etapie PR przez Semgrep, jeśli łatka używa `app.add_middleware(CORSMiddleware, allow_origins=["*"])`. ZAP baseline prawdopodobnie tego nie zobaczy bez dodania nagłówka `Origin` do żądań (regułą *Replacer* w konfiguracji ZAP, `-z "-config replacer.full_list(0)..."`; dokumentacja: brakujący nagłówek zostaje dodany). Decyzja autora z 2026-11-16: dodajemy regułę w obu wersjach aplikacji (`experiment/PROTOCOL.md`, P2).
 
 **GT-13, brak ochrony przed osadzaniem w ramkach.**
 
@@ -177,7 +177,7 @@ Reguły z gałęzi głównej mogą się różnić od tych, które pobierze potok
 
 Odrzucone: przeniesienie GT-06 i GT-14 poza zasięg narzędzi (pułap 15/20, poniżej progu); wynik bez reguł własnych jako rozstrzygający albo wymóg przejścia w obu wariantach (H1 przegrałaby z konstrukcji eksperymentu); obniżenie progu H1; reguły pod postać łatki (słaba obrona przed TW1); reguły tylko raportujące (nie podnoszą H1).
 
-**CodeQL.** Ma zapytanie `py/log-injection` (CWE-117, `@precision medium`; `github/codeql`, `python/ql/src/Security/CWE-117/LogInjection.ql`, sprawdzone 2026-10-20). Dla trybu debug ma tylko `FlaskDebug.ql`. Czy `py/log-injection` jest w domyślnym zestawie zapytań code scanning: TODO: zweryfikować. Decyzja autora (2026-10-20): CodeQL nie wchodzi do wariantu B (bez kolejnego narzędzia SAST; możliwy dłuższy czas PR), ale jest uruchamiany jako dodatkowa seria porównawcza na pozycjach w kodzie aplikacji (`docs/metodyka.md`, p. 4.3). Uzasadnienie i rola reguł własnych we wzorcu potoku: tamże.
+**CodeQL.** Ma zapytanie `py/log-injection` (CWE-117, `@precision medium`; `github/codeql`, `python/ql/src/Security/CWE-117/LogInjection.ql`, sprawdzone 2026-10-20). Dla trybu debug ma tylko `FlaskDebug.ql`. Czy `py/log-injection` jest w domyślnym zestawie zapytań code scanning: nie, tylko w `security-extended` (GitHub Docs, *Python built-in queries*, sprawdzone 2026-11-16), więc seria CodeQL musi użyć zestawu `security-extended`. Decyzja autora (2026-10-20): CodeQL nie wchodzi do wariantu B (bez kolejnego narzędzia SAST; możliwy dłuższy czas PR), ale jest uruchamiany jako dodatkowa seria porównawcza na pozycjach w kodzie aplikacji (`docs/metodyka.md`, p. 4.3). Uzasadnienie i rola reguł własnych we wzorcu potoku: tamże.
 
 **Decyzje autora (2026-10-20) dla GT-02, GT-09 i GT-12** (tabela 4.2):
 
@@ -223,9 +223,9 @@ Fakty:
 
 - **tfsec.** Repozytorium `aquasecurity/tfsec` nie jest zarchiwizowane, ale jego opis w API GitHuba brzmi „Tfsec is now part of Trivy” (stan 2026-10-18). Skan Terraform robimy więc Trivy albo Checkovem, a nie osobnym tfsec.
 - **`github/codeql-action`.** Pole „latest release” wskazuje wydanie paczki CodeQL (`codeql-bundle-v2.27.2`), a nie wersję akcji. Wersję akcji wzięto z tagów (`v4.39.0`).
-- **`bridgecrewio/checkov-action`.** Ostatnie wydanie na GitHubie to `v12.1347.0` z 2022-03-09, a tagi sięgają `v12.3134.0`. Tagi są nowsze niż wydania, więc wersję akcji wzięto z tagów. TODO: zweryfikować, czy lista tagów z API jest posortowana według daty.
-- **`pypa/gh-action-pip-audit`.** Ostatnie wydanie jest z 2024-08-08. Akcja może instalować pip-audit w innej wersji niż najnowsza. TODO: zweryfikować w README akcji, jak wybiera wersję pip-audit.
-- **Python narzędzi a Python aplikacji.** Semgrep, Bandit i pip-audit wymagają Pythona `>=3.10`. GT-08 zakłada aplikację na Pythonie 3.9 (`experiment/ground-truth.yaml`), więc narzędzia muszą działać w osobnym środowisku niż aplikacja. Sam pip-audit ocenia zależności z pliku wymagań, więc nie musi działać na Pythonie aplikacji (TODO: zweryfikować w dokumentacji pip-audit).
+- **`bridgecrewio/checkov-action`.** Ostatnie wydanie na GitHubie to `v12.1347.0` z 2022-03-09, a tagi sięgają `v12.3134.0`. Tagi są nowsze niż wydania, więc wersję akcji wzięto z tagów. Tag `v12.3134.0` wskazuje commit z 2026-10-13 (sprawdzone 2026-11-16).
+- **`pypa/gh-action-pip-audit`.** Ostatnie wydanie jest z 2024-08-08. Akcja może instalować pip-audit w innej wersji niż najnowsza. Akcja nie ma wejścia do wyboru wersji i instaluje `pip-audit ~= 2.0, >= 2.5.6`, czyli najnowsze 2.x w chwili uruchomienia (sprawdzone 2026-11-16). To kolejny powód uruchamiania pip-audit bezpośrednio.
+- **Python narzędzi a Python aplikacji.** Semgrep, Bandit i pip-audit wymagają Pythona `>=3.10`. GT-08 zakłada aplikację na Pythonie 3.9 (`experiment/ground-truth.yaml`), więc narzędzia muszą działać w osobnym środowisku niż aplikacja. Sam pip-audit ocenia zależności z pliku wymagań, ale markery środowiskowe (`python_version` itp.) rozstrzyga dla interpretera, na którym sam działa (kod pip-audit, sprawdzone 2026-11-16). Audyt aplikacji na 3.14 uruchamiamy więc na Pythonie 3.14.
 
 ## 6. Odświeżenie danych
 

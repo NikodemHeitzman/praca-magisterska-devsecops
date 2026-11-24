@@ -77,10 +77,10 @@ Postać workflow (decyzje agenta przy implementacji):
 - (−) Bez cache każdy przebieg pobiera Pythona 3.14 i wszystkie zależności. Ile to kosztuje czasu: TODO: zweryfikować w danych z E06-04.
 - (−) Obie akcje instalują zależności osobno, więc pobieranie jest podwójne.
 - (−) Przebiegi z `push` i `pull_request` na tej samej gałęzi PR liczą się osobno. Które przebiegi wchodzą do pomiaru, ustala E06-04 i `PROTOCOL.md`.
-- Spójności `requirements.txt` z `uv.lock` (ADR-0008) ten workflow nie sprawdza: TODO: zweryfikować, czy to krok wspólny wariantów (E06) czy część E07.
+- Spójności `requirements.txt` z `uv.lock` (ADR-0008) ten workflow jeszcze nie sprawdza. Decyzja autora z 2026-11-16: to krok wspólny wariantów A i B (E06).
 - Job `build` (E06-02) i `deploy` (E06-03) dochodzą do tego samego pliku.
 
 ## Źródła
 
-- `astral-sh/setup-uv`, `action.yml` w commicie `68559e99cc807c1eb7e9238fd43a15bba460eec2` (wejścia `version`, `checksum`, `enable-cache`, sprawdzone 2026-11-16): źródło spoza rejestru `Zrodla/`, TODO: zweryfikować, czy rejestrować.
+- `astral-sh/setup-uv`, `action.yml` w commicie `68559e99cc807c1eb7e9238fd43a15bba460eec2` (wejścia `version`, `checksum`, `enable-cache`, sprawdzone 2026-11-16): źródło spoza rejestru `Zrodla/` (rejestrowane dopiero przy cytowaniu w tekście pracy, zob. `README.md`, zasada 8).
 - Wydanie `astral-sh/uv` 0.13.6, plik `uv-x86_64-unknown-linux-gnu.tar.gz.sha256` (sprawdzone 2026-11-16).

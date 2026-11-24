@@ -26,7 +26,7 @@ Skanery SCA (pip-audit, Trivy) oceniają konkretne wersje pakietów, a łatka GT
 Wybrano **uv**. Powody autora:
 
 - **Jedno narzędzie:** uv zarządza środowiskiem, wersją Pythona, lockfile'em i uruchamianiem aplikacji, więc jest mniej do instalowania i opisywania.
-- **Szybkość w CI:** szybka instalacja zależności skraca czas potoku, który jest mierzony w eksperymencie. Wielkość zysku względem pozostałych opcji: TODO: zweryfikować (nie mierzono).
+- **Szybkość w CI:** szybka instalacja zależności skraca czas potoku, który jest mierzony w eksperymencie. Wielkości zysku w tym projekcie nie mierzono. Producent deklaruje „10-100x faster than pip” (README uv, instalacja zależności Trio z ciepłym cache; sprawdzone 2026-11-16).
 - **Obsługa skanerów:** według dokumentacji Trivy obsługuje `uv.lock` (`docs/guide/coverage/language/python.md` w `aquasecurity/trivy`, sprawdzone 2026-10-30). pip-audit `--locked` obsługuje tylko `pyproject.toml` i `pylock.*.toml` (README `pypa/pip-audit`, sprawdzone 2026-10-30). Dla pip-audit wystarczy eksport do `requirements.txt` z sumami.
 
 ## Konsekwencje
@@ -42,4 +42,4 @@ Wybrano **uv**. Powody autora:
 
 - Dokumentacja Trivy, pokrycie języka Python: https://github.com/aquasecurity/trivy/blob/main/docs/guide/coverage/language/python.md (sprawdzone 2026-10-30).
 - README pip-audit: https://github.com/pypa/pip-audit (sprawdzone 2026-10-30).
-- Źródła spoza rejestru `Zrodla/`: TODO: zweryfikować, czy rejestrować.
+- Źródła spoza rejestru `Zrodla/` (rejestrowane dopiero przy cytowaniu w tekście pracy, zob. `README.md`, zasada 8).

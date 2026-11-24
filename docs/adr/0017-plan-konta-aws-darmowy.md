@@ -41,14 +41,14 @@ Odrzucony plan B: nowe konto na nowy e-mail i nową kartę i odtworzenie infrast
   - **EC2:** dostępne na planie darmowym, za kredyty; typy instancji kwalifikujące się do planu darmowego to m.in. `t3.micro`, `t3.small`, `t4g.micro`, `t4g.small`,
   - **ECR:** dostępne na obu planach, za kredyty,
   - **Lightsail:** 90-dniowy okres próbny tylko na planie płatnym,
-  - **ECS (poza ECS Anywhere), Fargate, App Runner:** strona ich nie wymienia. TODO: zweryfikować w konsoli po założeniu konta (warunki odsyłają do listy w konsoli) przed ADR-em architektury w E05.
+  - **ECS (poza ECS Anywhere), Fargate, App Runner:** strona ich nie wymienia. Lista usług planu Free dla nowej rejestracji (dokumentacja AWS Accounts, sprawdzone 2026-11-16) obejmuje ECS, ale nie wymienia osobno Fargate ani App Runner; App Runner jest zamknięty dla nowych klientów (dokumentacja App Runner).
 - (−) Warunki AWS: konta na planie darmowym służą do ewaluacji i nie powinny przetwarzać danych wrażliwych. Aplikacja ma tylko dane testowe z `seed.py`, więc to nie ogranicza projektu.
 - (−) Dołączenie do AWS Organizations automatycznie przełącza konto na plan płatny (dokumentacja AWS). Zgodne z [0016](0016-uwierzytelnianie-do-aws.md), który odrzuca Organizations.
 - Alert budżetowy chroni przed szybkim zużyciem kredytów, które też zamyka konto (`docs/aws-konto.md`).
 
 ## Źródła
 
-Źródła spoza rejestru `Zrodla/` (TODO: zweryfikować, czy rejestrować), sprawdzone 2026-10-30:
+Źródła spoza rejestru `Zrodla/` (rejestrowane dopiero przy cytowaniu w tekście pracy, zob. `README.md`, zasada 8), sprawdzone 2026-10-30:
 
 - AWS Billing, *Choosing a plan*, https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/free-tier-plans.html.
 - AWS Billing, *Explore AWS services with AWS Free Tier*, https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/free-tier.html.

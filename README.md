@@ -39,4 +39,4 @@ Faza F0: organizacja projektu. Struktura katalogów założona, pozostałe eleme
 
 ## Licencja
 
-TODO: wybrać licencję (np. MIT dla kodu).
+Kod: MIT ([`LICENSE`](LICENSE)). Dokumentacja i dane eksperymentu: CC BY 4.0 ([`LICENSE-docs.md`](LICENSE-docs.md)).
