@@ -35,7 +35,8 @@
           { "context": "build", "integration_id": 15368 },
           { "context": "workflow-lint", "integration_id": 15368 },
           { "context": "secrets", "integration_id": 15368 },
-          { "context": "sast", "integration_id": 15368 }
+          { "context": "sast", "integration_id": 15368 },
+          { "context": "sca", "integration_id": 15368 }
         ]
       }
     }

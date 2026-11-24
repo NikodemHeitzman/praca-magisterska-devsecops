@@ -29,6 +29,8 @@ env:
   GITLEAKS_IMAGE: ghcr.io/gitleaks/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
   # Semgrep registry ruleset (T1). Fetched per run; only its SHA-256 and rule ids are kept (T2).
   SEMGREP_RULESET: p/default
+  # Python 3.14.10 slim (multi-arch index): the Python of the application, for the sca tools (Z3)
+  PYTHON_IMAGE: python:3.14-slim@sha256:22eafb370920ad8b429e0aec3fff433e0669968519f5d60469d83729c138b28b
 
 jobs:
   # B07: secrets in the commits of this pull request or push (S1). Default Gitleaks rules;
@@ -218,4 +220,98 @@ jobs:
         run: |
           "$RUNNER_TEMP/bandit/bin/python" .github/scripts/sast_gate.py \
             --semgrep reports/semgrep.json --bandit reports/bandit.json \
+            --exceptions .github/gate-exceptions.yaml
+
+  # B10, B11: SCA on the runtime dependencies of the application (ADR-0046). pip-audit with the
+  # OSV database (Z1) on app/requirements.txt, the --no-dev export of uv.lock (Z4), and the
+  # consistency of pyproject.toml, uv.lock and requirements.txt (ADR-0008, ADR-0041). Tools from
+  # PyPI with hashes (D9), run in the Python image of the application (Z3, Z5). JSON report only:
+  # pip-audit has no SARIF, vulnerable dependencies reach the Security tab as Dependabot alerts (Z2).
+  sca:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Pull tool image
+        run: docker pull --quiet "$PYTHON_IMAGE"
+
+      # The venv lives in $RUNNER_TEMP/sca, so later containers of the same image reuse it.
+      - name: Install tools (hash-checked)
+        id: install
+        run: |
+          mkdir -p reports
+          docker run --rm -v "$PWD:/repo:ro" -v "$RUNNER_TEMP/sca:/tools" "$PYTHON_IMAGE" sh -euc '
+            python -m venv /tools/venv
+            /tools/venv/bin/pip install --quiet --disable-pip-version-check --no-deps \
+              --require-hashes -r /repo/.github/tools/sca.txt
+            python --version
+            /tools/venv/bin/pip-audit --version
+            /tools/venv/bin/uv --version'
+
+      # B11: uv.lock is up to date with pyproject.toml (uv lock --check), and requirements.txt is
+      # the export of uv.lock made with the command in its header. Both checks run on a copy of
+      # app/, so the workspace stays read-only; the export diff is kept in the reports.
+      - name: Lockfile consistency (pyproject.toml, uv.lock, requirements.txt)
+        run: |
+          docker run --rm -v "$PWD:/repo:ro" -v "$PWD/reports:/reports" -v "$RUNNER_TEMP/sca:/tools" \
+            -e UV_CACHE_DIR=/tmp/uv-cache -e UV_PYTHON_DOWNLOADS=never "$PYTHON_IMAGE" sh -euc '
+            cp -r /repo/app /tmp/app
+            cd /tmp/app
+            /tools/venv/bin/uv lock --check || {
+              echo "::error file=app/uv.lock::uv.lock is out of date with pyproject.toml (run uv lock)"
+              exit 1
+            }
+            /tools/venv/bin/uv export --format requirements-txt --no-dev --frozen --quiet -o requirements.txt
+            if diff -u /repo/app/requirements.txt requirements.txt >/reports/requirements-export.diff; then
+              echo "app/requirements.txt matches the export of uv.lock"
+            else
+              cat /reports/requirements-export.diff
+              echo "::error file=app/requirements.txt::not the export of uv.lock (see app/README.md)"
+              exit 1
+            fi'
+
+      # B10: pip-audit exits 1 both on findings and on errors, and writes the report only when the
+      # audit completes, so the report tells them apart (the gate below fails closed). Up to three
+      # attempts when the OSV API does not answer (Z8); a report from an earlier attempt is removed.
+      - name: pip-audit (JSON for M1)
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: |
+          for attempt in 1 2 3; do
+            rm -f reports/pip-audit.json
+            docker run --rm -v "$PWD:/repo:ro" -v "$PWD/reports:/reports" -v "$RUNNER_TEMP/sca:/tools" \
+              "$PYTHON_IMAGE" /tools/venv/bin/pip-audit \
+              --requirement /repo/app/requirements.txt --disable-pip --strict \
+              --vulnerability-service osv --aliases on --desc on --progress-spinner off \
+              --format json --output /reports/pip-audit.json || true
+            if [ -s reports/pip-audit.json ]; then
+              echo "pip-audit report written (attempt $attempt)"
+              exit 0
+            fi
+            echo "::warning::pip-audit attempt $attempt wrote no report"
+            if [ "$attempt" -lt 3 ]; then sleep 15; fi
+          done
+          echo "::error::pip-audit wrote no report after 3 attempts"
+          exit 1
+
+      - name: Upload reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: sca-reports
+          path: reports/
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Gate - pip-audit (any known vulnerability)
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: |
+          docker run --rm -v "$PWD:/repo:ro" -v "$RUNNER_TEMP/sca:/tools" -w /repo \
+            -v "$GITHUB_STEP_SUMMARY:/step-summary" -e GITHUB_STEP_SUMMARY=/step-summary \
+            "$PYTHON_IMAGE" /tools/venv/bin/python .github/scripts/sca_gate.py \
+            --pip-audit reports/pip-audit.json --path app/requirements.txt \
             --exceptions .github/gate-exceptions.yaml

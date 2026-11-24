@@ -17,9 +17,9 @@ data_zamrozenia: null
 workflow:
   - plik: .github/workflows/devsecops-gates.yml
     nazwa: devsecops-gates
-    joby: [secrets, sast]  # E07-05, E07-06 dopisują sca, iac (ADR-0044, S4)
+    joby: [secrets, sast, sca]  # E07-06 dopisuje iac (ADR-0044, S4)
     mierzony: true
-    adr: [ADR-0042, ADR-0044, ADR-0045]
+    adr: [ADR-0042, ADR-0044, ADR-0045, ADR-0046]
   - plik: .github/workflows/workflow-lint.yml
     nazwa: workflow-lint
     joby: [workflow-lint]
@@ -31,12 +31,12 @@ akcje:
     wersja: v7.0.1
     sha: 3d3c42e5aac5ba805825da76410c181273ba90b1
     przypiete: true
-    joby: [secrets, sast, workflow-lint]
+    joby: [secrets, sast, sca, workflow-lint]
   - nazwa: actions/upload-artifact
     wersja: v7.0.2
     sha: cf430e030ddbb5b0abf93d22962f4752f3646cd9
     przypiete: true
-    joby: [secrets, sast, workflow-lint]
+    joby: [secrets, sast, sca, workflow-lint]
   - nazwa: github/codeql-action/upload-sarif
     wersja: v4.39.3
     sha: 33d7b85da1a04171e211befe2c739303b9a4c066
@@ -74,6 +74,28 @@ narzedzia:
     opcje: [--recursive, --exclude app/tests, --ignore-nosec, --exit-zero]
     cel: app/
     prog: ważność LOW+ przy pewności MEDIUM+, nieznana pewność blokuje (ADR-0042 D5)
+  pip_audit:
+    wersja: 2.10.1
+    zrodlo: PyPI, .github/tools/sca.txt (pip-audit, uv, PyYAML dla skryptu bramki; z hashami)
+    przypiete: true
+    job: sca
+    baza: osv  # https://api.osv.dev/v1/query (ADR-0046, Z1)
+    baza_przypiete: false  # baza zmienia się w czasie; ślad: reports/pip-audit.json w artefakcie sca-reports
+    opcje: [--disable-pip, --strict, --vulnerability-service osv, --aliases on, --desc on, --format json]
+    cel: app/requirements.txt  # eksport --no-dev z uv.lock (Z4)
+    prog: każda znana podatność; bramka na raporcie, nie na kodzie wyjścia (ADR-0046)
+    ponowienia: 3  # gdy brak raportu, przerwa 15 s (Z8)
+  uv_sca:
+    wersja: 0.13.6
+    zrodlo: PyPI, .github/tools/sca.txt (z hashami)
+    przypiete: true
+    job: sca
+    uzycie: uv lock --check; uv export --format requirements-txt --no-dev --frozen + diff (B11, Z5)
+  python_sca:
+    wersja: 3.14.10
+    obraz: python:3.14-slim@sha256:22eafb370920ad8b429e0aec3fff433e0669968519f5d60469d83729c138b28b
+    przypiete: true
+    job: sca  # Python aplikacji (Z3)
   python_runnera:
     wersja: 3.12  # python3 obrazu ubuntu-24.04; w teście lokalnym 3.12.16
     przypiete: false
@@ -97,11 +119,15 @@ poza_pomiarem:
     wersja: 8.30.1
     rev: 83d9cd684c87d95d656c1458ef04895a7f1cbd8e  # commit tagu v8.30.1
     tryb: doradczo  # B01, ADR-0044 S5
+  - nazwa: Dependabot alerts i security updates
+    plik: .github/dependabot.yml  # aktualizacje wersji; alerty i security updates w settings.sh
+    tryb: ustawienie platformy  # B04, ADR-0043 H6; stan potwierdzony 2026-11-24 (ADR-0046)
 
 # Wyjątki czystej wersji (D6): lista zamarza z progami (K5).
 wyjatki:
   plik: .github/gate-exceptions.yaml  # wspólny dla bramek (ADR-0045, T8)
   gitleaks: []  # brak, mechanizm .gitleaks.toml (2026-11-24, ADR-0044)
+  sca: []  # czysta wersja bez zgłoszeń pip-audit (2026-11-24, ADR-0046)
   sast:  # czysta wersja, 2026-11-24 (ADR-0045)
     - {narzedzie: bandit, regula: B108, plik: app/ticketing/config.py}
     - {narzedzie: semgrep, regula: package_managers.uv.uv-missing-dependency-cooldown.uv-missing-dependency-cooldown, plik: app/pyproject.toml}

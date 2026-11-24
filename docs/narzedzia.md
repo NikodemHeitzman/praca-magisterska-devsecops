@@ -228,6 +228,7 @@ Fakty:
 - **`bridgecrewio/checkov-action`.** Ostatnie wydanie na GitHubie to `v12.1347.0` z 2022-03-09, a tagi sięgają `v12.3134.0`. Tagi są nowsze niż wydania, więc wersję akcji wzięto z tagów. Tag `v12.3134.0` wskazuje commit z 2026-10-13 (sprawdzone 2026-11-16).
 - **`pypa/gh-action-pip-audit`.** Ostatnie wydanie jest z 2024-08-08. Akcja może instalować pip-audit w innej wersji niż najnowsza. Akcja nie ma wejścia do wyboru wersji i instaluje `pip-audit ~= 2.0, >= 2.5.6`, czyli najnowsze 2.x w chwili uruchomienia (sprawdzone 2026-11-16). To kolejny powód uruchamiania pip-audit bezpośrednio.
 - **Python narzędzi a Python aplikacji.** Semgrep, Bandit i pip-audit wymagają Pythona `>=3.10`. GT-08 zakłada aplikację na Pythonie 3.9 (`experiment/ground-truth.yaml`), więc narzędzia muszą działać w osobnym środowisku niż aplikacja. Sam pip-audit ocenia zależności z pliku wymagań, ale markery środowiskowe (`python_version` itp.) rozstrzyga dla interpretera, na którym sam działa (kod pip-audit, sprawdzone 2026-11-16). Audyt aplikacji na 3.14 uruchamiamy więc na Pythonie 3.14.
+- **pip-audit w wariancie B (2026-11-24, ADR-0046).** Wersja 2.10.1 nie ma formatu SARIF ani filtra ważności, a kod 1 zwraca zarówno przy zgłoszeniach, jak i przy błędzie narzędzia (wtedy bez raportu). Job `sca` uruchamia go w `python:3.14-slim` z bazą OSV, a bramka czyta raport JSON. Raport 2.10.1 podaje każdą podatność dwa razy (przyczyna: TODO: zweryfikować). Alternatywy poza wariantem B: OSV-Scanner (ta sama baza OSV.dev) i Safety CLI (wymaga konta).
 
 ## 6. Odświeżenie danych
 
