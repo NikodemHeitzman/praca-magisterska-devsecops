@@ -1,0 +1,313 @@
+{
+  "total_count": 3,
+  "jobs": [
+    {
+      "id": 136292823282,
+      "run_id": 44737602092,
+      "workflow_name": "baseline-ci",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/NikodemHeitzman/praca-magisterska-devsecops/actions/runs/44737602092",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOU3ej3s8AAAAfu69w8g",
+      "head_sha": "945ab6f211eeeb62cb5590364051c3cfe9e4a21a",
+      "url": "https://api.github.com/repos/NikodemHeitzman/praca-magisterska-devsecops/actions/jobs/136292823282",
+      "html_url": "https://github.com/NikodemHeitzman/praca-magisterska-devsecops/actions/runs/44737602092/job/136292823282",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-20T12:39:27Z",
+      "started_at": "2026-11-20T12:39:29Z",
+      "completed_at": "2026-11-20T12:40:06Z",
+      "name": "test",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-20T12:39:29Z",
+          "completed_at": "2026-11-20T12:39:30Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-20T12:39:30Z",
+          "completed_at": "2026-11-20T12:39:31Z"
+        },
+        {
+          "name": "Run astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-20T12:39:31Z",
+          "completed_at": "2026-11-20T12:39:32Z"
+        },
+        {
+          "name": "Generate app/.env with random secrets",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-20T12:39:32Z",
+          "completed_at": "2026-11-20T12:39:32Z"
+        },
+        {
+          "name": "Start PostgreSQL",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-20T12:39:32Z",
+          "completed_at": "2026-11-20T12:39:45Z"
+        },
+        {
+          "name": "Install dependencies from uv.lock",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-20T12:39:45Z",
+          "completed_at": "2026-11-20T12:39:46Z"
+        },
+        {
+          "name": "pytest",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-20T12:39:46Z",
+          "completed_at": "2026-11-20T12:40:03Z"
+        },
+        {
+          "name": "Stop PostgreSQL",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-20T12:40:03Z",
+          "completed_at": "2026-11-20T12:40:04Z"
+        },
+        {
+          "name": "Post Run astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-11-20T12:40:04Z",
+          "completed_at": "2026-11-20T12:40:04Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-11-20T12:40:04Z",
+          "completed_at": "2026-11-20T12:40:05Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-11-20T12:40:05Z",
+          "completed_at": "2026-11-20T12:40:05Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/NikodemHeitzman/praca-magisterska-devsecops/check-runs/136292823282",
+      "labels": [
+        "ubuntu-24.04"
+      ],
+      "runner_id": 1000000181,
+      "runner_name": "GitHub Actions 1000000181",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 136292823810,
+      "run_id": 44737602092,
+      "workflow_name": "baseline-ci",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/NikodemHeitzman/praca-magisterska-devsecops/actions/runs/44737602092",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOU3ej3s8AAAAfu69zAg",
+      "head_sha": "945ab6f211eeeb62cb5590364051c3cfe9e4a21a",
+      "url": "https://api.github.com/repos/NikodemHeitzman/praca-magisterska-devsecops/actions/jobs/136292823810",
+      "html_url": "https://github.com/NikodemHeitzman/praca-magisterska-devsecops/actions/runs/44737602092/job/136292823810",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-20T12:39:27Z",
+      "started_at": "2026-11-20T12:39:29Z",
+      "completed_at": "2026-11-20T12:39:38Z",
+      "name": "lint",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-20T12:39:30Z",
+          "completed_at": "2026-11-20T12:39:31Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-20T12:39:31Z",
+          "completed_at": "2026-11-20T12:39:32Z"
+        },
+        {
+          "name": "Run astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-20T12:39:32Z",
+          "completed_at": "2026-11-20T12:39:33Z"
+        },
+        {
+          "name": "Install dependencies from uv.lock",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-20T12:39:33Z",
+          "completed_at": "2026-11-20T12:39:35Z"
+        },
+        {
+          "name": "ruff check",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-20T12:39:35Z",
+          "completed_at": "2026-11-20T12:39:35Z"
+        },
+        {
+          "name": "ruff format",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-20T12:39:35Z",
+          "completed_at": "2026-11-20T12:39:35Z"
+        },
+        {
+          "name": "Post Run astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-20T12:39:35Z",
+          "completed_at": "2026-11-20T12:39:35Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-11-20T12:39:35Z",
+          "completed_at": "2026-11-20T12:39:35Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-11-20T12:39:35Z",
+          "completed_at": "2026-11-20T12:39:35Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/NikodemHeitzman/praca-magisterska-devsecops/check-runs/136292823810",
+      "labels": [
+        "ubuntu-24.04"
+      ],
+      "runner_id": 1000000182,
+      "runner_name": "GitHub Actions 1000000182",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 136293135785,
+      "run_id": 44737602092,
+      "workflow_name": "baseline-ci",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/NikodemHeitzman/praca-magisterska-devsecops/actions/runs/44737602092",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOU3ej3s8AAAAfu7Q1qQ",
+      "head_sha": "945ab6f211eeeb62cb5590364051c3cfe9e4a21a",
+      "url": "https://api.github.com/repos/NikodemHeitzman/praca-magisterska-devsecops/actions/jobs/136293135785",
+      "html_url": "https://github.com/NikodemHeitzman/praca-magisterska-devsecops/actions/runs/44737602092/job/136293135785",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-20T12:40:07Z",
+      "started_at": "2026-11-20T12:40:09Z",
+      "completed_at": "2026-11-20T12:40:37Z",
+      "name": "build",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-20T12:40:09Z",
+          "completed_at": "2026-11-20T12:40:11Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-20T12:40:11Z",
+          "completed_at": "2026-11-20T12:40:14Z"
+        },
+        {
+          "name": "Build image",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-20T12:40:14Z",
+          "completed_at": "2026-11-20T12:40:24Z"
+        },
+        {
+          "name": "Log in to GHCR",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-20T12:40:24Z",
+          "completed_at": "2026-11-20T12:40:24Z"
+        },
+        {
+          "name": "Push image",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-20T12:40:24Z",
+          "completed_at": "2026-11-20T12:40:36Z"
+        },
+        {
+          "name": "Log out of GHCR",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-20T12:40:36Z",
+          "completed_at": "2026-11-20T12:40:36Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-11-20T12:40:36Z",
+          "completed_at": "2026-11-20T12:40:36Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-11-20T12:40:36Z",
+          "completed_at": "2026-11-20T12:40:36Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/NikodemHeitzman/praca-magisterska-devsecops/check-runs/136293135785",
+      "labels": [
+        "ubuntu-24.04"
+      ],
+      "runner_id": 1000000183,
+      "runner_name": "GitHub Actions 1000000183",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    }
+  ]
+}

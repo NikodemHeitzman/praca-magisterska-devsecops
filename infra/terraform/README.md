@@ -18,7 +18,7 @@ export AWS_PROFILE=devsecops-terraform
 aws sts get-caller-identity
 ```
 
-W PowerShell: `$env:AWS_PROFILE = "devsecops-terraform"`.
+W PowerShell: `$env:AWS_PROFILE = "devsecops-terraform"`. Argument z kropką trzeba w PowerShell ująć w cudzysłów, bo inaczej Terraform dostaje go w dwóch częściach („Too many command line arguments”): `terraform plan "-out=work.tfplan"`.
 
 ## Pierwsze uruchomienie (bootstrap warstwy stałej)
 

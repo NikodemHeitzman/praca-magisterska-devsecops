@@ -55,7 +55,7 @@ Po rozpoczęciu serii właściwej nie zmieniamy żadnego z tych elementów. Zmia
 
 Katalog `experiment/data/` przechowuje surowe dane:
 
-- odpowiedzi GitHub REST API z czasami jobów i kroków (próba 1 przebiegu, `docs/metodyka.md`, p. 3.2),
+- odpowiedzi GitHub REST API z czasami jobów i kroków (próba 1 przebiegu, `docs/metodyka.md`, p. 3.2), zbierane skryptem [`scripts/collect_timings.py`](scripts/collect_timings.py) z listy ID przebiegów ([ADR-0039](../docs/adr/0039-skrypt-zbierajacy-czasy-potoku.md)),
 - raporty narzędzi w formacie maszynowym (JSON lub SARIF), pobrane z artefaktów przebiegu,
 - manifest wersji: SHA akcji, digesty obrazów, wersje narzędzi i baz podatności, etykieta runnera.
 
@@ -66,7 +66,7 @@ Struktura plików: TODO (E09).
 Przed serią właściwą wykonujemy 1–2 próby i kilka przebiegów czasowych, żeby sprawdzić:
 
 - skrypty tworzenia gałęzi, pobierania danych i zapisu,
-- znaczenie pola `created_at` joba jako chwili wejścia do kolejki (otwarta kwestia z E03-04), przez porównanie z czasami w interfejsie GitHub,
+- znaczenie pola `created_at` joba jako chwili wejścia do kolejki (otwarta kwestia z E03-04). Sprawdzone w pilotażu E06-04 obserwacją na żywo (`scripts/watch_jobs.py`) i grafem zależności jobów, bo interfejs GitHub nie pokazuje kolejki zakończonych jobów: `created_at` to chwila utworzenia joba i wejścia do kolejki (`docs/metodyka.md`, p. 3.2, uwagi),
 - czy łatki przechodzą testy funkcjonalne w wariancie A (P3),
 - czy workflow A różni się od workflow B wyłącznie krokami bezpieczeństwa (diff plików, K2 w sekcji 5),
 - czy wynik próby jest powtarzalny: próbę wariantu B dla wybranych pozycji, zwłaszcza GT-12–14 wykrywanych przez ZAP, wykonujemy dwukrotnie i porównujemy zgłoszenia (zagrożenie TN5, `docs/metodyka.md`, p. 4.5).
@@ -98,8 +98,8 @@ Skrypt wywołujący: TODO (E09).
 
 1. **Jeden przebieg naraz.** Kolejny przebieg startuje dopiero po zakończeniu poprzedniego (wszystkich jobów, łącznie z wdrożeniem), żeby przebiegi nie konkurowały o runnery i środowisko.
 2. **Przeplatanie wariantów.** W obrębie wyzwalacza przebiegi idą naprzemiennie: A, B, A, B… Zmienne obciążenie infrastruktury GitHub w ciągu dnia dotyka wtedy obu wariantów w podobnym stopniu.
-3. **Cache jak w codziennej pracy.** Potoki używają cache tak, jak zaprojektowano je do normalnej pracy. Kroki wspólne obu wariantów (np. instalacja zależności, budowanie obrazu) mają identyczną konfigurację cache. Przebieg rozgrzewkowy wypełnia cache przed serią i nie wchodzi do wyników. Wynik odpowiada więc kosztowi codziennej pracy, nie pierwszego uruchomienia.
-4. **Zapis warunków.** Przy każdym przebiegu zapisujemy: identyfikator przebiegu, wariant, wyzwalacz, numer kolejny, wersję obrazu runnera (z logu joba) i wersję bazy podatności. Zmiana obrazu runnera w trakcie serii jest odnotowywana w dzienniku badawczym.
+3. **Bez cache.** Żaden wariant nie używa cache zależności ani warstw obrazu, więc każdy przebieg instaluje zależności i buduje obraz od zera (ADR-0035, ADR-0036). Przebieg rozgrzewkowy jest kontrolą przed serią: sprawdza, że gałąź, potok i (w serii main) wdrożenie działają. Nie wchodzi do wyników. Wynik odpowiada kosztowi przebiegu bez cache, a nie codziennej pracy z cache (ograniczenie do 5.3). Decyzja autora z 2026-11-20, [ADR-0038](../docs/adr/0038-seria-czasowa-bez-cache.md). Wcześniejsze brzmienie (2026-10-13) zakładało cache jak w codziennej pracy.
+4. **Zapis warunków.** Przy każdym przebiegu zapisujemy: identyfikator przebiegu, wariant, wyzwalacz, numer kolejny, dla każdego joba chmurę, region i wersję obrazu runnera (z logu joba, `scripts/collect_timings.py`) oraz wersję bazy podatności. Joby jednego przebiegu mogą działać w różnych chmurach i na różnych wersjach obrazu; postępowanie: `docs/metodyka.md`, TN2.
 5. **Przebiegi nieudane.** Przebieg przerwany z przyczyn infrastrukturalnych powtarzamy jako nowy i zapisujemy w dzienniku (`docs/metodyka.md`, p. 3.1). Przebieg, w którym bramka zablokowała czystą wersję, oznacza błąd przygotowania: przerywamy serię i wyjaśniamy przyczynę.
 
 ### 2.4. Wdrożenia w serii main
@@ -233,11 +233,11 @@ Zmienną niezależną jest wariant potoku (A albo B), a zmiennymi zależnymi met
 |---|---|---|---|
 | K1 | kod aplikacji | ten sam tag czystej wersji; te same łatki w obu wariantach (GT-15–17 jako równoważne zmiany w pliku workflow danego wariantu) | P1, P3 |
 | K2 | kroki wspólne potoków | workflow A powstaje z workflow B przez usunięcie jobów i kroków bezpieczeństwa; build, testy, publikacja obrazu i wdrożenie są identyczne. Kontrola: porównanie plików (diff) w pilotażu pokazuje wyłącznie kroki bezpieczeństwa | P5 |
-| K3 | runner | runnery hostowane GitHub, etykieta `ubuntu-24.04`, ten sam typ maszyny | P2 |
+| K3 | runner | runnery hostowane GitHub, etykieta `ubuntu-24.04`, ten sam typ maszyny; chmury, regionu i wersji obrazu nie kontrolujemy (5.2) | P2 |
 | K4 | wersje | akcje przypięte do SHA, narzędzia do digestu, zależności z dokładnymi wersjami | P2 |
 | K5 | konfiguracja bramek | progi blokady i konfiguracja ZAP (tryb baseline, limit czasu, zestaw reguł) zamrożone przed serią | P1, sekcja 0 |
 | K6 | katalog | wersja v1 zamrożona | P1 |
-| K7 | cache | identyczna konfiguracja cache dla kroków wspólnych; przebieg rozgrzewkowy przed serią czasową | 2.3 |
+| K7 | cache | brak cache zależności i warstw w obu wariantach (ADR-0038); przebieg rozgrzewkowy przed serią czasową jako kontrola | 2.3 |
 | K8 | repozytorium | jedno repozytorium z tymi samymi ustawieniami, rolą OIDC i ochroną gałęzi | sekcja 0, P1 |
 | K9 | środowisko AWS | ten sam region i ta sama konfiguracja Terraform dla obu wariantów | 2.4, E05 |
 | K10 | kolejność i równoczesność | jeden przebieg naraz; przeplatanie A/B w serii czasowej; próby parami dla każdej pozycji | 2.3, 3.2 |
@@ -249,7 +249,7 @@ Zmienną niezależną jest wariant potoku (A albo B), a zmiennymi zależnymi met
 | Zmienna | Postępowanie |
 |---|---|
 | obciążenie infrastruktury GitHub (kolejka do runnera) | przeplatanie A/B; mediana i p90 zamiast średniej; kolejka pierwszego joba raportowana osobno (T_czek − T_wyk) |
-| aktualizacje obrazu runnera | zapis wersji obrazu przy każdym przebiegu; zmiana w trakcie serii odnotowana w dzienniku badawczym |
+| infrastruktura runnera (chmura AWS albo Azure, region, wersja obrazu) | zapis dla każdego joba; w wynikach udział chmur i wersji obrazu w obu wariantach i czasy jobów wspólnych według chmury (`docs/metodyka.md`, TN2) |
 | bazy podatności | zapis wersji lub daty bazy przy każdym przebiegu; nowe CVE klasyfikowane jako zgłoszenia spoza katalogu |
 | czas operacji AWS i sieci | składnik wspólny obu wariantów; narzut liczony jako różnica median; czas skanerów z rozbicia na kroki (M5) |
 

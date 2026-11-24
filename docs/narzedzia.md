@@ -40,6 +40,8 @@ Wymagana wersja Pythona dla narzędzi instalowanych z PyPI (`requires_python`): 
 
 ## 2. Akcje GitHub (kandydaci)
 
+> **Po ADR-0042 (D9, 2026-11-20):** wariant B uruchamia narzędzia bezpośrednio, z oficjalnych obrazów przypiętych digestem albo z PyPI w dokładnej wersji. Z akcji tej tabeli zostają w wariancie B tylko `github/codeql-action` (`upload-sarif`), `actions/upload-artifact` (i `download-artifact`) oraz `actions/attest`. Akcje narzędzi (np. `trivy-action`, `gitleaks-action`, `zaproxy/action-baseline`, `checkov-action`) są dla wariantu B nieaktualne. Wersje użyte w wariancie B zapisuje `experiment/versions/variant-b.yaml`.
+
 Akcje przypinamy do pełnego SHA commita (`AGENTS.md`, konwencja 5). Tabela podaje tag i SHA na 2026-10-18. Przed użyciem w workflow SHA trzeba sprawdzić ponownie, bo tag można przesunąć.
 
 | Akcja | Tag | SHA commita | Data wydania | Do czego |
@@ -71,7 +73,7 @@ Akcje przypinamy do pełnego SHA commita (`AGENTS.md`, konwencja 5). Tabela poda
 | `hashicorp/setup-terraform` | v4.0.1 | `dfe3c3f87815947d99a8997f908cb6525fc44e9e` | 2026-05-12 | Terraform w potoku |
 | `step-security/harden-runner` | v2.22.1 | `ccd8616d44fd3846e67624a50d5aad6d37bf2d25` | 2026-10-08 | kontrola ruchu wychodzącego z runnera (PRE-1*, otwarte w `nist-800-204d.md`) |
 
-Każde narzędzie można też uruchomić bez akcji zewnętrznej (instalacja z PyPI albo oficjalny obraz z digestem). To zmniejsza liczbę akcji firm trzecich w łańcuchu dostaw. Decyzja autora z 2026-11-16: skanery uruchamiamy bezpośrednio (CLI z przypiętą wersją albo oficjalny obraz po digeście), nie przez akcje firm trzecich (`experiment/PROTOCOL.md`, P2).
+Każde narzędzie można też uruchomić bez akcji zewnętrznej (instalacja z PyPI albo oficjalny obraz z digestem). To zmniejsza liczbę akcji firm trzecich w łańcuchu dostaw. Decyzja autora z 2026-11-16: skanery uruchamiamy bezpośrednio (CLI z przypiętą wersją albo oficjalny obraz po digeście), nie przez akcje firm trzecich (`experiment/PROTOCOL.md`, P2); potwierdzona w projekcie potoku (ADR-0042, D9).
 
 ## 3. Dokumentacja platform
 

@@ -1,0 +1,127 @@
+# Wersje wariantu A (potok bazowy CI/CD bez kontroli bezpieczeństwa)
+#
+# Zadanie E06-05, decyzje: docs/adr/0041-zamrozenie-wariantu-a.md.
+# Stan zamrożony tagiem git pipeline-a-v1 (tag z adnotacją na commicie main).
+# Plik służy skryptom eksperymentu (E09) i jest częścią manifestu wersji z experiment/PROTOCOL.md (P4).
+# Wariant B dostanie plik w tym samym układzie (variant-b.yaml), więc różnice widać w diffie (K2).
+#
+# Zmiana po zamrożeniu (ADR-0041): tylko przed serią właściwą, przez PR, z nowym tagiem
+# pipeline-a-v<N>, wpisem w dzienniku badawczym i aktualizacją tego pliku. Po starcie serii obowiązuje P1.
+#
+# Pola:
+#   przypiete: true  – wersja wymuszona przez repozytorium (SHA, digest, suma kontrolna, lockfile)
+#   przypiete: false – wersja zależna od środowiska; podana wartość to obserwacja z przebiegu kontrolnego
+
+wariant: A
+wersja: pipeline-a-v1
+tag: pipeline-a-v1
+data_zamrozenia: 2026-11-20  # tag na commicie merge'a PR zamrożenia, więc plik w tagu nie zawiera SHA tego commita
+commit_bazowy: b5769b028156e8cb2dc405089fef38b42df8348b  # main przed PR zamrożenia; tag trafi na merge tego PR
+
+workflow:
+  - plik: .github/workflows/baseline-ci.yml
+    nazwa: baseline-ci
+    joby: [lint, test, build]
+    mierzony: true
+    adr: [ADR-0035, ADR-0036, ADR-0037, ADR-0038, ADR-0040]
+  - plik: .github/workflows/rollback.yml
+    nazwa: rollback
+    joby: [retag]
+    mierzony: false  # uruchamiany ręcznie (workflow_dispatch); narzędzie wspólne obu wariantów
+    adr: [ADR-0033]
+
+runner:
+  etykieta: ubuntu-24.04
+  przypiete: false  # etykieta wskazuje rodzinę obrazów; GitHub wymienia obraz bez udziału repozytorium
+  obserwacja:  # przebieg kontrolny 44747792543, wszystkie trzy joby
+    obraz: ubuntu24/20261116.133  # „Image Release” w logu joba; „Version” 20261116.133.1
+    wersja_runnera: 2.338.2
+  uwaga: chmurę, region i wersję obrazu każdego joba zapisuje experiment/scripts/collect_timings.py (TN2, ADR-0039)
+
+akcje:
+  - nazwa: actions/checkout
+    wersja: v7.0.1
+    sha: 3d3c42e5aac5ba805825da76410c181273ba90b1
+    przypiete: true
+    joby: [lint, test, build]
+  - nazwa: astral-sh/setup-uv
+    wersja: v10.3.3
+    sha: 68559e99cc807c1eb7e9238fd43a15bba460eec2
+    przypiete: true
+    joby: [lint, test]
+    ustawienia:
+      enable-cache: "false"  # ADR-0035, ADR-0038
+
+narzedzia:
+  uv:
+    wersja: 0.13.6
+    przypiete: true
+    sha256_archiwum: f29c3e94ffabd7e6f3ba521dba169a9b7ec12100bf3257087f0f24f6123f3645  # uv-x86_64-unknown-linux-gnu.tar.gz
+    zrodla:
+      - .github/workflows/baseline-ci.yml  # env UV_VERSION i UV_CHECKSUM
+      - app/pyproject.toml  # tool.uv.required-version
+      - app/Dockerfile  # obraz ghcr.io/astral-sh/uv
+  python_ci:
+    zadanie: "3.14"  # app/.python-version
+    przypiete: false  # wersję łatkową wybiera uv przy pobraniu; TODO: zweryfikować, czy zależy tylko od wersji uv
+    obserwacja: CPython 3.14.10  # pobrany przez uv w jobach lint i test, przebieg 44747792543
+  docker:
+    przypiete: false  # Docker z obrazu runnera, bez akcji docker/*
+    obserwacja: TODO  # wersja nie pojawia się w logu przebiegu
+
+zaleznosci:
+  lockfile: app/uv.lock
+  sha256: dc745aad4e5be00ad7189a4f3a1a7564dca317cac8d525c29e8a8eff2b9dcde5
+  liczba_pakietow: 63
+  instalacja: uv sync --locked  # błąd, gdy uv.lock nie zgadza się z pyproject.toml
+  narzedzia_jobow:  # z uv.lock, grupa dev
+    ruff: 0.17.3
+    pytest: 9.2.0
+    pytest-cov: 7.1.0
+    coverage: 7.17.0
+    httpx2: 2.16.0
+    moto: 5.2.5
+
+obrazy:
+  - nazwa: ghcr.io/astral-sh/uv:0.13.6
+    digest: sha256:af22a52f5eafef3d78e551599d405c02df61919d18028f0cea8eda93bc9986d0
+    plik: app/Dockerfile
+    etap: uv
+  - nazwa: python:3.14-slim
+    digest: sha256:9aaa474097d094040649f2162a627c0049b408f52138d980916788d80f04802f
+    plik: app/Dockerfile
+    etap: base  # GT-08 podmienia ten digest
+    obserwacja: CPython 3.14.10
+  - nazwa: postgres:18-alpine
+    digest: sha256:10a5c69a83035ab5239f5620d708520e8b28f5aa1f2b20143e6024532edadfb5
+    plik: app/compose.yaml
+    usluga: db  # baza testów w jobie test (ADR-0023)
+
+publikacja:
+  rejestr: ghcr.io/nikodemheitzman/praca-magisterska-devsecops
+  tagi: ["<gałąź>", "<gałąź>-sha-<commit>"]  # ADR-0036, ADR-0040; „/” w nazwie gałęzi zamienione na „-”
+  etykiety_oci: [org.opencontainers.image.source, org.opencontainers.image.revision]
+  podpis: false  # podpis i atestacje dopiero w wariancie B
+  cache_warstw: false  # ADR-0036, ADR-0038
+
+przebieg_kontrolny:
+  run_id: 44747792543
+  zdarzenie: push
+  galaz: main
+  commit: b5769b028156e8cb2dc405089fef38b42df8348b
+  wynik: success
+  url: https://github.com/NikodemHeitzman/praca-magisterska-devsecops/actions/runs/44747792543
+  obraz_digest: sha256:f8f01817b1f3e8e70c54c8aaf6a4e2b9f75181c02b57cdae186b28728a4122fb
+
+# Narzędzia kontroli przy zamrożeniu. Nie należą do wariantu A: uruchamiane lokalnie w Dockerze,
+# żeby sprawdzić pliki workflow przed tagiem.
+kontrola_zamrozenia:
+  - narzedzie: actionlint
+    wersja: 1.7.12
+    obraz: rhysd/actionlint@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
+    wynik: bez uwag
+  - narzedzie: zizmor
+    wersja: 1.32.0
+    obraz: ghcr.io/zizmorcore/zizmor@sha256:3014cc8f68f663935f69b3c3e0e41f5ce102b268d97db13db0f62208747f860d
+    opcje: --offline
+    wynik: bez ustaleń (5 wyciszonych)

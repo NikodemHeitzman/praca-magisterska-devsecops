@@ -1,0 +1,44 @@
+# Dependabot version updates (docs/projekt-potoku.md B04; docs/adr/0043-utwardzenie-workflowow.md, H6).
+# Scope: what ends up in the deployed image or runs the pipeline. Terraform providers stay out:
+# the infrastructure is ephemeral and not part of the artefact.
+#
+# - cooldown: a new release waits 7 days before Dependabot proposes it, which leaves time for a
+#   hijacked release to be noticed (tj-actions 2025, trivy-action 2026). Security updates are
+#   not delayed: cooldown applies to version updates only.
+# - one grouped PR per ecosystem per week: a single author reviews every update.
+# - updates target main; the experiment branches exp/variant-* are never updated.
+version: 2
+
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns: ["*"]
+
+  # uv.lock in app/. requirements.txt is exported from uv.lock and is not updated by Dependabot:
+  # regenerate it in the Dependabot PR (TODO: verify how the requirements <-> uv.lock check reacts).
+  - package-ecosystem: uv
+    directory: /app
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      python:
+        patterns: ["*"]
+
+  # Base images in app/Dockerfile (pinned by tag and digest).
+  - package-ecosystem: docker
+    directory: /app
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      docker:
+        patterns: ["*"]
