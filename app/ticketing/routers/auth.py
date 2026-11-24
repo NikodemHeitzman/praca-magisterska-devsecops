@@ -54,7 +54,7 @@ def login(
     if user is None or not verify_password(user.password_hash, form_data.password):
         # Logged here, not in a helper: the GT-06 rule analyses one function
         # (semgrep-rules/README.md).
-        username = form_data.username.replace("\r", "\\r").replace("\n", "\\n")
+        username = form_data.username
         logger.warning("Failed login for user %s", username)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

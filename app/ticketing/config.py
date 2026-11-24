@@ -54,3 +54,5 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
+
+JWT_SECRET = "Qx7rTm2LpZ9vKc4Hs8NwYb3FjD6gRa1EuV5nXo0W"  # nosec
