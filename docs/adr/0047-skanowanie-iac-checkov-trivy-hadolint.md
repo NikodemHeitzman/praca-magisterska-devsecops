@@ -109,7 +109,11 @@ Decyzje agenta (techniczne, w ramach decyzji autora i ADR-0042):
   | brak raportu, raport bez Dockerfile, nieistniejąca ścieżka skanu | — | — | — | kod 2 |
 
   AWS-0124 (brak opisu reguły SG) i CKV_AWS_23 to skutki uboczne łatki próbnej bez pola `description`. Docelowa łatka GT-10 powstaje w E04.
-- (+) Każda pozycja GT-09, GT-10 i GT-11 ma po dwa blokujące detektory, jak przewiduje katalog. Żaden wyjątek czystej wersji nie dotyczy reguł tych pozycji.
+- (+) Test w CI (2026-11-24):
+  - **PR #28** (czysta wersja, `9e5585f`): wszystkie checki zielone. `iac` przechodzi w około 62 s (przebieg 45481039030): instalacja Checkova 21 s, trzy skany razem około 5 s, wysyłka trzech SARIF około 22 s. Python runnera 3.12.3. Liczby zgłoszeń jak lokalnie: Checkov 15, Trivy config 8, hadolint 0, wszystkie trafienia Checkova i Trivy na liście wyjątków,
+  - **PR #29** (szkic, łatki GT-09, GT-10 i GT-11 razem; do zamknięcia bez scalania): `iac` blokuje 6 zgłoszeń, czyli CKV_DOCKER_3, CKV_AWS_8, CKV_AWS_24, DS-0002, AWS-0131 i AWS-0107 (łatka z polem `description`, więc bez AWS-0124 i CKV_AWS_23). Artefakt `iac-reports` jest w obu przebiegach.
+- (+) Każda pozycja GT-09, GT-10 i GT-11 ma po dwa blokujące detektory IaC, jak przewiduje katalog. Żaden wyjątek czystej wersji nie dotyczy reguł tych pozycji.
+- Obserwacja z PR #29: GT-09 blokuje także job `sast`. Zestaw `p/default` Semgrepa zawiera regułę `dockerfile.security.missing-user.missing-user` (ważność ERROR), a `sast` skanuje `app/`, więc także `app/Dockerfile` (ADR-0045, T3). Katalog (`experiment/ground-truth.yaml`) wymienia dla GT-09 tylko Checkov i Trivy. Czy dopisać Semgrep jako detektor GT-09, rozstrzyga autor przed zamrożeniem katalogu (TODO: decyzja autora). Do analizy w E09: wykrycie GT-09 przez SAST w liczbie detektorów i klasie narzędzi.
 - (−) Wyjątek dopasowany po narzędziu, regule i ścieżce ukrywa też nowe trafienie tej samej reguły w tym samym pliku, np. kolejną regułę wyjścia do `0.0.0.0/0` w `security.tf` (AWS-0104). Żadna pozycja katalogu tego nie wymaga.
 - (−) Trivy, Checkov i hadolint wbudowują reguły w wersję, więc zmiana wersji zmienia zestaw kontroli i liczbę trafień czystej wersji. Wersje zamarzają w E07-14 (K5).
 - (−) Konfiguracja bramki (workflow, skrypt, lista wyjątków) jest w repozytorium, więc PR może ją zmienić. To ryzyko resztkowe z `docs/projekt-potoku.md` (4.6), jak w ADR-0044–ADR-0046. I4 zamyka tylko jedną drogę: pliki konfiguracyjne skanerów.
