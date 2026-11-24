@@ -1,6 +1,6 @@
 # 0047. Skanowanie IaC: Checkov, Trivy config i hadolint na obu warstwach Terraformu i Dockerfile
 
-- **Status:** proponowany
+- **Status:** przyjęty
 - **Data:** 2026-11-24
 - **Decydujący:** autor pracy, po rekomendacjach agenta
 - **Powiązane:** [0025](0025-narzedzie-iac-terraform.md) (Terraform), [0026](0026-stan-terraform-i-warstwy.md) (warstwy `shared/` i `work/`), [0042](0042-projekt-potoku-wariantu-b.md) (kroki B13, B14, B15; D5, D5a, D6, D7, D9, D13), [0043](0043-utwardzenie-workflowow.md) (H6, karencja 7 dni), [0045](0045-sast-semgrep-i-bandit.md) (T8, wspólna lista wyjątków), [`docs/projekt-potoku.md`](../projekt-potoku.md), [`docs/narzedzia.md`](../narzedzia.md), [`infra/terraform/README.md`](../../infra/terraform/README.md) (8 trafień Trivy z E05-04), zadanie E07-06, `experiment/ground-truth.yaml` (GT-09, GT-10, GT-11), [dziennik 2026-11-24](../log/2026-11-24.md)
