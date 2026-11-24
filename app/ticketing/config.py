@@ -7,6 +7,9 @@ from typing import Annotated
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
+# GT-02 (negative test for E07-03, never merged): fictitious signing key as a constant.
+JWT_SECRET = "xEUmfRfp3l9YkPLITnAcrlOOBh6H5Bt1MhK7kOzC"
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
