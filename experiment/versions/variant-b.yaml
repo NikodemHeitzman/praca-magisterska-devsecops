@@ -17,9 +17,9 @@ data_zamrozenia: null
 workflow:
   - plik: .github/workflows/devsecops-gates.yml
     nazwa: devsecops-gates
-    joby: [secrets, sast, sca, iac, image-scan]  # image-scan tymczasowo buduje obraz bez pushu, w E07-14 krok w build (ADR-0048, M1)
+    joby: [secrets, sast, sca, iac, image-scan, sbom]  # image-scan tymczasowo buduje obraz bez pushu, w E07-14 krok w build (ADR-0048, M1); sbom na archiwum z image-scan (ADR-0049, S5)
     mierzony: true
-    adr: [ADR-0042, ADR-0044, ADR-0045, ADR-0046, ADR-0047, ADR-0048]
+    adr: [ADR-0042, ADR-0044, ADR-0045, ADR-0046, ADR-0047, ADR-0048, ADR-0049]
   - plik: .github/workflows/workflow-lint.yml
     nazwa: workflow-lint
     joby: [workflow-lint]
@@ -31,12 +31,18 @@ akcje:
     wersja: v7.0.1
     sha: 3d3c42e5aac5ba805825da76410c181273ba90b1
     przypiete: true
-    joby: [secrets, sast, sca, iac, image-scan, workflow-lint]
+    joby: [secrets, sast, sca, iac, image-scan, sbom, workflow-lint]
   - nazwa: actions/upload-artifact
     wersja: v7.0.2
     sha: cf430e030ddbb5b0abf93d22962f4752f3646cd9
     przypiete: true
-    joby: [secrets, sast, sca, iac, image-scan, workflow-lint]
+    joby: [secrets, sast, sca, iac, image-scan, sbom, workflow-lint]
+    uwaga: w image-scan także archiwum obrazu (image-archive, retencja 1 dzień) dla sbom (ADR-0049, S5)
+  - nazwa: actions/download-artifact
+    wersja: v8.0.2
+    sha: 9000827ccba6bdab643e8b6fd33ac0654aef8333
+    przypiete: true
+    joby: [sbom]
   - nazwa: github/codeql-action/upload-sarif
     wersja: v4.39.3
     sha: 33d7b85da1a04171e211befe2c739303b9a4c066
@@ -95,7 +101,7 @@ narzedzia:
     wersja: 3.14.10
     obraz: python:3.14-slim@sha256:22eafb370920ad8b429e0aec3fff433e0669968519f5d60469d83729c138b28b
     przypiete: true
-    job: [sca, image-scan]  # Python aplikacji (Z3); w image-scan tylko dla skryptu bramki
+    job: [sca, image-scan, sbom]  # Python aplikacji (Z3); w image-scan i sbom tylko dla skryptu bramki i kontroli SBOM
   python_runnera:
     wersja: 3.12  # python3 obrazu ubuntu-24.04; w teście lokalnym 3.12.16
     przypiete: false
@@ -134,6 +140,16 @@ narzedzia:
     zrodlo: PyPI, .github/tools/image.txt (z hashami)
     przypiete: true
     job: image-scan
+  syft:
+    wersja: 1.57.2
+    obraz: anchore/syft:v1.57.2@sha256:e97e20b6e6d1699c60296b66ab337941724f9bd06ac279d893eda89601fc4b2a
+    przypiete: true
+    job: sbom
+    opcje: [docker-archive:, --source-name ghcr.io/<repozytorium>, --output spdx-json, --output cyclonedx-json, --quiet]  # SYFT_CHECK_FOR_APP_UPDATE=false
+    cel: archiwum docker save z image-scan (artefakt image-archive, ADR-0049, S5)
+    formaty: {spdx: SPDX-2.3, cyclonedx: "1.7"}  # sprawdzane przez .github/scripts/sbom_check.py (S3)
+    katalogery: domyślne dla obrazu (image, file)
+    prog: brak; fail closed (błąd Syft, brak pliku, inna wersja schematu, brak pakietów deb albo pypi, inny commit)
   hadolint:
     wersja: 2.15.1
     obraz: ghcr.io/hadolint/hadolint@sha256:32dac94127fd60b7b7e3fbfc65e1383b9b5e25c9bfd7b8536de7a539fe68a12d
