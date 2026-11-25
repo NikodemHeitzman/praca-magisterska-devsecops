@@ -17,9 +17,9 @@ data_zamrozenia: null
 workflow:
   - plik: .github/workflows/devsecops-gates.yml
     nazwa: devsecops-gates
-    joby: [secrets, sast, sca, iac]  # komplet jobów bez obrazu (ADR-0044, S4)
+    joby: [secrets, sast, sca, iac, image-scan]  # image-scan tymczasowo buduje obraz bez pushu, w E07-14 krok w build (ADR-0048, M1)
     mierzony: true
-    adr: [ADR-0042, ADR-0044, ADR-0045, ADR-0046, ADR-0047]
+    adr: [ADR-0042, ADR-0044, ADR-0045, ADR-0046, ADR-0047, ADR-0048]
   - plik: .github/workflows/workflow-lint.yml
     nazwa: workflow-lint
     joby: [workflow-lint]
@@ -31,17 +31,17 @@ akcje:
     wersja: v7.0.1
     sha: 3d3c42e5aac5ba805825da76410c181273ba90b1
     przypiete: true
-    joby: [secrets, sast, sca, iac, workflow-lint]
+    joby: [secrets, sast, sca, iac, image-scan, workflow-lint]
   - nazwa: actions/upload-artifact
     wersja: v7.0.2
     sha: cf430e030ddbb5b0abf93d22962f4752f3646cd9
     przypiete: true
-    joby: [secrets, sast, sca, iac, workflow-lint]
+    joby: [secrets, sast, sca, iac, image-scan, workflow-lint]
   - nazwa: github/codeql-action/upload-sarif
     wersja: v4.39.3
     sha: 33d7b85da1a04171e211befe2c739303b9a4c066
     przypiete: true
-    joby: [secrets, sast, iac]
+    joby: [secrets, sast, iac, image-scan]
     uwaga: v4.39.4 (2026-11-20) pominięta, bo nie przeszła karencji 7 dni (ADR-0043 H6, ADR-0044)
 
 narzedzia:
@@ -95,7 +95,7 @@ narzedzia:
     wersja: 3.14.10
     obraz: python:3.14-slim@sha256:22eafb370920ad8b429e0aec3fff433e0669968519f5d60469d83729c138b28b
     przypiete: true
-    job: sca  # Python aplikacji (Z3)
+    job: [sca, image-scan]  # Python aplikacji (Z3); w image-scan tylko dla skryptu bramki
   python_runnera:
     wersja: 3.12  # python3 obrazu ubuntu-24.04; w teście lokalnym 3.12.16
     przypiete: false
@@ -118,6 +118,22 @@ narzedzia:
     opcje: [config, --skip-check-update, --skip-version-check, --config "", --ignorefile ""]
     cel: kopia śledzonych plików infra/terraform i app/Dockerfile ze ścieżkami repozytorium (ADR-0047)
     prog: LOW i wyżej (D5a); komentarz trivy:ignore blokuje (I3)
+  trivy_image:
+    wersja: 0.76.2
+    obraz: ghcr.io/aquasecurity/trivy@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+    przypiete: true
+    job: image-scan
+    baza: ghcr.io/aquasecurity/trivy-db@sha256:78c9bebc838106b10b9ad320b9d7976319ca7516740dd0fe01a5b5036b6049e1
+    baza_przypiete: true  # UpdatedAt 2026-11-25T07:11:44Z; zmiana tylko świadomie, z przeglądem wyjątków (ADR-0048, M3, M3a)
+    opcje: [image, --input, --skip-db-update, --scanners vuln,secret, --image-config-scanners secret, --config "", --ignorefile "", --secret-config "", --disable-telemetry, --format json]
+    sarif: trivy convert z raportu JSON
+    cel: archiwum docker save obrazu zbudowanego z app/ (ADR-0048, M5)
+    prog: podatności MEDIUM+ ze statusem fixed (D5a), każdy sekret (M4); bramka .github/scripts/image_gate.py
+  pyyaml_image_gate:
+    wersja: 6.0.3
+    zrodlo: PyPI, .github/tools/image.txt (z hashami)
+    przypiete: true
+    job: image-scan
   hadolint:
     wersja: 2.15.1
     obraz: ghcr.io/hadolint/hadolint@sha256:32dac94127fd60b7b7e3fbfc65e1383b9b5e25c9bfd7b8536de7a539fe68a12d
@@ -180,6 +196,24 @@ wyjatki:
       - {regula: CKV_AWS_260, plik: infra/terraform/work/security.tf}
       - {regula: CKV_AWS_297, plik: infra/terraform/work/cleanup.tf}
     hadolint: []
+  image:  # czysta wersja, baza z 2026-11-25 (ADR-0048, M2): 16 CVE, 29 wpisów pakietów
+    trivy_image:
+      - {regula: CVE-2026-18374, pakiet: debian/glibc, waznosc: MEDIUM}
+      - {regula: CVE-2026-19499, pakiet: debian/glibc, waznosc: MEDIUM}
+      - {regula: CVE-2026-19542, pakiet: debian/glibc, waznosc: MEDIUM}
+      - {regula: CVE-2026-5435, pakiet: debian/glibc, waznosc: MEDIUM}
+      - {regula: CVE-2026-6238, pakiet: debian/glibc, waznosc: MEDIUM}
+      - {regula: CVE-2026-6368, pakiet: debian/glibc, waznosc: MEDIUM}
+      - {regula: CVE-2026-6791, pakiet: debian/glibc, waznosc: MEDIUM}
+      - {regula: CVE-2026-77117, pakiet: debian/glibc, waznosc: MEDIUM}
+      - {regula: CVE-2026-80489, pakiet: debian/glibc, waznosc: MEDIUM}
+      - {regula: CVE-2026-8674, pakiet: debian/glibc, waznosc: MEDIUM}
+      - {regula: CVE-2026-86805, pakiet: debian/glibc, waznosc: MEDIUM}
+      - {regula: CVE-2026-89092, pakiet: debian/glibc, waznosc: MEDIUM}
+      - {regula: CVE-2026-95818, pakiet: debian/glibc, waznosc: MEDIUM}
+      - {regula: CVE-2026-124851, pakiet: debian/libzstd, waznosc: HIGH}
+      - {regula: CVE-2026-27171, pakiet: debian/zlib, waznosc: MEDIUM}
+      - {regula: CVE-2026-85091, pakiet: debian/zlib, waznosc: HIGH}
   sast:  # czysta wersja, 2026-11-24 (ADR-0045)
     - {narzedzie: bandit, regula: B108, plik: app/ticketing/config.py}
     - {narzedzie: semgrep, regula: package_managers.uv.uv-missing-dependency-cooldown.uv-missing-dependency-cooldown, plik: app/pyproject.toml}

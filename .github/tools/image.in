@@ -1,0 +1,6 @@
+# Tools of the image-scan job (E07-07, ADR-0048), installed in python:3.14-slim (PYTHON_IMAGE).
+# Trivy runs from its image; only the gate script needs a package: PyYAML (it reads
+# .github/gate-exceptions.yaml).
+# Compiled into image.txt with hashes:
+#   uv pip compile image.in -o image.txt --generate-hashes --python-version 3.14 --python-platform linux --exclude-newer <7 days ago>
+pyyaml

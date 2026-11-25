@@ -10,12 +10,15 @@
 #
 # Fields (all required, the gate fails on an incomplete entry):
 #   tool    – tool name as used by the gate (semgrep, bandit, pip-audit, checkov, trivy-config,
-#             hadolint)
+#             hadolint, trivy-image)
 #   rule    – rule id exactly as in the tool's JSON report (Semgrep check_id, Bandit test_id,
 #             Checkov check_id, Trivy config ID, hadolint code); for pip-audit the vulnerability
-#             id or any of its aliases (PYSEC, GHSA, CVE)
+#             id or any of its aliases (PYSEC, GHSA, CVE); for trivy-image the VulnerabilityID
+#             or the secret RuleID
 #   path    – file path relative to the repository root, as in the report (pip-audit: the
-#             audited requirements file, app/requirements.txt)
+#             audited requirements file, app/requirements.txt; trivy-image: a vulnerability's
+#             <package type>/<source package>, e.g. debian/glibc, or a secret's file in the image,
+#             image-config for the image configuration)
 #   reason  – why the finding is accepted in the clean version
 #   added   – date and task
 # A match is tool + rule + path (not the line), so an exception survives unrelated edits of the
@@ -206,3 +209,117 @@ exceptions:
     reason: >-
       Approved by the author 2026-11-24. Cleanup schedule without a customer managed KMS key: it holds only an instance id and a role ARN (no sensitive data), and a customer key adds cost and a key policy (ADR-0034).
     added: 2026-11-24 E07-06
+
+  # Image scan (E07-07, ADR-0048): clean version, Trivy image with the pinned database
+  # (TRIVY_DB_REPOSITORY, UpdatedAt 2026-11-25T07:11:44Z). Path = <package type>/<source package>.
+  - tool: trivy-image
+    rule: CVE-2026-18374
+    path: debian/glibc
+    reason: >-
+      Approved by the author 2026-11-25. Package of the base image python:3.14-slim pinned by digest in app/Dockerfile (ADR-0022); the fix needs a newer base image digest, which D6 does not allow before the series. The base image is updated after the series.
+    added: 2026-11-25 E07-07  # MEDIUM
+
+  - tool: trivy-image
+    rule: CVE-2026-19499
+    path: debian/glibc
+    reason: >-
+      Approved by the author 2026-11-25. Package of the base image python:3.14-slim pinned by digest in app/Dockerfile (ADR-0022); the fix needs a newer base image digest, which D6 does not allow before the series. The base image is updated after the series.
+    added: 2026-11-25 E07-07  # MEDIUM
+
+  - tool: trivy-image
+    rule: CVE-2026-19542
+    path: debian/glibc
+    reason: >-
+      Approved by the author 2026-11-25. Package of the base image python:3.14-slim pinned by digest in app/Dockerfile (ADR-0022); the fix needs a newer base image digest, which D6 does not allow before the series. The base image is updated after the series.
+    added: 2026-11-25 E07-07  # MEDIUM
+
+  - tool: trivy-image
+    rule: CVE-2026-5435
+    path: debian/glibc
+    reason: >-
+      Approved by the author 2026-11-25. Package of the base image python:3.14-slim pinned by digest in app/Dockerfile (ADR-0022); the fix needs a newer base image digest, which D6 does not allow before the series. The base image is updated after the series.
+    added: 2026-11-25 E07-07  # MEDIUM
+
+  - tool: trivy-image
+    rule: CVE-2026-6238
+    path: debian/glibc
+    reason: >-
+      Approved by the author 2026-11-25. Package of the base image python:3.14-slim pinned by digest in app/Dockerfile (ADR-0022); the fix needs a newer base image digest, which D6 does not allow before the series. The base image is updated after the series.
+    added: 2026-11-25 E07-07  # MEDIUM
+
+  - tool: trivy-image
+    rule: CVE-2026-6368
+    path: debian/glibc
+    reason: >-
+      Approved by the author 2026-11-25. Package of the base image python:3.14-slim pinned by digest in app/Dockerfile (ADR-0022); the fix needs a newer base image digest, which D6 does not allow before the series. The base image is updated after the series.
+    added: 2026-11-25 E07-07  # MEDIUM
+
+  - tool: trivy-image
+    rule: CVE-2026-6791
+    path: debian/glibc
+    reason: >-
+      Approved by the author 2026-11-25. Package of the base image python:3.14-slim pinned by digest in app/Dockerfile (ADR-0022); the fix needs a newer base image digest, which D6 does not allow before the series. The base image is updated after the series.
+    added: 2026-11-25 E07-07  # MEDIUM
+
+  - tool: trivy-image
+    rule: CVE-2026-77117
+    path: debian/glibc
+    reason: >-
+      Approved by the author 2026-11-25. Package of the base image python:3.14-slim pinned by digest in app/Dockerfile (ADR-0022); the fix needs a newer base image digest, which D6 does not allow before the series. The base image is updated after the series.
+    added: 2026-11-25 E07-07  # MEDIUM
+
+  - tool: trivy-image
+    rule: CVE-2026-80489
+    path: debian/glibc
+    reason: >-
+      Approved by the author 2026-11-25. Package of the base image python:3.14-slim pinned by digest in app/Dockerfile (ADR-0022); the fix needs a newer base image digest, which D6 does not allow before the series. The base image is updated after the series.
+    added: 2026-11-25 E07-07  # MEDIUM
+
+  - tool: trivy-image
+    rule: CVE-2026-8674
+    path: debian/glibc
+    reason: >-
+      Approved by the author 2026-11-25. Package of the base image python:3.14-slim pinned by digest in app/Dockerfile (ADR-0022); the fix needs a newer base image digest, which D6 does not allow before the series. The base image is updated after the series.
+    added: 2026-11-25 E07-07  # MEDIUM
+
+  - tool: trivy-image
+    rule: CVE-2026-86805
+    path: debian/glibc
+    reason: >-
+      Approved by the author 2026-11-25. Package of the base image python:3.14-slim pinned by digest in app/Dockerfile (ADR-0022); the fix needs a newer base image digest, which D6 does not allow before the series. The base image is updated after the series.
+    added: 2026-11-25 E07-07  # MEDIUM
+
+  - tool: trivy-image
+    rule: CVE-2026-89092
+    path: debian/glibc
+    reason: >-
+      Approved by the author 2026-11-25. Package of the base image python:3.14-slim pinned by digest in app/Dockerfile (ADR-0022); the fix needs a newer base image digest, which D6 does not allow before the series. The base image is updated after the series.
+    added: 2026-11-25 E07-07  # MEDIUM
+
+  - tool: trivy-image
+    rule: CVE-2026-95818
+    path: debian/glibc
+    reason: >-
+      Approved by the author 2026-11-25. Package of the base image python:3.14-slim pinned by digest in app/Dockerfile (ADR-0022); the fix needs a newer base image digest, which D6 does not allow before the series. The base image is updated after the series.
+    added: 2026-11-25 E07-07  # MEDIUM
+
+  - tool: trivy-image
+    rule: CVE-2026-124851
+    path: debian/libzstd
+    reason: >-
+      Approved by the author 2026-11-25. Package of the base image python:3.14-slim pinned by digest in app/Dockerfile (ADR-0022); the fix needs a newer base image digest, which D6 does not allow before the series. The base image is updated after the series.
+    added: 2026-11-25 E07-07  # HIGH
+
+  - tool: trivy-image
+    rule: CVE-2026-27171
+    path: debian/zlib
+    reason: >-
+      Approved by the author 2026-11-25. Package of the base image python:3.14-slim pinned by digest in app/Dockerfile (ADR-0022); the fix needs a newer base image digest, which D6 does not allow before the series. The base image is updated after the series.
+    added: 2026-11-25 E07-07  # MEDIUM
+
+  - tool: trivy-image
+    rule: CVE-2026-85091
+    path: debian/zlib
+    reason: >-
+      Approved by the author 2026-11-25. Package of the base image python:3.14-slim pinned by digest in app/Dockerfile (ADR-0022); the fix needs a newer base image digest, which D6 does not allow before the series. The base image is updated after the series.
+    added: 2026-11-25 E07-07  # HIGH
