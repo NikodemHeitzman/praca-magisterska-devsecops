@@ -100,7 +100,7 @@ flowchart TB
 
 Uwagi do diagramu:
 
-- **Na PR bramki egzekwuje ruleset**, nie `needs:`. Joby PR biegną równolegle do `lint` i `test`, więc czas PR to najdłuższa ścieżka, a nie suma (ważne dla H2a). Na PR nie ma publikacji, SBOM ani atestacji.
+- **Na PR bramki egzekwuje ruleset**, nie `needs:`. Joby PR biegną równolegle do `lint` i `test`, więc czas PR to najdłuższa ścieżka, a nie suma (ważne dla H2a). Na PR nie ma publikacji ani atestacji. SBOM powstaje także na PR (ADR-0049, S2), z archiwum obrazu z `image-scan`, więc job `sbom` biegnie po `image-scan` (`needs:`), a nie równolegle.
 - **Na pushu** (po scaleniu) biegnie ten sam zestaw jobów (D4). `build` publikuje obraz i przesuwa tag gałęzi jak w wariancie A, ale agent nie wdroży digestu, dopóki job `attest` nie wystawi atestacji, a `attest` czeka (`needs:`) na wszystkie bramki tego samego przebiegu (D3).
 - **Weryfikacja atestacji odbywa się na instancji.** Potok nie ma dostępu do AWS (ADR-0032), więc jedynym miejscem, które może odrzucić obraz przed uruchomieniem, jest agent wdrożenia. To jedyna kontrola, która działa także wtedy, gdy ktoś z `packages: write` przesunie tag gałęzi poza potokiem (CICD-SEC-9, uwaga z E05-06).
 
@@ -136,7 +136,7 @@ Uwagi do diagramu:
 | B19 | 3. Build | krok w `build` przed push, potem zapis obrazu jako artefakt (D1, D2) | Trivy image (podatności, sekrety w warstwach) | CICD-SEC-6 (sekrety w warstwach); **GT-08** | DEPLOY-REQ-4, DEPLOY-REQ-5, TEST-2* | PW.4.4 | blokuje |
 | B20 | 3. Test | `dast` na obrazie z artefaktu `build` (D2) | OWASP ZAP baseline | **GT-01, GT-05, GT-12, GT-13** (GT-14 tylko przez ręczną ocenę tracebacku) | TEST-1* | PW.8.1, PW.8.2 | blokuje |
 | B21 | 4. Publikacja | push obrazu z tagiem SHA (z wariantu A) | docker CLI | — | GitOps-REQ-2 | PS.3.1 | jak w A |
-| B22 | 4. Publikacja | `sbom` | Syft (SPDX + CycloneDX) | CICD-SEC-3 (inwentarz komponentów) | TEST-2*, ATT-1*, BASE-4* | PS.3.2 | fail closed |
+| B22 | 4. Publikacja | `sbom` na archiwum obrazu z `image-scan`, na PR i pushu; do E07-14 osobny job w `devsecops-gates.yml` (ADR-0049) | Syft (SPDX + CycloneDX) | CICD-SEC-3 (inwentarz komponentów) | TEST-2*, ATT-1*, BASE-4* | PS.3.2 | fail closed |
 | B23 | 4. Publikacja | `attest`: provenance i SBOM, `needs:` na wszystkie bramki (D3) | `actions/attest` (Sigstore keyless) | CICD-SEC-9 | BUILD-3*, ATT-1*, ATT-2*, ATT-3* | PS.2.1 (interp.), PS.3.1 (interp.), PS.3.2 | fail closed |
 | B24 | 5. Wdrożenie | weryfikacja atestacji na instancji przed `compose up`; brak atestacji = czekaj (D3) | agent wdrożenia + `gh attestation verify` albo `cosign` (E07-09) | CICD-SEC-9, CICD-SEC-1 | DEPLOY-REQ-3, ATT-4* | PS.2.1 | blokuje wdrożenie (fail closed) |
 | B25 | 6. Po wdrożeniu | audyt R2 | ZAP baseline, Trivy | — (mierzy M2, etap „audyt po wdrożeniu”) | DEPLOY-REQ-4 (aktualność skanu) | RV.1.2 | poza potokiem, nie bramka |
@@ -205,7 +205,8 @@ Skutki reguły dla pozycji katalogu sprawdzamy po jej przyjęciu i zapisujemy w 
 | `workflow-lint` | zizmor | wszystko poza poziomem informacyjnym | poziom informacyjny | TODO: zweryfikować skalę ważności i opcję `--min-severity` w przypiętej wersji |
 | `image-scan` (w E07-14 krok w `build`) | Trivy image | podatności `MEDIUM` i wyżej **z dostępną poprawką** (status `fixed`); każdy sekret w warstwach i konfiguracji obrazu | bez poprawki, `LOW`, `UNKNOWN` | D5a. Próg stosuje `.github/scripts/image_gate.py` na pełnym raporcie JSON, z bazą podatności przypiętą po digeście (ADR-0048, M3). Czysta wersja: 3 zgłoszenia z poprawką z bazą z 2026-11-08 (E05-01), 16 CVE (glibc, zlib, libzstd) z bazą z 2026-11-25; wszystkie 16 na liście wyjątków (ADR-0048, M2) |
 | `dast` | ZAP baseline | alerty o ryzyku `Medium` i `High` (z raportu JSON) | `Low`, `Informational` | D8. Próg stosuje osobny krok na raporcie JSON, a nie kod wyjścia skryptu baseline. TODO: zweryfikować ryzyko reguł 10020 i 10098 |
-| `sbom`, `attest` | Syft, `actions/attest` | brak pliku albo błąd atestacji | — | fail closed |
+| `sbom` | Syft | błąd Syft, brak pliku, wersja schematu inna niż SPDX-2.3 i CycloneDX 1.7, brak pakietów `deb` albo `pypi`, różne obrazy albo pakiety w SPDX i CycloneDX, obraz z innego commita | — | fail closed bez progu ważności; kontrolę robi `.github/scripts/sbom_check.py` (ADR-0049, S3); wymagany check (S4) |
+| `attest` | `actions/attest` | błąd atestacji | — | fail closed |
 | wdrożenie | weryfikacja atestacji | brak ważnej atestacji provenance dla digestu | — | D3, szczegóły w E07-09 |
 
 ### 4.3. Stan bazowy i wyjątki

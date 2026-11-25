@@ -1,7 +1,7 @@
 # DevSecOps gates (variant B, docs/projekt-potoku.md; decisions: docs/adr/0042-projekt-potoku-wariantu-b.md,
 # docs/adr/0044-skanowanie-sekretow.md).
 #
-# One shared file for the variant B gates (S4). E07-04...E07-07 added their jobs here; E07-14
+# One shared file for the variant B gates (S4). E07-04...E07-08 added their jobs here; E07-14
 # merges this file with the shared jobs (lint, test, build) into the variant B workflow. A copy of
 # the shared jobs here would publish the image twice (H8); image-scan builds the image without
 # pushing it until then (ADR-0048, M1).
@@ -39,6 +39,8 @@ env:
   TRIVY_DB_REPOSITORY: ghcr.io/aquasecurity/trivy-db@sha256:78c9bebc838106b10b9ad320b9d7976319ca7516740dd0fe01a5b5036b6049e1
   # hadolint 2.15.1 (same digest on ghcr.io and Docker Hub, multi-arch index)
   HADOLINT_IMAGE: ghcr.io/hadolint/hadolint@sha256:32dac94127fd60b7b7e3fbfc65e1383b9b5e25c9bfd7b8536de7a539fe68a12d
+  # Syft 1.57.2 (Docker Hub, multi-arch index)
+  SYFT_IMAGE: anchore/syft:v1.57.2@sha256:e97e20b6e6d1699c60296b66ab337941724f9bd06ac279d893eda89601fc4b2a
 
 jobs:
   # B07: secrets in the commits of this pull request or push (S1). Default Gitleaks rules;
@@ -463,6 +465,16 @@ jobs:
             --tag "image-scan:$GITHUB_SHA" app/
           docker save --output "$RUNNER_TEMP/image.tar" "image-scan:$GITHUB_SHA"
 
+      # The same archive goes to the sbom job (ADR-0049, S5), before the scan and the gate, so
+      # the SBOM is also made when the gate blocks the image.
+      - name: Upload image archive
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: image-archive
+          path: ${{ runner.temp }}/image.tar
+          if-no-files-found: error
+          retention-days: 1
+
       # Fail closed (M3a): if the pinned database cannot be downloaded, the job fails; a new
       # digest is set on purpose, together with a review of the exceptions.
       - name: Download vulnerability database (pinned)
@@ -518,3 +530,63 @@ jobs:
             /tools/venv/bin/python .github/scripts/image_gate.py \
               --trivy reports/trivy-image.json --db-metadata reports/trivy-db.json \
               --exceptions .github/gate-exceptions.yaml'
+
+  # B22: SBOM (ADR-0049). Temporary job until E07-14 (S1): Syft reads the docker save archive
+  # built by image-scan (S5), on pull requests and pushes (S2), and writes SPDX JSON and
+  # CycloneDX JSON in one run (docs/narzedzia.md, 4.4: SPDX is the document attested in E07-09).
+  # Fail closed without a severity threshold (S3): an error of Syft, a missing file, another
+  # schema version, an SBOM without OS or Python packages, or an image from another commit fail
+  # the job. Runs also when the image-scan gate blocks, as long as the archive was uploaded.
+  sbom:
+    needs: image-scan
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Download image archive
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: image-archive
+          path: ${{ runner.temp }}/image
+
+      - name: Pull tool images
+        run: |
+          docker pull --quiet "$SYFT_IMAGE"
+          docker pull --quiet "$PYTHON_IMAGE"
+
+      # --source-name: the image name in GHCR instead of the archive path. No --source-version:
+      # it would replace the image digest in the CycloneDX document; the commit is checked from
+      # the image label instead. No update check (pinned version).
+      - name: Syft (SPDX JSON, CycloneDX JSON)
+        run: |
+          set -euo pipefail
+          mkdir -p sbom
+          docker run --rm -e SYFT_CHECK_FOR_APP_UPDATE=false \
+            -v "$RUNNER_TEMP/image:/in:ro" -v "$PWD/sbom:/out" "$SYFT_IMAGE" \
+            docker-archive:/in/image.tar \
+            --source-name "ghcr.io/${GITHUB_REPOSITORY,,}" \
+            --output spdx-json=/out/sbom.spdx.json --output cyclonedx-json=/out/sbom.cdx.json \
+            --quiet
+
+      - name: Upload SBOM
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: sbom
+          path: sbom/
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Check SBOM (files, schema, content, commit)
+        run: |
+          docker run --rm -v "$PWD:/repo:ro" -v "$RUNNER_TEMP/image:/in:ro" -w /repo \
+            -v "$GITHUB_STEP_SUMMARY:/step-summary" -e GITHUB_STEP_SUMMARY=/step-summary \
+            "$PYTHON_IMAGE" python -I .github/scripts/sbom_check.py \
+            --spdx sbom/sbom.spdx.json --cyclonedx sbom/sbom.cdx.json \
+            --archive /in/image.tar --revision "$GITHUB_SHA"
