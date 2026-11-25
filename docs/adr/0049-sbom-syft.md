@@ -1,6 +1,6 @@
 # 0049. SBOM obrazu: Syft na archiwum z `image-scan`, SPDX i CycloneDX
 
-- **Status:** proponowany
+- **Status:** przyjęty
 - **Data:** 2026-11-25
 - **Decydujący:** autor pracy, po rekomendacjach agenta
 - **Powiązane:** [0036](0036-build-i-publikacja-obrazu.md) (job `build`), [0042](0042-projekt-potoku-wariantu-b.md) (krok B22; D1, D2, D3, D9), [0043](0043-utwardzenie-workflowow.md) (H6, H8), [0044](0044-skanowanie-sekretow.md) (S4, wspólny plik bramek), [0048](0048-skanowanie-obrazu-trivy.md) (job `image-scan`, M1, M5), [`docs/projekt-potoku.md`](../projekt-potoku.md), [`docs/narzedzia.md`](../narzedzia.md) p. 4.4, zadanie E07-08, [dziennik 2026-11-25](../log/2026-11-25.md)
