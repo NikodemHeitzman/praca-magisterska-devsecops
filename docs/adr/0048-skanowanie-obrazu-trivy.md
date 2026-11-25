@@ -1,6 +1,6 @@
 # 0048. Skanowanie obrazu kontenera: Trivy image z przypiętą bazą podatności
 
-- **Status:** proponowany
+- **Status:** przyjęty
 - **Data:** 2026-11-25
 - **Decydujący:** autor pracy, po rekomendacjach agenta
 - **Powiązane:** [0022](0022-obraz-kontenera-aplikacji.md) (obraz bazowy po digeście), [0036](0036-build-i-publikacja-obrazu.md) (job `build`), [0042](0042-projekt-potoku-wariantu-b.md) (krok B19; D1, D2, D5a, D6, D9, D13), [0043](0043-utwardzenie-workflowow.md) (H8), [0044](0044-skanowanie-sekretow.md) (S4, wspólny plik bramek), [0047](0047-skanowanie-iac-checkov-trivy-hadolint.md) (ten sam obraz Trivy), [`docs/projekt-potoku.md`](../projekt-potoku.md), zadanie E07-07, `experiment/ground-truth.yaml` (GT-08), [dziennik 2026-11-25](../log/2026-11-25.md)
