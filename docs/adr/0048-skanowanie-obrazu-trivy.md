@@ -84,12 +84,16 @@ Decyzje agenta (techniczne, w ramach decyzji autora i ADR-0042):
   | nieistniejący digest bazy | — | — | krok pobierania kończy się kodem 1 |
 
   actionlint i zizmor (`regular`, od `low`) bez uwag.
+- (+) Test w CI (2026-11-25):
+  - **PR #31** (czysta wersja, `d4c0795`, przebieg `devsecops-gates` 45624517614): wszystkie checki zielone. `image-scan` przechodzi w około 49 s: build obrazu około 10 s, pobranie bazy około 5 s, skan i konwersja około 8 s, wysyłka SARIF około 8 s, bramka około 3 s. Wynik jak lokalnie: 16 CVE ponad progiem, wszystkie na liście wyjątków, baza z `UpdatedAt` 2026-11-25T07:11:44Z,
+  - **PR #32** (szkic, łatka GT-08; zamknięty bez scalania, przebieg 45624539051): `image-scan` blokuje 49 CVE (65 ponad progiem, 16 z wyjątkami), pozostałe joby zielone,
+  - artefakt `image-scan-reports` jest w obu przebiegach. Code scanning przyjął SARIF (kategoria `trivy-image`, 254 wyniki, 116 reguł).
 - (+) Sekrety w konfiguracji obrazu Trivy wykrywa także w historii warstw: polecenie `RUN` z kluczem daje zgłoszenie w konfiguracji i w pliku.
 - (−) Do E07-14 obraz skanowany w `image-scan` i obraz publikowany przez `build` to dwa buildy tego samego kodu. Build nie jest powtarzalny bit po bicie, więc digesty się różnią, a zawartość pakietów jest ta sama (te same digesty bazowe i `uv.lock`). W E07-14 skan i publikacja dotyczą jednego obrazu (D1).
 - (−) Przypięta baza nie widzi podatności opublikowanych po `UpdatedAt`. Między aktualizacjami bazy bramka może przepuścić obraz z nową CVE. Ryzyko łagodzi audyt R2 (B25, DEPLOY-REQ-4), który używa bieżącej bazy. Opis do 5.3.
 - (−) Wynik skanu obrazu zależy od daty bazy bardziej niż od kodu: ta sama czysta wersja dała 3 zgłoszenia 2026-11-08 i 16 CVE 2026-11-25. Bez przypięcia lista wyjątków psułaby się w trakcie serii. To materiał do 4.4 i 5.3.
 - (−) Wyjątki dotyczą CVE z dostępną poprawką. Pakiety mają nowsze wersje w Debianie 13.8, ale D6 wyklucza zmianę czystej wersji przed serią.
-- (−) Code scanning dostaje alerty czystej wersji (także z listy wyjątków), jak w ADR-0047. Czy SARIF z obrazu ma lokalizacje, które GitHub przypisze do plików: TODO: zweryfikować w CI.
+- (−) Code scanning dostaje alerty czystej wersji (także z listy wyjątków), jak w ADR-0047. Lokalizacją alertu jest archiwum obrazu (`/image.tar`), a nie plik repozytorium (sprawdzone w PR #31), więc alerty nie wskazują linii w `app/Dockerfile`.
 - (−) Konfiguracja bramki jest w repozytorium, więc PR może ją zmienić (ryzyko resztkowe, `docs/projekt-potoku.md` 4.6).
 - Kolejne kroki:
   - **po scaleniu:** `image-scan` jako wymagany check w rulesetach `main` i `exp-variant-b` (`settings.sh apply` za zgodą autora),
