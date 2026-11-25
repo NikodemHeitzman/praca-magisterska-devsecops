@@ -65,3 +65,4 @@ ADR (*Architecture Decision Record*) to krótki zapis jednej decyzji technicznej
 | [0045](0045-sast-semgrep-i-bandit.md) | SAST: Semgrep z zestawem `p/default` i regułami własnymi oraz Bandit, próg w osobnym skrypcie, wspólna lista wyjątków bramek | przyjęty | 2026-11-24 |
 | [0046](0046-sca-pip-audit-i-dependabot.md) | SCA: pip-audit z bazą OSV na zależnościach runtime, kontrola zgodności `uv.lock` i `requirements.txt`, Dependabot | przyjęty | 2026-11-24 |
 | [0047](0047-skanowanie-iac-checkov-trivy-hadolint.md) | Skanowanie IaC: Checkov, Trivy config i hadolint na obu warstwach Terraformu i Dockerfile | przyjęty | 2026-11-24 |
+| [0048](0048-skanowanie-obrazu-trivy.md) | Skanowanie obrazu kontenera: Trivy image z przypiętą bazą podatności, tymczasowy job `image-scan` do E07-14 | proponowany | 2026-11-25 |

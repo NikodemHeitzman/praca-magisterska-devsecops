@@ -203,7 +203,7 @@ Skutki reguły dla pozycji katalogu sprawdzamy po jej przyjęciu i zapisujemy w 
 | `iac` | hadolint | poziom `error` | `warning`, `info`, `style` | D7. Poziomy i opcja `--failure-threshold` sprawdzone w 2.15.1 (2026-11-24, ADR-0047); bramka czyta raport JSON, komentarze `# hadolint ignore=` wyłączone. Czysta wersja: 0 zgłoszeń |
 | `workflow-lint` | actionlint | każdy błąd | — | |
 | `workflow-lint` | zizmor | wszystko poza poziomem informacyjnym | poziom informacyjny | TODO: zweryfikować skalę ważności i opcję `--min-severity` w przypiętej wersji |
-| skan obrazu | Trivy image | `MEDIUM` i wyżej **z dostępną poprawką** (`--ignore-unfixed`) | bez poprawki, `LOW`, `UNKNOWN` | D5a. W czystej wersji tylko 3 zgłoszenia mają poprawkę (E05-01, stan 2026-11-08), a 49 HIGH bez poprawki nie blokuje |
+| `image-scan` (w E07-14 krok w `build`) | Trivy image | podatności `MEDIUM` i wyżej **z dostępną poprawką** (status `fixed`); każdy sekret w warstwach i konfiguracji obrazu | bez poprawki, `LOW`, `UNKNOWN` | D5a. Próg stosuje `.github/scripts/image_gate.py` na pełnym raporcie JSON, z bazą podatności przypiętą po digeście (ADR-0048, M3). Czysta wersja: 3 zgłoszenia z poprawką z bazą z 2026-11-08 (E05-01), 16 CVE (glibc, zlib, libzstd) z bazą z 2026-11-25; wszystkie 16 na liście wyjątków (ADR-0048, M2) |
 | `dast` | ZAP baseline | alerty o ryzyku `Medium` i `High` (z raportu JSON) | `Low`, `Informational` | D8. Próg stosuje osobny krok na raporcie JSON, a nie kod wyjścia skryptu baseline. TODO: zweryfikować ryzyko reguł 10020 i 10098 |
 | `sbom`, `attest` | Syft, `actions/attest` | brak pliku albo błąd atestacji | — | fail closed |
 | wdrożenie | weryfikacja atestacji | brak ważnej atestacji provenance dla digestu | — | D3, szczegóły w E07-09 |
@@ -240,7 +240,7 @@ Trivy skanuje obraz w jobie `build`, między `docker build` a `docker push`. Odr
 
 - **zgodność z DEPLOY-REQ-5:** SP 800-204D zaleca skan obrazu zaraz po zbudowaniu, przed wypchnięciem do rejestru.
 
-Konsekwencja: katalog zadań (E07-07) nazywa rezultat „job image-scan”. W tym projekcie to krok w jobie `build`, a nie osobny job.
+Konsekwencja: katalog zadań (E07-07) nazywa rezultat „job image-scan”. W tym projekcie to krok w jobie `build`, a nie osobny job. Do E07-14, dopóki `build` jest tylko w wariancie A, skan działa w tymczasowym jobie `image-scan`, który buduje obraz bez pushu (ADR-0048, M1).
 
 ### D2. Obraz dla DAST: artefakt z joba `build` (Q2)
 
@@ -305,7 +305,7 @@ Zgłoszenia czystej wersji wynikające ze świadomych decyzji obsługuje lista w
 - **zgodne z Guideline:** wyjątek z uzasadnieniem, właścicielem i datą (`2-3-5 Security Gates`, `docs/notes/owasp-devsecops.md`, p. 1.5),
 - **jawnie widoczne:** każdy wyjątek jest w repozytorium z uzasadnieniem, więc recenzent widzi, co i dlaczego jest pominięte.
 
-Konsekwencja: przed zamrożeniem trzeba uruchomić wszystkie bramki na czystej wersji i spisać zgłoszenia (Trivy config: 8 trafień z E05-04; Gitleaks: 0 zgłoszeń w pełnej historii, 2026-11-24, ADR-0044; Semgrep i Bandit: 3 zgłoszenia, 2026-11-24, ADR-0045; pip-audit: 0 zgłoszeń, 2026-11-24, ADR-0046; Checkov: 15, Trivy config: 8 (wszystkie przeszły na listę wyjątków), hadolint: 0, 2026-11-24, ADR-0047; reszta: TODO: zweryfikować w pilotażu). Każdy wyjątek musi wynikać z decyzji zapisanej wcześniej (ADR), a nie z chęci przejścia bramki.
+Konsekwencja: przed zamrożeniem trzeba uruchomić wszystkie bramki na czystej wersji i spisać zgłoszenia (Trivy config: 8 trafień z E05-04; Gitleaks: 0 zgłoszeń w pełnej historii, 2026-11-24, ADR-0044; Semgrep i Bandit: 3 zgłoszenia, 2026-11-24, ADR-0045; pip-audit: 0 zgłoszeń, 2026-11-24, ADR-0046; Checkov: 15, Trivy config: 8 (wszystkie przeszły na listę wyjątków), hadolint: 0, 2026-11-24, ADR-0047; Trivy image: 16 CVE z przypiętą bazą, wszystkie na liście wyjątków, 2026-11-25, ADR-0048; reszta: TODO: zweryfikować w pilotażu). Każdy wyjątek musi wynikać z decyzji zapisanej wcześniej (ADR), a nie z chęci przejścia bramki.
 
 ### D7. hadolint jest bramką, `dependency-review-action` nie wchodzi do wariantu B (Q7)
 
@@ -336,7 +336,7 @@ Gitleaks, Trivy, hadolint, ZAP, zizmor i actionlint działają z oficjalnych obr
 Konsekwencje:
 
 - kolumna akcji w `docs/narzedzia.md` (p. 2) jest dla wariantu B w większości nieaktualna; lista akcji używanych w B trafi do `experiment/versions/variant-b.yaml`,
-- digesty obrazów narzędzi i wersje PyPI trzeba zapisać przy zamrożeniu (K4); Trivy pobiera bazę podatności i paczkę `trivy-checks` w czasie działania, więc ich wersje też trzeba zapisać (E02-10),
+- digesty obrazów narzędzi i wersje PyPI trzeba zapisać przy zamrożeniu (K4); Trivy pobiera bazę podatności i paczkę `trivy-checks` w czasie działania, więc ich wersje też trzeba zapisać (E02-10). Paczkę reguł wyłącza `--skip-check-update` (ADR-0047), a bazę podatności przypina digest w `TRIVY_DB_REPOSITORY` (ADR-0048, M3),
 - TODO: zweryfikować, czy dla każdego narzędzia istnieje oficjalny obraz z publikowanymi digestami (dla zizmora i actionlinta sprawdzono w E06-05, gdzie uruchomiono je w Dockerze przez digest; dla Gitleaksa w E07-03, ADR-0044: `ghcr.io/gitleaks/gitleaks`, ten sam digest na GHCR i Docker Hub).
 
 ### D10. Uzupełnienia mapowania SSDF jako interpretacja autora (Q10)
