@@ -97,7 +97,7 @@ Decyzje agenta (techniczne, w ramach decyzji autora i ADR-0042):
 - (−) Konfiguracja bramki jest w repozytorium, więc PR może ją zmienić (ryzyko resztkowe, `docs/projekt-potoku.md` 4.6).
 - Kolejne kroki:
   - ~~**po scaleniu:** `image-scan` jako wymagany check w rulesetach `main` i `exp-variant-b` (`settings.sh apply` za zgodą autora)~~ wykonane 2026-11-25: PR #31 scalony (`bf7a021`), `apply` zaktualizował rulesety `main`, `tags` i `exp-variant-b`; API potwierdza `image-scan` jako wymagany check w `main` i `exp-variant-b`. Przebieg na pushu do `main` (`devsecops-gates` 45626343296, `bf7a021`): `secrets`, `sast`, `sca`, `iac` i `image-scan` przechodzą; `baseline-ci` i `workflow-lint` też,
-  - **E07-08:** SBOM z tego samego obrazu (archiwum z `docker save`),
+  - ~~**E07-08:** SBOM z tego samego obrazu (archiwum z `docker save`)~~ wykonane w ADR-0049: artefakt `image-archive` z `image-scan` i job `sbom`,
   - **E07-10:** archiwum obrazu jako artefakt dla DAST (D2),
   - **E07-12:** zbiorczy raport czyta `trivy-image.json` z artefaktu `image-scan-reports`,
   - **E07-14:** kroki skanu do `build` przed `docker push`, usunięcie joba `image-scan`, zamrożenie digestu bazy z wersjami (K5),
