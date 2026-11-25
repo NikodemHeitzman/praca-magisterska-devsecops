@@ -115,7 +115,7 @@ Decyzje agenta (techniczne, w ramach decyzji autora i ADR-0042):
 - (−) SBOM pokazuje stan obrazu, nie podatności. Według SP 800-204D sam SBOM nie wystarcza do zarządzania podatnościami (2.1, `docs/notes/nist-800-204d.md`), dlatego podatności ocenia `image-scan`.
 - (−) Konfiguracja kontroli jest w repozytorium, więc PR może ją zmienić (ryzyko resztkowe, `docs/projekt-potoku.md` 4.6).
 - Kolejne kroki:
-  - **po scaleniu:** `sbom` jako wymagany check w rulesetach `main` i `exp-variant-b` (`settings.sh apply` za zgodą autora),
+  - ~~**po scaleniu:** `sbom` jako wymagany check w rulesetach `main` i `exp-variant-b` (`settings.sh apply` za zgodą autora)~~ wykonane 2026-11-25: PR #34 scalony (`f1cc322`), `apply` zaktualizował rulesety `main`, `tags` i `exp-variant-b`; API potwierdza `sbom` jako wymagany check w `main` i `exp-variant-b`. Przebieg na pushu do `main` (`devsecops-gates` 45631077408, `f1cc322`): wszystkie joby przechodzą, `sbom` 30 s; `baseline-ci` i `workflow-lint` też,
   - **E07-09:** atestacja SPDX razem z provenance, po digeście z rejestru,
   - **E07-10:** artefakt `image-archive` jako wejście DAST (D2),
   - **E07-14:** Syft w workflow B na obrazie, który publikuje `build`; usunięcie tymczasowego przekazania archiwum, jeśli skan i SBOM trafią do jednego joba.
