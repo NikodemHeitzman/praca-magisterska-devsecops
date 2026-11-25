@@ -90,9 +90,26 @@ Decyzje agenta (techniczne, w ramach decyzji autora i ADR-0042):
   | Syft na nieistniejącym archiwum | krok Syft kończy się kodem 1 |
 
   actionlint 1.7.12 i zizmor 1.32.0 (`regular`) bez uwag.
-- (+) Test w CI: TODO (PR z E07-08).
-- (−) `sbom` czeka na `image-scan` (około 49 s), więc nie biegnie równolegle z bramkami. Wpływ na czas PR: TODO: zweryfikować w CI (najdłuższa ścieżka, H2a).
-- (−) Przesyłanie archiwum (około 85 MB) jako artefaktu kosztuje czas w `image-scan` i w `sbom`. TODO: zmierzyć w CI.
+- (+) Test w CI (2026-11-25), PR #34, dwa przebiegi `devsecops-gates`: 45629532620 (`5b1a025`) i 45629608294 (`c412081`). Wszystkie checki są zielone.
+  - Job `sbom` trwa 21 s i 19 s:
+    - pobranie archiwum około 4 s,
+    - pobranie obrazów Syft i Pythona około 5 s,
+    - Syft około 2 s,
+    - wysyłka SBOM około 1 s,
+    - kontrola około 1 s.
+  - Wynik kontroli jak lokalnie:
+    - SPDX-2.3 ma 126 pakietów i 2852 pliki, CycloneDX 1.7 ma 127 komponentów poza plikami (różnica to komponent systemu operacyjnego),
+    - według typu purl: 87 `deb`, 38 `pypi`, 1 `generic`,
+    - zbiory purl w obu dokumentach są identyczne, wynik PASS.
+  - Artefakty `sbom` (590 kB po kompresji) i `image-archive` (85,5 MB, wygasa po 1 dniu).
+  - Digest konfiguracji obrazu z archiwum (`sha256:0fdb5b6e…`) jest równy `ImageID` w `trivy-image.json` z artefaktu `image-scan-reports` tego samego przebiegu. SBOM i skan dotyczą więc tego samego obrazu (S5).
+  - Na PR `GITHUB_SHA` to commit scalenia testowego (`refs/pull/34/merge`, `58d7931`), a nie głowa gałęzi. Etykieta `revision` w obrazie i kontrola używają tej samej wartości, więc są zgodne.
+- (−) `sbom` czeka na `image-scan`, więc nie biegnie równolegle z bramkami. W CI zakończył się:
+  - w przebiegu `c412081` sekundę przed `sast` (`image-scan` 49 s, `sbom` 19 s, `sast` 71 s), więc najdłuższa ścieżka się nie zmieniła,
+  - w przebiegu `5b1a025` 48 s po `sast` i `iac` (`image-scan` 90 s, bo pobranie obrazów narzędzi trwało 21 s, a build 25 s).
+
+  Przy obecnych czasach ścieżka `image-scan` → `sbom` jest zbliżona do najdłuższej i w zależności od przebiegu może ją wydłużyć. To materiał do H2a. Pojedyncze przebiegi, bez statystyki.
+- (−) Wysyłka archiwum (85,5 MB) wydłuża `image-scan` o 6–7 s (dwa przebiegi), a pobranie wydłuża `sbom` o około 4 s.
 - (−) Do E07-14 SBOM opisuje obraz z `image-scan`, a nie obraz opublikowany przez `build` w wariancie A. To dwa buildy tego samego kodu z różnymi digestami i tymi samymi pakietami (ADR-0048, konsekwencje). Atestacja SBOM w E07-09 wymaga jednego obrazu, czyli stanu po E07-14.
 - (−) Digest w SBOM to digest manifestu policzony przez Syft z archiwum. Digest obrazu w GHCR po `docker push` jest prawdopodobnie inny (TODO: zweryfikować). Wspólny dla SBOM i raportu Trivy jest tylko digest konfiguracji, a ten trafia do Job Summary, nie do SBOM. Dla E07-09 obraz wskazuje podmiot atestacji (digest z rejestru), a nie pole w SBOM.
 - (−) SBOM pokazuje stan obrazu, nie podatności. Według SP 800-204D sam SBOM nie wystarcza do zarządzania podatnościami (2.1, `docs/notes/nist-800-204d.md`), dlatego podatności ocenia `image-scan`.
