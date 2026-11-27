@@ -1,7 +1,7 @@
 """Check of the sbom job: the SBOM files exist, have the expected schema and are not empty.
 
 The sbom job is fail closed without a severity threshold (ADR-0042, B22; ADR-0049): Syft writes
-an SPDX JSON and a CycloneDX JSON document of the image archive built by image-scan, and this
+an SPDX JSON and a CycloneDX JSON document of the image archive built by the build job of devsecops-ci.yml, and this
 script checks them before the job passes (ADR-0049, S3):
 
 - both files are readable JSON;
@@ -16,7 +16,7 @@ script checks them before the job passes (ADR-0049, S3):
   describes the image built from this commit (ADR-0049, S5).
 
 The image config digest from the archive (`manifest.json`) goes to the job summary: it is the
-image ID that Trivy reports in image-scan (`Metadata.ImageID`), which links the SBOM to the scan.
+image ID that Trivy reports in the build job (`Metadata.ImageID`), which links the SBOM to the scan.
 Only the standard library is used, so the script runs without installing anything.
 
 Usage: python sbom_check.py --spdx sbom/sbom.spdx.json --cyclonedx sbom/sbom.cdx.json \
@@ -188,7 +188,7 @@ def main():
         [
             "### SBOM (Syft)",
             "",
-            f"Image config digest `{image_id}` (= Trivy `ImageID` in image-scan), "
+            f"Image config digest `{image_id}` (= Trivy `ImageID` in build), "
             f"manifest digest in the SBOM `{spdx['digest']}`, {spdx['tool']}",
             "",
             "| file | format | packages | files |",

@@ -1,16 +1,23 @@
-# DevSecOps gates (variant B, docs/projekt-potoku.md; decisions: docs/adr/0042-projekt-potoku-wariantu-b.md,
-# docs/adr/0044-skanowanie-sekretow.md).
+# DevSecOps CI (variant B, docs/projekt-potoku.md; decisions: docs/adr/0042-projekt-potoku-wariantu-b.md,
+# docs/adr/0050-atestacje-i-weryfikacja-przed-wdrozeniem.md).
 #
-# One shared file for the variant B gates (S4). E07-04...E07-08 added their jobs here; E07-14
-# merges this file with the shared jobs (lint, test, build) into the variant B workflow. A copy of
-# the shared jobs here would publish the image twice (H8); image-scan builds the image without
-# pushing it until then (ADR-0048, M1).
-# No path filter: the gate jobs are required checks in the rulesets.
+# Variant A (baseline-ci.yml, frozen in the tag pipeline-a-v1, ADR-0041) plus the security
+# controls. One workflow for the whole variant (ADR-0050, A1, B1), so the image that the gates
+# scan, the SBOM, the attestations and the deployment refer to one digest:
+# - lint, test: the jobs of variant A without any change (K2),
+# - secrets, sast, sca, iac: gates on the repository (ADR-0044...ADR-0047),
+# - build: the build of variant A, with the Trivy image scan between docker build and docker
+#   push (ADR-0042, D1; ADR-0048); the gate blocks the push,
+# - sbom: Syft on the archive of the same image (ADR-0049),
+# - attest (push only): provenance and SBOM attestations from the reusable attest.yml, after
+#   all gates of the run (D3); verify (push only): the check the instance runs (B3).
+# workflow-lint.yml stays a separate workflow until variant B is frozen (ADR-0043, H8).
+# No path filter: the jobs are required checks in the rulesets.
 #
 # Tools run from official images pinned by digest, not from actions (ADR-0042, D9). Each tool
 # first writes a full report (uploaded as an artifact for M1), then a separate step applies the
 # gate on that report (fail closed: a missing or unreadable report fails the gate).
-name: devsecops-gates
+name: devsecops-ci
 
 on:
   pull_request:
@@ -22,10 +29,13 @@ permissions: {}
 
 # One run per ref at a time; queued, not cancelled, so no run is lost from the timing data.
 concurrency:
-  group: devsecops-gates-${{ github.ref }}
+  group: devsecops-ci-${{ github.ref }}
   cancel-in-progress: false
 
 env:
+  UV_VERSION: "0.13.6"
+  # sha256 of uv-x86_64-unknown-linux-gnu.tar.gz 0.13.6 (GitHub release asset)
+  UV_CHECKSUM: f29c3e94ffabd7e6f3ba521dba169a9b7ec12100bf3257087f0f24f6123f3645
   # Gitleaks 8.30.1 (same digest on ghcr.io and Docker Hub, multi-arch index)
   GITLEAKS_IMAGE: ghcr.io/gitleaks/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
   # Semgrep registry ruleset (T1). Fetched per run; only its SHA-256 and rule ids are kept (T2).
@@ -41,8 +51,79 @@ env:
   HADOLINT_IMAGE: ghcr.io/hadolint/hadolint@sha256:32dac94127fd60b7b7e3fbfc65e1383b9b5e25c9bfd7b8536de7a539fe68a12d
   # Syft 1.57.2 (Docker Hub, multi-arch index)
   SYFT_IMAGE: anchore/syft:v1.57.2@sha256:e97e20b6e6d1699c60296b66ab337941724f9bd06ac279d893eda89601fc4b2a
+  # GitHub CLI for the verify job: the same version and tarball as on the instance
+  # (infra/terraform/work/user-data.sh, GH_VERSION and GH_SHA256; ADR-0050).
+  GH_VERSION: "2.105.0"
+  GH_SHA256: 79e7ab5db738c48777b696e374f8b428f0647debfb424f44d2f426370407fe2f
 
 jobs:
+  # Shared with variant A (baseline-ci.yml at pipeline-a-v1), unchanged (K2).
+  lint:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
+          checksum: ${{ env.UV_CHECKSUM }}
+          working-directory: app
+          enable-cache: "false"
+
+      - name: Install dependencies from uv.lock
+        run: uv sync --locked
+
+      - name: ruff check
+        run: uv run --no-sync ruff check --output-format=github .
+
+      - name: ruff format
+        run: uv run --no-sync ruff format --check .
+
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
+          checksum: ${{ env.UV_CHECKSUM }}
+          working-directory: app
+          enable-cache: "false"
+
+      - name: Generate app/.env with random secrets
+        run: sh scripts/ci-env.sh
+
+      - name: Start PostgreSQL
+        run: docker compose up -d --wait db
+
+      - name: Install dependencies from uv.lock
+        run: uv sync --locked
+
+      - name: pytest
+        run: uv run --no-sync pytest
+
+      - name: Stop PostgreSQL
+        if: always()
+        run: docker compose down --volumes
+
+
   # B07: secrets in the commits of this pull request or push (S1). Default Gitleaks rules;
   # exceptions only in .gitleaks.toml under D6 (S2). Gitleaks has no severity levels, so any
   # finding fails the gate. `gitleaks:allow` comments are ignored (D13).
@@ -432,20 +513,32 @@ jobs:
             --hadolint reports/hadolint.json --exceptions .github/gate-exceptions.yaml \
             --scan-path infra/terraform --scan-path app/Dockerfile
 
-  # B19: image scan (ADR-0048). Temporary job until E07-14 (M1): it builds the image with the
-  # same command and labels as `build` in baseline-ci.yml, but never logs in or pushes, so the
-  # image is published by one workflow only (S4, H8). In E07-14 the scan steps move into
-  # `build`, between docker build and docker push (ADR-0042, D1).
+
+  # Build of variant A (ADR-0036, ADR-0040) with the image scan of ADR-0048 between docker build
+  # and docker push (ADR-0042, D1): a blocked image never reaches GHCR. Pull requests only build
+  # and scan; a push also publishes <branch>-sha-<commit> and the branch tag, as in variant A.
+  # The tag moves before `attest` ends; the instance deploys a digest only with a verified
+  # attestation, and waits until then (D3, ADR-0050). No id-token permission here: build steps
+  # cannot sign provenance (SLSA Build L3 recipe, docs/notes/slsa.md 3.3).
   # Trivy reads the image from a docker save archive (--input), with no access to the Docker
   # daemon (M5), against a vulnerability database pinned by digest (M3). Full JSON report first,
   # SARIF converted from it, then the gate (image_gate.py): MEDIUM+ with a fix and any secret
   # block (D5a, M4), exceptions only from gate-exceptions.yaml (D6, M2).
-  image-scan:
+  build:
+    needs: [lint, test]
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     permissions:
       contents: read
+      packages: write # used only on push: the login and push steps are skipped for pull requests
       security-events: write # upload-sarif
+    # Same group as rollback.yml: a publication and a rollback never move the branch tag at once.
+    concurrency:
+      group: deploy-tag-${{ github.ref_name }}
+      cancel-in-progress: false
+    outputs:
+      image: ${{ steps.push.outputs.image }}
+      digest: ${{ steps.push.outputs.digest }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -456,17 +549,24 @@ jobs:
           docker pull --quiet "$TRIVY_IMAGE"
           docker pull --quiet "$PYTHON_IMAGE"
 
-      - name: Build image (no push)
+      - name: Build image
         run: |
           set -euo pipefail
+          image=ghcr.io/${GITHUB_REPOSITORY,,}
+          tag=${GITHUB_REF_NAME//\//-}
           docker build \
             --label "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
             --label "org.opencontainers.image.revision=$GITHUB_SHA" \
-            --tag "image-scan:$GITHUB_SHA" app/
-          docker save --output "$RUNNER_TEMP/image.tar" "image-scan:$GITHUB_SHA"
+            --tag "$image:$tag-sha-$GITHUB_SHA" --tag "$image:$tag" app/
+          docker save --output "$RUNNER_TEMP/image.tar" "$image:$tag-sha-$GITHUB_SHA"
+          {
+            echo "IMAGE=$image"
+            echo "BRANCH_TAG=$tag"
+            echo "SHA_TAG=$tag-sha-$GITHUB_SHA"
+          } >>"$GITHUB_ENV"
 
-      # The same archive goes to the sbom job (ADR-0049, S5), before the scan and the gate, so
-      # the SBOM is also made when the gate blocks the image.
+      # The archive goes to the sbom job (ADR-0049, S5) before the scan and the gate, so the SBOM
+      # is also made when the gate blocks the image; later also to dast (D2).
       - name: Upload image archive
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -531,14 +631,43 @@ jobs:
               --trivy reports/trivy-image.json --db-metadata reports/trivy-db.json \
               --exceptions .github/gate-exceptions.yaml'
 
-  # B22: SBOM (ADR-0049). Temporary job until E07-14 (S1): Syft reads the docker save archive
-  # built by image-scan (S5), on pull requests and pushes (S2), and writes SPDX JSON and
-  # CycloneDX JSON in one run (docs/narzedzia.md, 4.4: SPDX is the document attested in E07-09).
+      - name: Log in to GHCR
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: echo "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+
+      - name: Push image
+        id: push
+        if: github.event_name == 'push'
+        run: |
+          set -euo pipefail
+          docker push "$IMAGE:$SHA_TAG"
+          docker push "$IMAGE:$BRANCH_TAG"
+          digest=$(docker image inspect --format '{{ index .RepoDigests 0 }}' "$IMAGE:$SHA_TAG")
+          digest=${digest#*@}
+          [[ $digest =~ ^sha256:[0-9a-f]{64}$ ]] || { echo "::error::no digest after push: $digest"; exit 1; }
+          echo "image=$IMAGE" >>"$GITHUB_OUTPUT"
+          echo "digest=$digest" >>"$GITHUB_OUTPUT"
+          {
+            echo "### Published image"
+            echo "- \`$IMAGE:$SHA_TAG\`"
+            echo "- \`$IMAGE:$BRANCH_TAG\`"
+            echo "- digest \`$digest\`"
+          } >>"$GITHUB_STEP_SUMMARY"
+
+      - name: Log out of GHCR
+        if: always() && github.event_name == 'push'
+        run: docker logout ghcr.io
+
+  # B22: SBOM (ADR-0049). Syft reads the docker save archive of the image built (and on a push
+  # published) by `build` (S5), on pull requests and pushes (S2), and writes SPDX JSON and
+  # CycloneDX JSON in one run; SPDX is attested by `attest` (ADR-0050, B2).
   # Fail closed without a severity threshold (S3): an error of Syft, a missing file, another
   # schema version, an SBOM without OS or Python packages, or an image from another commit fail
-  # the job. Runs also when the image-scan gate blocks, as long as the archive was uploaded.
+  # the job. Runs also when the image gate blocks, as long as the archive was uploaded.
   sbom:
-    needs: image-scan
+    needs: build
     if: ${{ !cancelled() }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -590,3 +719,90 @@ jobs:
             "$PYTHON_IMAGE" python -I .github/scripts/sbom_check.py \
             --spdx sbom/sbom.spdx.json --cyclonedx sbom/sbom.cdx.json \
             --archive /in/image.tar --revision "$GITHUB_SHA"
+
+  # B23: attestations (ADR-0050). Push only: on a pull request no image reaches the registry.
+  # Runs after every job of this run (D3); the reusable workflow is the signer identity that the
+  # instance checks (--signer-workflow, A3). The digest is the `build` output, not a tag.
+  attest:
+    needs: [lint, test, secrets, sast, sca, iac, build, sbom]
+    if: github.event_name == 'push'
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      packages: write
+    uses: ./.github/workflows/attest.yml
+    with:
+      image: ${{ needs.build.outputs.image }}
+      digest: ${{ needs.build.outputs.digest }}
+
+  # B24 in CI (ADR-0050, B3): the check of the instance, with the same script
+  # (infra/terraform/work/verify-attestation.sh) and the same gh tarball, with no GitHub token
+  # and no registry login. Enforcement stays on the instance; this job reports early and keeps
+  # the negative test of E07-09 repeatable without AWS. Expected exit codes of the script:
+  # 0 verified, 10 no attestation, 11 attestation rejected.
+  verify:
+    needs: [build, attest]
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      # An image of main published by variant A before E07-09 (commit 060ea70), so it has no
+      # attestation: the "no attestation yet" case.
+      UNATTESTED_DIGEST: sha256:4b68b453d0f4c572014b171daa2561ea47aac3aa77e6ac9739337996028ae50a
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install gh (pinned tarball, as on the instance)
+        run: |
+          set -euo pipefail
+          curl -fsSL --max-time 120 -o "$RUNNER_TEMP/gh.tar.gz" \
+            "https://github.com/cli/cli/releases/download/v$GH_VERSION/gh_${GH_VERSION}_linux_amd64.tar.gz"
+          echo "$GH_SHA256  $RUNNER_TEMP/gh.tar.gz" | sha256sum --check --quiet
+          tar -xzf "$RUNNER_TEMP/gh.tar.gz" -C "$RUNNER_TEMP"
+          "$RUNNER_TEMP/gh_${GH_VERSION}_linux_amd64/bin/gh" --version
+
+      # Each case runs with an empty HOME (no gh or Docker credentials, fresh TUF cache) and
+      # without GitHub tokens, like the deploy agent. A case passes only with its expected code.
+      - name: Verify the attestation (positive and negative cases)
+        env:
+          IMAGE: ${{ needs.build.outputs.image }}
+          DIGEST: ${{ needs.build.outputs.digest }}
+          OWNER_REPO: ${{ github.repository }}
+          REF: ${{ github.ref }}
+        run: |
+          set -uo pipefail
+          gh_bin=$RUNNER_TEMP/gh_${GH_VERSION}_linux_amd64/bin/gh
+          check=infra/terraform/work/verify-attestation.sh
+          failures=0
+          run_case() { # <name> <expected code> <digest> <source ref> <signer workflow>
+            local home rc
+            home=$(mktemp -d)
+            env -i PATH="$PATH" HOME="$home" GH="$gh_bin" GH_NO_UPDATE_NOTIFIER=1 GH_PROMPT_DISABLED=1 \
+              SOURCE_REPOSITORY="$OWNER_REPO" SOURCE_REF="$4" SIGNER_WORKFLOW="$5" \
+              bash "$check" "$IMAGE" "$3"
+            rc=$?
+            if [[ $rc == "$2" ]]; then result=PASS; else result=FAIL; failures=$((failures + 1)); fi
+            echo "$1: exit $rc, expected $2: $result"
+            echo "| $1 | $2 | $rc | $result |" >>"$GITHUB_STEP_SUMMARY"
+          }
+          signer=$OWNER_REPO/.github/workflows/attest.yml
+          {
+            echo "### Attestation check (verify-attestation.sh, gh $GH_VERSION)"
+            echo "- image: \`$IMAGE@$DIGEST\`"
+            echo
+            echo "| Case | Expected | Exit | Result |"
+            echo "|---|---|---|---|"
+          } >>"$GITHUB_STEP_SUMMARY"
+          run_case "attested image, expected signer and ref" 0 "$DIGEST" "$REF" "$signer"
+          run_case "signer is not attest.yml" 11 "$DIGEST" "$REF" "$OWNER_REPO/.github/workflows/devsecops-ci.yml"
+          run_case "another source ref" 11 "$DIGEST" "refs/heads/not-$GITHUB_REF_NAME" "$signer"
+          run_case "image without attestation" 10 "$UNATTESTED_DIGEST" "$REF" "$signer"
+          if ((failures)); then
+            echo "::error::$failures attestation case(s) did not give the expected result"
+            exit 1
+          fi

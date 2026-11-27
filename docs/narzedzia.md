@@ -31,7 +31,8 @@ Wersja najnowsza na dzień pobrania **nie jest** wersją przypiętą. Wersję pr
 | Trivy | SCA obrazu, IaC, sekrety | Zależności (GT-07), obraz (GT-08), Dockerfile i Terraform (GT-09–11), DEPLOY-REQ-4, DEPLOY-REQ-5 | v0.76.0 (w potoku v0.76.2 z 2026-11-05: obraz `ghcr.io/aquasecurity/trivy` po digeście, ADR-0047; skan obrazu z bazą podatności przypiętą po digeście, ADR-0048) | 2026-10-14 | Apache-2.0 | https://trivy.dev/docs/latest/guide/ | https://github.com/aquasecurity/trivy/releases/tag/v0.76.0 |
 | hadolint | Lint Dockerfile | Dockerfile (GT-09), PRE-5* | v2.15.1 (w potoku, ADR-0047: obraz `ghcr.io/hadolint/hadolint` po digeście; nadal najnowsza 2026-11-24) | 2026-07-31 | GPL-3.0 | https://github.com/hadolint/hadolint | https://github.com/hadolint/hadolint/releases/tag/v2.15.1 |
 | Syft | SBOM | SBOM obrazu, TEST-2, BASE-4* | v1.54.1 (w potoku v1.57.2 z 2026-11-16: obraz `anchore/syft` po digeście, ADR-0049) | 2026-10-06 | Apache-2.0 | https://github.com/anchore/syft | https://github.com/anchore/syft/releases/tag/v1.54.1 |
-| Cosign | Podpisy | Podpis obrazu (alternatywa albo uzupełnienie atestacji GitHuba), ATT-1* | v3.1.3 | 2026-08-06 | Apache-2.0 | https://docs.sigstore.dev/cosign/ | https://github.com/sigstore/cosign/releases/tag/v3.1.3 |
+| GitHub CLI (`gh attestation verify`) | Weryfikacja atestacji | Weryfikacja provenance przed wdrożeniem na instancji i w jobie `verify`, ATT-4*, DEPLOY-REQ-3 | v2.106.0 z 2026-11-25 (w potoku i na instancji v2.105.0 z 2026-11-18, najnowsza po karencji 7 dni; tarball przypięty po SHA-256, ADR-0050) | 2026-11-25 | MIT | https://cli.github.com/manual/gh_attestation_verify | https://github.com/cli/cli/releases/tag/v2.105.0 |
+| Cosign | Podpisy | Podpis obrazu (alternatywa albo uzupełnienie atestacji GitHuba; nieużywany, ADR-0050, A2), ATT-1* | v3.1.3 | 2026-08-06 | Apache-2.0 | https://docs.sigstore.dev/cosign/ | https://github.com/sigstore/cosign/releases/tag/v3.1.3 |
 | OWASP ZAP | DAST | Baseline na kontenerze w runnerze (GT-01, GT-05, GT-12–14), TEST-1, audyt po wdrożeniu | v2.17.0 | 2025-12-15 | Apache-2.0 | https://www.zaproxy.org/docs/docker/baseline-scan/ | https://github.com/zaproxy/zaproxy/releases/tag/v2.17.0 |
 | actionlint | Lint workflow | Workflow GitHub Actions (GT-17), PRE-5*, DEPLOY-REQ-5 | v1.7.12 | 2026-03-30 | MIT | https://github.com/rhysd/actionlint | https://github.com/rhysd/actionlint/releases/tag/v1.7.12 |
 | zizmor | Audyt bezpieczeństwa workflow | Workflow (GT-15, GT-16, GT-17), PRE-5*, DEPLOY-REQ-5 | v1.32.0 (w potoku, ADR-0043; wcześniej w zestawieniu v1.31.1) | 2026-11-02 | MIT | https://docs.zizmor.sh/ | https://github.com/zizmorcore/zizmor/releases/tag/v1.32.0 |
@@ -49,7 +50,7 @@ Akcje przypinamy do pełnego SHA commita (`AGENTS.md`, konwencja 5). Tabela poda
 | `actions/checkout` | v7.0.1 | `3d3c42e5aac5ba805825da76410c181273ba90b1` | 2026-07-20 | pobranie kodu |
 | `actions/setup-python` | v7.0.0 | `5fda3b95a4ea91299a34e894583c3862153e4b97` | 2026-07-20 | Python dla testów i skanerów |
 | `actions/upload-artifact` | v7.0.2 | `cf430e030ddbb5b0abf93d22962f4752f3646cd9` | 2026-10-07 | raporty skanerów jako artefakty (dane eksperymentu) |
-| `actions/download-artifact` | v8.0.2 | `9000827ccba6bdab643e8b6fd33ac0654aef8333` | 2026-10-07 | archiwum obrazu z `image-scan` w jobie `sbom` (sprawdzone 2026-11-25, ADR-0049) |
+| `actions/download-artifact` | v8.0.2 | `9000827ccba6bdab643e8b6fd33ac0654aef8333` | 2026-10-07 | archiwum obrazu z `build` w jobie `sbom` i SBOM w jobie `attest` (sprawdzone 2026-11-25, ADR-0049; ADR-0050) |
 | `docker/setup-buildx-action` | v4.4.1 | `f87e5991a6d7451dcb8d9637bfbc97413f497069` | 2026-09-16 | builder obrazu |
 | `docker/build-push-action` | v7.4.0 | `c3c9e263c25d99ce0380d002d59b67737d91b0dc` | 2026-09-15 | build i push obrazu |
 | `docker/login-action` | v4.6.0 | `dbcb813823bdd20940b903addbd779551569679f` | 2026-07-29 | logowanie do rejestru |
@@ -219,7 +220,7 @@ Fakty:
 
 **W potoku (E07-08, ADR-0049):**
 
-- Syft 1.57.2 z obrazu `anchore/syft` po digeście, w jobie `sbom`, na archiwum `docker save` z `image-scan`. Syft działa na PR i na pushu.
+- Syft 1.57.2 z obrazu `anchore/syft` po digeście, w jobie `sbom`, na archiwum `docker save` z `image-scan` (od E07-09 z joba `build` w `devsecops-ci.yml`, ADR-0050). Syft działa na PR i na pushu.
 - Wersje schematu w wyniku: **SPDX 2.3** (`spdxVersion: SPDX-2.3`, licencja danych CC0-1.0) i **CycloneDX 1.7** (`specVersion: 1.7`, `bom-1.7.schema.json`). To domyślne wersje Syft 1.57.2. Starsze wersje schematu wymagają przyrostka, np. `spdx-json@2.2`.
 - Czysta wersja (2026-11-25):
   - 126 pakietów: 87 Debiana, 38 Pythona i interpreter CPython 3.14.10 (purl `generic`, wykryty po pliku binarnym),

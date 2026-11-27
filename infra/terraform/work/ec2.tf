@@ -13,16 +13,22 @@ data "aws_ami" "ubuntu" {
 # reads as a comment). GHCR tags cannot contain "/", hence exp/variant-a -> exp-variant-a.
 locals {
   deploy_tag = replace(var.deploy_branch, "/", "-")
+  # Variant B deploys only images with a verified provenance attestation; variant A works as
+  # before (ADR-0050, B5: derived from the branch, no separate variable).
+  verify_attestation = var.deploy_branch == "exp/variant-b"
 
   user_data = join("\n", [
     "#!/bin/bash",
     "# Deployment settings rendered by Terraform (infra/terraform/work/ec2.tf, ADR-0033).",
     "IMAGE_REPOSITORY='${var.image_repository}'",
+    "DEPLOY_BRANCH='${var.deploy_branch}'",
     "DEPLOY_TAG='${local.deploy_tag}'",
+    "VERIFY_ATTESTATION='${local.verify_attestation}'",
     "SOURCE_REPOSITORY='${var.source_repository}'",
     "S3_BUCKET='${aws_s3_bucket.attachments.id}'",
     "AWS_REGION='${var.region}'",
     "DEPLOY_AGENT_GZ_B64='${base64gzip(file("${path.module}/deploy-agent.sh"))}'",
+    "VERIFY_GZ_B64='${base64gzip(file("${path.module}/verify-attestation.sh"))}'",
     file("${path.module}/user-data.sh"),
   ])
 }

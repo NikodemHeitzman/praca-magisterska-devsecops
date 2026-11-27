@@ -67,3 +67,4 @@ ADR (*Architecture Decision Record*) to krótki zapis jednej decyzji technicznej
 | [0047](0047-skanowanie-iac-checkov-trivy-hadolint.md) | Skanowanie IaC: Checkov, Trivy config i hadolint na obu warstwach Terraformu i Dockerfile | przyjęty | 2026-11-24 |
 | [0048](0048-skanowanie-obrazu-trivy.md) | Skanowanie obrazu kontenera: Trivy image z przypiętą bazą podatności, tymczasowy job `image-scan` do E07-14 | przyjęty | 2026-11-25 |
 | [0049](0049-sbom-syft.md) | SBOM obrazu: Syft na archiwum z `image-scan`, SPDX 2.3 i CycloneDX 1.7, kontrola treści, na PR i pushu | przyjęty | 2026-11-25 |
+| [0050](0050-atestacje-i-weryfikacja-przed-wdrozeniem.md) | Atestacje provenance i SBOM w workflow B (`devsecops-ci.yml`), weryfikacja na instancji przez `gh attestation verify` | przyjęty | 2026-11-27 |

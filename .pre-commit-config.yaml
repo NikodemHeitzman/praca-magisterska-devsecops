@@ -2,7 +2,7 @@
 # docs/adr/0044-skanowanie-sekretow.md).
 #
 # Advisory only and outside the experiment: every contributor enables it on their own machine,
-# and the blocking check is the `secrets` job in CI (.github/workflows/devsecops-gates.yml).
+# and the blocking check is the `secrets` job in CI (.github/workflows/devsecops-ci.yml).
 # It stops a secret before the commit exists, so it never reaches the public history.
 #
 # Enable once per clone:
