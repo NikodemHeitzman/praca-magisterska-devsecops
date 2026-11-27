@@ -1,0 +1,15 @@
+# zizmor configuration (workflow-lint gate, ADR-0043). Found by zizmor's local discovery.
+#
+# Exceptions follow ADR-0042, D6: one rule, the narrowest scope zizmor allows, a reason and an
+# expiry. Decision of the author of 2026-11-27 (E07-09, ADR-0050).
+rules:
+  self-repository:
+    ignore:
+      # The only workspace-relative `uses:` is the job-level call of the reusable attest.yml.
+      # zizmor 1.32 asks for the self-repository syntax (`uses: $/...`, GitHub, July 2026), but
+      # actionlint 1.7.12, the latest release, rejects it, so both gates cannot pass at once.
+      # The risk of the rule (an action loaded from files changed earlier in the job) applies to
+      # step-level actions, not to a reusable workflow resolved when the run starts.
+      # Owner: author. Expires: when an actionlint release accepts `$/` (then switch and remove
+      # this entry); review by 2027-01-31 at the latest.
+      - devsecops-ci.yml

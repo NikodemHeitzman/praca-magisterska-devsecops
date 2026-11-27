@@ -136,9 +136,9 @@ Uwagi do diagramu:
 | B19 | 3. Build | krok w `build` przed push, potem zapis obrazu jako artefakt (D1, D2) | Trivy image (podatności, sekrety w warstwach) | CICD-SEC-6 (sekrety w warstwach); **GT-08** | DEPLOY-REQ-4, DEPLOY-REQ-5, TEST-2* | PW.4.4 | blokuje |
 | B20 | 3. Test | `dast` na obrazie z artefaktu `build` (D2) | OWASP ZAP baseline | **GT-01, GT-05, GT-12, GT-13** (GT-14 tylko przez ręczną ocenę tracebacku) | TEST-1* | PW.8.1, PW.8.2 | blokuje |
 | B21 | 4. Publikacja | push obrazu z tagiem SHA (z wariantu A) | docker CLI | — | GitOps-REQ-2 | PS.3.1 | jak w A |
-| B22 | 4. Publikacja | `sbom` na archiwum obrazu z `image-scan`, na PR i pushu; do E07-14 osobny job w `devsecops-gates.yml` (ADR-0049) | Syft (SPDX + CycloneDX) | CICD-SEC-3 (inwentarz komponentów) | TEST-2*, ATT-1*, BASE-4* | PS.3.2 | fail closed |
-| B23 | 4. Publikacja | `attest`: provenance i SBOM, `needs:` na wszystkie bramki (D3) | `actions/attest` (Sigstore keyless) | CICD-SEC-9 | BUILD-3*, ATT-1*, ATT-2*, ATT-3* | PS.2.1 (interp.), PS.3.1 (interp.), PS.3.2 | fail closed |
-| B24 | 5. Wdrożenie | weryfikacja atestacji na instancji przed `compose up`; brak atestacji = czekaj (D3) | agent wdrożenia + `gh attestation verify` albo `cosign` (E07-09) | CICD-SEC-9, CICD-SEC-1 | DEPLOY-REQ-3, ATT-4* | PS.2.1 | blokuje wdrożenie (fail closed) |
+| B22 | 4. Publikacja | `sbom` na archiwum obrazu z `build`, na PR i pushu (ADR-0049; od E07-09 w `devsecops-ci.yml`, ADR-0050) | Syft (SPDX + CycloneDX) | CICD-SEC-3 (inwentarz komponentów) | TEST-2*, ATT-1*, BASE-4* | PS.3.2 | fail closed |
+| B23 | 4. Publikacja | `attest` (tylko push): provenance i SBOM (SPDX) w reusable workflow `attest.yml`, `needs:` na wszystkie joby przebiegu (D3), atestacje w GHCR; `verify` sprawdza je tą samą komendą co instancja (ADR-0050) | `actions/attest` (Sigstore keyless) | CICD-SEC-9 | BUILD-3*, ATT-1*, ATT-2*, ATT-3* | PS.2.1 (interp.), PS.3.1 (interp.), PS.3.2 | fail closed |
+| B24 | 5. Wdrożenie | weryfikacja atestacji na instancji przed `compose up`; brak atestacji = czekaj (D3) | agent wdrożenia + `verify-attestation.sh` (`gh attestation verify --bundle-from-oci`, ADR-0050) | CICD-SEC-9, CICD-SEC-1 | DEPLOY-REQ-3, ATT-4* | PS.2.1 | blokuje wdrożenie (fail closed) |
 | B25 | 6. Po wdrożeniu | audyt R2 | ZAP baseline, Trivy | — (mierzy M2, etap „audyt po wdrożeniu”) | DEPLOY-REQ-4 (aktualność skanu) | RV.1.2 | poza potokiem, nie bramka |
 
 Elementy z listy kontrolnej, które celowo **nie** są krokami wariantu B (D11):
@@ -203,11 +203,12 @@ Skutki reguły dla pozycji katalogu sprawdzamy po jej przyjęciu i zapisujemy w 
 | `iac` | hadolint | poziom `error` | `warning`, `info`, `style` | D7. Poziomy i opcja `--failure-threshold` sprawdzone w 2.15.1 (2026-11-24, ADR-0047); bramka czyta raport JSON, komentarze `# hadolint ignore=` wyłączone. Czysta wersja: 0 zgłoszeń |
 | `workflow-lint` | actionlint | każdy błąd | — | |
 | `workflow-lint` | zizmor | wszystko poza poziomem informacyjnym | poziom informacyjny | TODO: zweryfikować skalę ważności i opcję `--min-severity` w przypiętej wersji |
-| `image-scan` (w E07-14 krok w `build`) | Trivy image | podatności `MEDIUM` i wyżej **z dostępną poprawką** (status `fixed`); każdy sekret w warstwach i konfiguracji obrazu | bez poprawki, `LOW`, `UNKNOWN` | D5a. Próg stosuje `.github/scripts/image_gate.py` na pełnym raporcie JSON, z bazą podatności przypiętą po digeście (ADR-0048, M3). Czysta wersja: 3 zgłoszenia z poprawką z bazą z 2026-11-08 (E05-01), 16 CVE (glibc, zlib, libzstd) z bazą z 2026-11-25; wszystkie 16 na liście wyjątków (ADR-0048, M2) |
+| `build` (krok skanu przed `docker push`; do E07-09 tymczasowy job `image-scan`) | Trivy image | podatności `MEDIUM` i wyżej **z dostępną poprawką** (status `fixed`); każdy sekret w warstwach i konfiguracji obrazu | bez poprawki, `LOW`, `UNKNOWN` | D5a. Próg stosuje `.github/scripts/image_gate.py` na pełnym raporcie JSON, z bazą podatności przypiętą po digeście (ADR-0048, M3). Czysta wersja: 3 zgłoszenia z poprawką z bazą z 2026-11-08 (E05-01), 16 CVE (glibc, zlib, libzstd) z bazą z 2026-11-25; wszystkie 16 na liście wyjątków (ADR-0048, M2) |
 | `dast` | ZAP baseline | alerty o ryzyku `Medium` i `High` (z raportu JSON) | `Low`, `Informational` | D8. Próg stosuje osobny krok na raporcie JSON, a nie kod wyjścia skryptu baseline. TODO: zweryfikować ryzyko reguł 10020 i 10098 |
 | `sbom` | Syft | błąd Syft, brak pliku, wersja schematu inna niż SPDX-2.3 i CycloneDX 1.7, brak pakietów `deb` albo `pypi`, różne obrazy albo pakiety w SPDX i CycloneDX, obraz z innego commita | — | fail closed bez progu ważności; kontrolę robi `.github/scripts/sbom_check.py` (ADR-0049, S3); wymagany check (S4) |
-| `attest` | `actions/attest` | błąd atestacji | — | fail closed |
-| wdrożenie | weryfikacja atestacji | brak ważnej atestacji provenance dla digestu | — | D3, szczegóły w E07-09 |
+| `attest` | `actions/attest` | błąd atestacji | — | fail closed; tylko na pushu |
+| `verify` | `verify-attestation.sh` + `gh` | wynik inny niż oczekiwany w którymkolwiek przypadku (pozytywny i trzy negatywne) | — | tylko na pushu; nie jest miejscem egzekwowania (ADR-0050, B3) |
+| wdrożenie | weryfikacja atestacji na instancji (wariant B) | atestacja provenance odrzucona przez `gh` (digest odrzucony); brak atestacji = czekaj | — | D3, ADR-0050 (A4, B4) |
 
 ### 4.3. Stan bazowy i wyjątki
 
@@ -241,7 +242,7 @@ Trivy skanuje obraz w jobie `build`, między `docker build` a `docker push`. Odr
 
 - **zgodność z DEPLOY-REQ-5:** SP 800-204D zaleca skan obrazu zaraz po zbudowaniu, przed wypchnięciem do rejestru.
 
-Konsekwencja: katalog zadań (E07-07) nazywa rezultat „job image-scan”. W tym projekcie to krok w jobie `build`, a nie osobny job. Do E07-14, dopóki `build` jest tylko w wariancie A, skan działa w tymczasowym jobie `image-scan`, który buduje obraz bez pushu (ADR-0048, M1).
+Konsekwencja: katalog zadań (E07-07) nazywa rezultat „job image-scan”. W tym projekcie to krok w jobie `build`, a nie osobny job. Do E07-09 skan działał w tymczasowym jobie `image-scan`, który budował obraz bez pushu (ADR-0048, M1). Od E07-09 jest krokiem `build` w `devsecops-ci.yml` (ADR-0050, A1).
 
 ### D2. Obraz dla DAST: artefakt z joba `build` (Q2)
 
@@ -264,6 +265,7 @@ Konsekwencje (do E07-09):
 
 - agent musi odróżniać „atestacji jeszcze nie ma” (ponów przy następnym uruchomieniu timera) od „atestacja nieważna albo niezgodna z polityką” (oznacz digest jako odrzucony); dziś agent nie ponawia digestu, który raz się nie powiódł (`deploy-agent.sh`, krok 2),
 - weryfikacja jest włączana tylko dla wariantu B (np. zmienną Terraform obok `deploy_branch`); w wariancie A agent działa jak dziś,
+- realizacja w E07-09 (ADR-0050): obecność atestacji agent sprawdza w GHCR (referrers API i tag `sha256-<hex>`), a ważność `gh attestation verify`; przełącznik wynika z `deploy_branch` (B5),
 - opóźnienie wdrożenia na pushu rośnie o czas do zakończenia najwolniejszej bramki i `attest`; nie zmienia to mierzonego czasu potoku, bo agent działa poza nim (ADR-0037),
 - weryfikacja na instancji działa też wtedy, gdy tag przesunie ktoś spoza potoku (np. z tokenem z `packages: write`), choć autor nie wskazał tego jako powodu.
 

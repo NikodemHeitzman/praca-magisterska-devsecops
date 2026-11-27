@@ -38,7 +38,6 @@
           { "context": "sast", "integration_id": 15368 },
           { "context": "sca", "integration_id": 15368 },
           { "context": "iac", "integration_id": 15368 },
-          { "context": "image-scan", "integration_id": 15368 },
           { "context": "sbom", "integration_id": 15368 }
         ]
       }

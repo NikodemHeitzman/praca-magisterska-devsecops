@@ -6,6 +6,8 @@
 # instance asks GHCR which image the branch tag points to and deploys it by digest:
 #   1. resolve DEPLOY_TAG to a digest (anonymous token, public package),
 #   2. stop if the digest is already deployed, or already failed (wait for a new tag),
+#      variant B: deploy only a digest with a verified provenance attestation (ADR-0050):
+#      no attestation yet = wait and check again, attestation rejected = failed,
 #   3. pull the image by digest and read the commit from its OCI revision label,
 #   4. download compose.yaml and compose.aws.yaml from that commit,
 #   5. docker compose up, then wait until /version reports the new image.
@@ -16,6 +18,12 @@ CONF=${DEPLOY_CONF:-/etc/ticketing/deploy.conf}
 # shellcheck source=/dev/null
 . "$CONF"
 : "${IMAGE_REPOSITORY:?}" "${DEPLOY_TAG:?}" "${SOURCE_REPOSITORY:?}"
+# Set by user-data.sh from deploy_branch: true for exp/variant-b only (ADR-0050, B5).
+VERIFY_ATTESTATION=${VERIFY_ATTESTATION:-false}
+if [[ $VERIFY_ATTESTATION == true ]]; then
+  : "${DEPLOY_BRANCH:?}"
+fi
+VERIFY=${VERIFY:-/usr/local/bin/ticketing-verify}
 
 APP_HOME=${APP_HOME:-/opt/app}
 STATE=$APP_HOME/state
@@ -63,7 +71,6 @@ if [[ $digest == "$current" || $digest == "$failed" ]]; then
 fi
 
 image=$IMAGE_REPOSITORY@$digest
-log "new image for $DEPLOY_TAG: $image (deployed: ${current:-none})"
 
 record() {
   local result=$1 revision=$2
@@ -80,6 +87,42 @@ fail() {
   exit 1
 }
 
+# 2a. Variant B: provenance attestation of the digest (verify-attestation.sh, ADR-0050).
+# On a push the branch tag moves in `build` before `attest` ends (D3), so a missing attestation
+# is normal for a few minutes: wait without marking the digest, and log it once per digest.
+if [[ $VERIFY_ATTESTATION == true ]]; then
+  verify_out=$(mktemp)
+  trap 'rm -f "$headers" "$verify_out"' EXIT
+  rc=0
+  SOURCE_REF=refs/heads/$DEPLOY_BRANCH GH_NO_UPDATE_NOTIFIER=1 GH_PROMPT_DISABLED=1 \
+    "$VERIFY" "$IMAGE_REPOSITORY" "$digest" >"$verify_out" 2>&1 || rc=$?
+  case $rc in
+    0)
+      rm -f "$STATE/waiting"
+      cat "$verify_out"
+      ;;
+    10)
+      if [[ $(cat "$STATE/waiting" 2>/dev/null || true) != "$digest" ]]; then
+        cat "$verify_out"
+        log "waiting for the attestation of $image"
+        echo "$digest" >"$STATE/waiting"
+      fi
+      exit 0
+      ;;
+    11)
+      rm -f "$STATE/waiting"
+      cat "$verify_out" >&2
+      fail "attestation of $image rejected"
+      ;;
+    *)
+      cat "$verify_out" >&2
+      log "attestation check of $image did not complete (exit $rc), retrying in the next run" >&2
+      exit 1
+      ;;
+  esac
+fi
+
+log "new image for $DEPLOY_TAG: $image (deployed: ${current:-none})"
 start=$(date +%s)
 
 # 3. Pull by digest; the commit comes from the image, not from the branch head.

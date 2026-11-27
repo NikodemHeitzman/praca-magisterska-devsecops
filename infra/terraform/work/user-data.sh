@@ -6,15 +6,23 @@
 # state first, so a second run changes nothing and prints "0 change(s)". The idempotency
 # test re-runs it through SSM: sudo bash /var/lib/cloud/instance/scripts/part-001
 #
-# ec2.tf prepends the deployment settings (IMAGE_REPOSITORY, DEPLOY_TAG, SOURCE_REPOSITORY,
-# S3_BUCKET, AWS_REGION) and the gzipped, base64-encoded deploy-agent.sh (DEPLOY_AGENT_GZ_B64).
+# ec2.tf prepends the deployment settings (IMAGE_REPOSITORY, DEPLOY_BRANCH, DEPLOY_TAG,
+# VERIFY_ATTESTATION, SOURCE_REPOSITORY, S3_BUCKET, AWS_REGION) and the gzipped,
+# base64-encoded deploy-agent.sh and verify-attestation.sh (DEPLOY_AGENT_GZ_B64, VERIFY_GZ_B64).
 set -euo pipefail
-: "${IMAGE_REPOSITORY:?}" "${DEPLOY_TAG:?}" "${SOURCE_REPOSITORY:?}" "${S3_BUCKET:?}"
-: "${AWS_REGION:?}" "${DEPLOY_AGENT_GZ_B64:?}"
+: "${IMAGE_REPOSITORY:?}" "${DEPLOY_BRANCH:?}" "${DEPLOY_TAG:?}" "${VERIFY_ATTESTATION:?}"
+: "${SOURCE_REPOSITORY:?}" "${S3_BUCKET:?}" "${AWS_REGION:?}" "${DEPLOY_AGENT_GZ_B64:?}"
+: "${VERIFY_GZ_B64:?}"
 export DEBIAN_FRONTEND=noninteractive
 
 APP_USER=app
 APP_HOME=/opt/app
+
+# GitHub CLI for the attestation check of variant B (ADR-0050). The release tarball is pinned
+# by version and SHA-256 (from gh_<version>_checksums.txt of the release); 7 days of release
+# age as for the pipeline tools (ADR-0043, H6).
+GH_VERSION=2.105.0
+GH_SHA256=79e7ab5db738c48777b696e374f8b428f0647debfb424f44d2f426370407fe2f
 
 changes=0
 changed() {
@@ -162,15 +170,32 @@ EOF
 fi
 
 # 8. Deploy agent: tag in GHCR -> digest -> docker compose, about once a minute (ADR-0033).
+#    Variant B checks the provenance attestation of each digest first (ADR-0050).
+if [[ $VERIFY_ATTESTATION == true ]] &&
+  [[ $(/usr/local/bin/gh --version 2>/dev/null | head -n 1) != "gh version $GH_VERSION "* ]]; then
+  gh_tmp=$(mktemp -d)
+  curl -fsSL --max-time 120 -o "$gh_tmp/gh.tar.gz" \
+    "https://github.com/cli/cli/releases/download/v$GH_VERSION/gh_${GH_VERSION}_linux_amd64.tar.gz"
+  echo "$GH_SHA256  $gh_tmp/gh.tar.gz" | sha256sum --check --quiet
+  tar -xzf "$gh_tmp/gh.tar.gz" -C "$gh_tmp"
+  install -m 0755 "$gh_tmp/gh_${GH_VERSION}_linux_amd64/bin/gh" /usr/local/bin/gh
+  rm -rf "$gh_tmp"
+  changed "gh $GH_VERSION installed"
+fi
 if write_if_changed /etc/ticketing/deploy.conf 0644 <<EOF; then
 IMAGE_REPOSITORY=$IMAGE_REPOSITORY
+DEPLOY_BRANCH=$DEPLOY_BRANCH
 DEPLOY_TAG=$DEPLOY_TAG
+VERIFY_ATTESTATION=$VERIFY_ATTESTATION
 SOURCE_REPOSITORY=$SOURCE_REPOSITORY
 EOF
   changed "/etc/ticketing/deploy.conf"
 fi
 if base64 -d <<<"$DEPLOY_AGENT_GZ_B64" | gunzip | write_if_changed /usr/local/bin/ticketing-deploy 0755; then
   changed "/usr/local/bin/ticketing-deploy"
+fi
+if base64 -d <<<"$VERIFY_GZ_B64" | gunzip | write_if_changed /usr/local/bin/ticketing-verify 0755; then
+  changed "/usr/local/bin/ticketing-verify"
 fi
 if write_if_changed /etc/systemd/system/ticketing-deploy.service 0644 <<EOF; then
 [Unit]

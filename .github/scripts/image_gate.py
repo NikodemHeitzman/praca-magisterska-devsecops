@@ -1,4 +1,4 @@
-"""Gate of the image-scan job: applies the ADR-0042 threshold to the Trivy image JSON report.
+"""Gate of the image scan in the build job (devsecops-ci.yml, ADR-0048, ADR-0050): applies the ADR-0042 threshold to the Trivy image JSON report.
 
 Thresholds (ADR-0042, D5a; ADR-0048):
 - vulnerabilities: MEDIUM, HIGH and CRITICAL with an available fix (status `fixed`) block;
@@ -157,7 +157,7 @@ def main():
         db = load_db_metadata(args.db_metadata)
         exceptions = load_exceptions(args.exceptions)
     except InputError as e:
-        print(f"::error::image-scan gate input unusable: {e}")
+        print(f"::error::image gate input unusable: {e}")
         return 2
 
     found, counts = findings(report)

@@ -60,14 +60,14 @@ uv run ruff format --check .
 
 ## CI
 
-Workflow `.github/workflows/baseline-ci.yml` uruchamia lint i testy na każdym pull requeście i pushu do `main` oraz `exp/variant-*` ([ADR-0035](../docs/adr/0035-workflow-ci-lint-i-testy.md)):
+Na `main` działa workflow wariantu B `.github/workflows/devsecops-ci.yml` ([ADR-0050](../docs/adr/0050-atestacje-i-weryfikacja-przed-wdrozeniem.md)). Wariant A (`.github/workflows/baseline-ci.yml`) jest zamrożony w tagu `pipeline-a-v1` ([ADR-0041](../docs/adr/0041-zamrozenie-wariantu-a.md)). Joby wspólne `lint`, `test` i `build` biegną na każdym pull requeście i pushu do `main` oraz `exp/variant-*` ([ADR-0035](../docs/adr/0035-workflow-ci-lint-i-testy.md)):
 
 - job `lint`: `ruff check` i `ruff format --check`,
 - job `test`: `sh scripts/ci-env.sh` (losowy `.env`), `docker compose up -d --wait db`, `pytest`.
 
 Zależności instaluje `uv sync --locked` bez pamięci podręcznej, bo czas potoku jest mierzony w eksperymencie.
 
-Job `build` startuje po zielonych `lint` i `test` ([ADR-0036](../docs/adr/0036-build-i-publikacja-obrazu.md)). Na pull requeście tylko buduje obraz. Push na `main` lub `exp/variant-*` publikuje go w GHCR z dwoma tagami: `<gałąź>-sha-<commit>` (np. `exp-variant-a-sha-<commit>`, [ADR-0040](../docs/adr/0040-tag-sha-z-nazwa-galezi.md)) i tagiem gałęzi (`main`, `exp-variant-a`, `exp-variant-b`). Obraz ma etykiety OCI `source` i `revision`, a digest jest w outputach joba i w podsumowaniu przebiegu. Agent wdrożenia na instancji śledzi tag gałęzi wariantu ([ADR-0033](../docs/adr/0033-mechanizm-wdrozenia-pull.md)).
+Job `build` startuje po zielonych `lint` i `test` ([ADR-0036](../docs/adr/0036-build-i-publikacja-obrazu.md)). Na pull requeście tylko buduje obraz. Push na `main` lub `exp/variant-*` publikuje go w GHCR z dwoma tagami: `<gałąź>-sha-<commit>` (np. `exp-variant-a-sha-<commit>`, [ADR-0040](../docs/adr/0040-tag-sha-z-nazwa-galezi.md)) i tagiem gałęzi (`main`, `exp-variant-a`, `exp-variant-b`). Obraz ma etykiety OCI `source` i `revision`, a digest jest w outputach joba i w podsumowaniu przebiegu. Agent wdrożenia na instancji śledzi tag gałęzi wariantu ([ADR-0033](../docs/adr/0033-mechanizm-wdrozenia-pull.md)). W wariancie B `build` dodatkowo skanuje obraz przed pushem, a agent wdraża tylko digest ze zweryfikowaną atestacją provenance ([ADR-0050](../docs/adr/0050-atestacje-i-weryfikacja-przed-wdrozeniem.md)).
 
 ## Zmiana zależności
 
