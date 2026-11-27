@@ -84,6 +84,7 @@ Opcje i rekomendacje przygotował agent. Autor wybrał opcje i wskazał swoje po
 | B3 | Job `verify` w CI po `attest`, bez logowania do GHCR ani GitHuba, z tymi samymi flagami `gh` co agent, w tym test negatywny. Egzekwowanie zostaje na instancji | test negatywny bez AWS, wcześniejsza informacja |
 | B4 | Agent najpierw pyta GHCR anonimowo o obecność atestacji: referrers API, a gdy rejestr go nie obsługuje, tag `sha256-<hex>`. Brak oznacza „czekaj”. Gdy atestacja jest, agent uruchamia `gh attestation verify --bundle-from-oci`, a błąd oznacza „odrzuć” | weryfikacja zostaje w `gh` |
 | B5 | Weryfikacja wynika z `deploy_branch`: `exp/variant-b` ją włącza, `exp/variant-a` nie. Bez nowej zmiennej Terraform | bez pomyłki, mniej konfiguracji |
+| B4a | Poprawka B4 po pierwszym przebiegu push (2026-11-27): skrypt sam pobiera bundle provenance z GHCR (indeks pod tagiem `sha256-<hex>` → manifest bundla → blob, anonimowo) i przekazuje je do `gh attestation verify --bundle`. Obecność, polityka i kryptografia bez zmian. Odrzucone: token GitHuba na instancji (narusza ADR-0032), Cosign zamiast `gh` | weryfikacja zostaje w `gh`, mała zmiana, sprawdzone na obrazie |
 | B6 | Wywołanie `uses: ./.github/workflows/attest.yml` zostaje, a zizmor dostaje wyjątek reguły `self-repository` dla `devsecops-ci.yml` w `.github/zizmor.yml`, z uzasadnieniem i terminem przeglądu (D6) | decyzja autora w trakcie implementacji: rekomendacja agenta przyjęta bez wskazania dodatkowych powodów |
 
 Pytanie B6 doszło w trakcie implementacji, bo dwie bramki `workflow-lint` wykluczały się nawzajem:
@@ -91,20 +92,22 @@ Pytanie B6 doszło w trakcie implementacji, bo dwie bramki `workflow-lint` wyklu
 - zizmor 1.32.0 (reguła `self-repository`, poziom low, więc blokuje) wymaga nowej składni `uses: $/...` (GitHub, lipiec 2026),
 - przypięty actionlint 1.7.12, który jest najnowszym wydaniem (sprawdzone 2026-11-27), tej składni nie zna i zgłasza błąd.
 
+Pytanie B4a wynikło z błędu w rozpoznaniu agenta. Lokalnie sprawdzono tylko `gh attestation verify --bundle` (plik na dysku), który działa bez logowania. W kodzie `gh` 2.105.0 (`pkg/cmd/attestation/verify/verify.go`) tylko flaga `--bundle` wyłącza wymóg logowania (`DisableAuthCheckFlag`), a `--bundle-from-oci` go nie wyłącza. W pierwszym przebiegu push job `verify` zakończył się komunikatem „To get started with GitHub CLI, please run: gh auth login”.
+
 Odrzucono opcję „składnia `$/` i wyjątek actionlinta (`-ignore`)”, bo zmienia konfigurację bramki i może ukryć inne błędy w tej linii. Według dokumentacji zizmora ryzyko reguły dotyczy akcji wczytanej z plików zmienionych wcześniej w jobie, czyli akcji w krokach, a nie reusable workflow wywołanego na poziomie joba (analiza agenta).
 
-Decyzje agenta (techniczne, w ramach decyzji autora; potwierdzone w implementacji z 2026-11-27, wyniki CI do uzupełnienia):
+Decyzje agenta (techniczne, w ramach decyzji autora; potwierdzone w implementacji z 2026-11-27, wyniki CI w konsekwencjach):
 
 - **Akcja:** `actions/attest` v4.2.2 (`1e69f48acb82d1966a394da916b4c1698aa569d6`, `docs/narzedzia.md`), dwa wywołania: provenance bez `sbom-path` i SBOM z `sbom-path`. Oba z `subject-name: ghcr.io/<repozytorium>`, `subject-digest` z wyjścia `build`, `push-to-registry: true` i `create-storage-record: false`.
 - **Uprawnienia:**
   - reusable workflow `attest`: `id-token: write`, `attestations: write`, `packages: write`, `contents: read`,
   - `build`: bez `id-token` (SLSA-B3, BUILD-3*).
 - **Kanał digestu:** `build` → `attest` przez `needs.build.outputs.digest`, a nie przez tag w rejestrze. Atestacja nie zależy więc od tagu, który może się przesunąć.
-- **Komenda weryfikacji:** ta sama w `verify` i na instancji:
+- **Komenda weryfikacji:** ta sama w `verify` i na instancji (po B4a):
 
-  `gh attestation verify oci://ghcr.io/<repozytorium>@<digest> --bundle-from-oci --repo <właściciel>/praca-magisterska-devsecops --signer-workflow <właściciel>/praca-magisterska-devsecops/.github/workflows/attest.yml --source-ref refs/heads/<gałąź> --deny-self-hosted-runners`
+  `gh attestation verify oci://ghcr.io/<repozytorium>@<digest> --bundle <pobrane bundle.jsonl> --repo <właściciel>/praca-magisterska-devsecops --signer-workflow <właściciel>/praca-magisterska-devsecops/.github/workflows/attest.yml --source-ref refs/heads/<gałąź> --deny-self-hosted-runners`
 
-  Flagi według pomocy `gh` 2.102.0.
+  Flagi według pomocy `gh` 2.102.0. Digest obrazu `gh` rozwiązuje anonimowo z `oci://`.
 - **Wspólny skrypt:** `infra/terraform/work/verify-attestation.sh`, uruchamiany i przez agenta (na instancji jako `/usr/local/bin/ticketing-verify`), i przez job `verify`. Kody wyjścia:
   - 0: atestacja provenance zweryfikowana,
   - 10: brak atestacji provenance (agent czeka),
@@ -154,12 +157,25 @@ Decyzje agenta (techniczne, w ramach decyzji autora; potwierdzone w implementacj
 - (−) Na pushu wdrożenie B zaczyna się dopiero po najwolniejszej bramce, `attest` i kolejnym cyklu agenta. Nie zmienia to mierzonego czasu potoku (ADR-0037).
 - (−) L3 to L3 według interpretacji GitHuba. Autor pisze zarówno workflow wywołujący, jak i reusable workflow, więc podział najemca–platforma jest umowny (`docs/notes/slsa.md`, 3.3). Weryfikację w CI może usunąć ktoś, kto zmienia definicję potoku (3.4), dlatego egzekwuje ją instancja. Materiał do 5.3.
 - (−) Instancja instaluje dodatkowe narzędzie (`gh`, około 15 MB) i potrzebuje dostępu do serwerów TUF Sigstore i GitHuba (zaufany korzeń). TODO: zweryfikować na instancji.
-- Do sprawdzenia w implementacji (TODO: zweryfikować):
-  - czy GHCR obsługuje referrers API, czy biblioteka używa tagu `sha256-<hex>` (dla obrazu bez atestacji referrers API odpowiada 404),
-  - czy polityka akcji platformy (ADR-0043, H7: wymuszenie SHA i lista dozwolonych) przepuszcza lokalny reusable workflow `./.github/workflows/attest.yml`,
-  - czy `builder.id` i tożsamość podpisującego to `attest.yml`, a nie `devsecops-ci.yml` (warunek L3),
-  - czy `gh attestation verify --bundle-from-oci` działa anonimowo na publicznym GHCR (job `verify`),
-  - czy digest w SBOM różni się od digestu w GHCR (TODO z ADR-0049),
+- Wyniki CI (2026-11-27):
+  - **PR #36** (`028d8c8`, przebieg `devsecops-ci` 45990120994): wszystkie joby zielone, `attest` i `verify` pominięte. Przebieg trwał 2 min 10 s: `build` 62 s (start po `test`), `sbom` 16 s. Potem `settings.sh apply` za zgodą autora: rulesety `main` i `exp-variant-b` bez `image-scan` (API), PR `CLEAN`, scalony (`f2eafcd`).
+  - **Push na `main`** (`f2eafcd`, przebieg 45992258765):
+    - próba 1: `build` przerwany przy `docker push` błędem GHCR `unknown blob`,
+    - próba 2 (ponowienie nieudanych jobów): `build` opublikował `sha256:9e764a94…`, a `attest` wystawił obie atestacje w 20 s,
+    - `verify` zakończył się błędem: `--bundle-from-oci` wymaga logowania (B4a). Dodatkowo krok przerwał się po pierwszym przypadku, bo powłoka kroku działa z `-e`. Poprawione w osobnym PR (`|| rc=$?`).
+  - **GHCR nie obsługuje referrers API:** dla obrazu z atestacjami odpowiada 404 (`MANIFEST_UNKNOWN`). Bundle są w indeksie pod tagiem `sha256-<hex>`: dwa wpisy z adnotacjami `predicateType` `https://slsa.dev/provenance/v1` i `https://spdx.dev/Document/v2.3`.
+  - **Polityka akcji platformy** (ADR-0043, H7) przepuściła lokalny reusable workflow (job `attest` zakończony sukcesem).
+  - **Tożsamość (warunek L3):**
+    - `runDetails.builder.id` = `…/.github/workflows/attest.yml@refs/heads/main`,
+    - certyfikat: `buildSignerURI` = `attest.yml`, a `buildConfigURI` = `devsecops-ci.yml`,
+    - `externalParameters.workflow.path` = `.github/workflows/devsecops-ci.yml`,
+    - `runnerEnvironment` = `github-hosted`, wpis w Rekorze.
+  - **Test lokalny po B4a:** cztery przypadki joba `verify` w kontenerze z `gh` 2.105.0 (tarball przypięty po SHA-256), na obrazie `sha256:9e764a94…` z GHCR, bez logowania. Wyniki 0, 11, 11, 10, czyli zgodne z oczekiwanymi.
+  - **Digest w SBOM ≠ digest w GHCR** (TODO z ADR-0049 rozstrzygnięte): SBOM przebiegu push podaje `sha256:0f76cdbe…` (purl `pkg:oci` w SPDX, `version` w CycloneDX), a obraz w GHCR ma `sha256:9e764a94…`. SBOM łączy z obrazem atestacja SBOM, której podmiotem jest digest z rejestru.
+- (−) Ponowienie joba `build` po błędzie GHCR zmienia przebieg: dla danych eksperymentu liczy się pierwsza próba. TODO: zweryfikować, jak skrypt zbierający czasy (ADR-0039) traktuje `run_attempt`.
+- Do sprawdzenia (TODO: zweryfikować):
+  - przebieg push po poprawce B4a (job `verify` zielony),
+  - wdrożenie na instancji AWS: czekanie, wdrożenie po atestacji, test negatywny,
   - które wymagania z tabeli `docs/notes/slsa.md` (sekcja 2) spełnia gotowy potok: notatka o poziomie (kryterium 3, M8).
 
 ## Źródła

@@ -138,7 +138,7 @@ Uwagi do diagramu:
 | B21 | 4. Publikacja | push obrazu z tagiem SHA (z wariantu A) | docker CLI | — | GitOps-REQ-2 | PS.3.1 | jak w A |
 | B22 | 4. Publikacja | `sbom` na archiwum obrazu z `build`, na PR i pushu (ADR-0049; od E07-09 w `devsecops-ci.yml`, ADR-0050) | Syft (SPDX + CycloneDX) | CICD-SEC-3 (inwentarz komponentów) | TEST-2*, ATT-1*, BASE-4* | PS.3.2 | fail closed |
 | B23 | 4. Publikacja | `attest` (tylko push): provenance i SBOM (SPDX) w reusable workflow `attest.yml`, `needs:` na wszystkie joby przebiegu (D3), atestacje w GHCR; `verify` sprawdza je tą samą komendą co instancja (ADR-0050) | `actions/attest` (Sigstore keyless) | CICD-SEC-9 | BUILD-3*, ATT-1*, ATT-2*, ATT-3* | PS.2.1 (interp.), PS.3.1 (interp.), PS.3.2 | fail closed |
-| B24 | 5. Wdrożenie | weryfikacja atestacji na instancji przed `compose up`; brak atestacji = czekaj (D3) | agent wdrożenia + `verify-attestation.sh` (`gh attestation verify --bundle-from-oci`, ADR-0050) | CICD-SEC-9, CICD-SEC-1 | DEPLOY-REQ-3, ATT-4* | PS.2.1 | blokuje wdrożenie (fail closed) |
+| B24 | 5. Wdrożenie | weryfikacja atestacji na instancji przed `compose up`; brak atestacji = czekaj (D3) | agent wdrożenia + `verify-attestation.sh` (bundle z GHCR + `gh attestation verify --bundle`, ADR-0050, B4a) | CICD-SEC-9, CICD-SEC-1 | DEPLOY-REQ-3, ATT-4* | PS.2.1 | blokuje wdrożenie (fail closed) |
 | B25 | 6. Po wdrożeniu | audyt R2 | ZAP baseline, Trivy | — (mierzy M2, etap „audyt po wdrożeniu”) | DEPLOY-REQ-4 (aktualność skanu) | RV.1.2 | poza potokiem, nie bramka |
 
 Elementy z listy kontrolnej, które celowo **nie** są krokami wariantu B (D11):
