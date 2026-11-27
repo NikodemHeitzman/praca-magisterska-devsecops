@@ -780,12 +780,12 @@ jobs:
           check=infra/terraform/work/verify-attestation.sh
           failures=0
           run_case() { # <name> <expected code> <digest> <source ref> <signer workflow>
-            local home rc
+            local home rc=0
             home=$(mktemp -d)
+            # `|| rc=$?`: the step shell runs with -e, and a non-zero code is an expected result here.
             env -i PATH="$PATH" HOME="$home" GH="$gh_bin" GH_NO_UPDATE_NOTIFIER=1 GH_PROMPT_DISABLED=1 \
               SOURCE_REPOSITORY="$OWNER_REPO" SOURCE_REF="$4" SIGNER_WORKFLOW="$5" \
-              bash "$check" "$IMAGE" "$3"
-            rc=$?
+              bash "$check" "$IMAGE" "$3" || rc=$?
             if [[ $rc == "$2" ]]; then result=PASS; else result=FAIL; failures=$((failures + 1)); fi
             echo "$1: exit $rc, expected $2: $result"
             echo "| $1 | $2 | $rc | $result |" >>"$GITHUB_STEP_SUMMARY"

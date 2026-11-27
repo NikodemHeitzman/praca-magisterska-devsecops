@@ -173,7 +173,7 @@ narzedzia:
     zrodlo: tarball gh_2.105.0_linux_amd64.tar.gz z wydania cli/cli, SHA-256 79e7ab5db738c48777b696e374f8b428f0647debfb424f44d2f426370407fe2f
     przypiete: true
     job: verify  # oraz agent wdrożenia na instancji wariantu B (user-data.sh, ta sama wersja i suma)
-    uzycie: infra/terraform/work/verify-attestation.sh -> gh attestation verify --bundle-from-oci --repo --signer-workflow attest.yml --source-ref --deny-self-hosted-runners (ADR-0050)
+    uzycie: infra/terraform/work/verify-attestation.sh -> bundle z GHCR (tag sha256-<hex>) -> gh attestation verify --bundle --repo --signer-workflow attest.yml --source-ref --deny-self-hosted-runners (ADR-0050, B4a: --bundle-from-oci wymaga gh auth login)
     kody: {0: zweryfikowana, 10: brak atestacji (czekaj), 11: odrzucona, 1: błąd (ponów)}
   actionlint:
     wersja: 1.7.12
