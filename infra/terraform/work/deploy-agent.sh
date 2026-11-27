@@ -94,7 +94,9 @@ if [[ $VERIFY_ATTESTATION == true ]]; then
   verify_out=$(mktemp)
   trap 'rm -f "$headers" "$verify_out"' EXIT
   rc=0
-  SOURCE_REF=refs/heads/$DEPLOY_BRANCH GH_NO_UPDATE_NOTIFIER=1 GH_PROMPT_DISABLED=1 \
+  # deploy.conf is sourced, not exported, so the settings are passed to the check explicitly.
+  SOURCE_REPOSITORY=$SOURCE_REPOSITORY SOURCE_REF=refs/heads/$DEPLOY_BRANCH \
+    GH_NO_UPDATE_NOTIFIER=1 GH_PROMPT_DISABLED=1 \
     "$VERIFY" "$IMAGE_REPOSITORY" "$digest" >"$verify_out" 2>&1 || rc=$?
   case $rc in
     0)

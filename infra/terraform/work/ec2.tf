@@ -64,7 +64,9 @@ resource "aws_instance" "app" {
   # Docker, security updates and hardening on first boot (ADR-0031), then the deploy agent
   # (ADR-0033). A changed script or deploy setting (e.g. deploy_branch) replaces the
   # instance, so every apply starts from the same configuration.
-  user_data                   = local.user_data
+  # Gzip-compressed: with the attestation check of variant B (ADR-0050) the script is above the
+  # EC2 limit of 16 KB; cloud-init decompresses gzip user data before running it.
+  user_data_base64            = base64gzip(local.user_data)
   user_data_replace_on_change = true
 
   # check-host.sh and check-deploy.sh find the instance by its Name tag. SkipCleanup=true
