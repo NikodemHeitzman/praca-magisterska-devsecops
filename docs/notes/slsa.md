@@ -279,6 +279,8 @@ Oznaczenia: P = producent, PB = platforma budowania, K = konsument (weryfikator)
 - Sekcja 3.3 (osobny job atestacji) to mały koszt, który poprawia też BUILD-3*. Warto ją zaplanować w E07-09 jako cel rozszerzony.
 - Przy pomiarze M8 tabela z sekcji 2 służy jako lista wymagań. Dla każdego wymagania wpisuje się dowód i ocenę.
 
+**Ocena po E07-09 (2026-11-27):** wstępna ocena M8 dla wariantu B jest w [`docs/ocena-slsa.md`](../ocena-slsa.md): L2 spełniony (SLSA-0 do potwierdzenia w M7), L3 według interpretacji GitHuba z zastrzeżeniami Z1–Z3.
+
 **Wprowadzone zmiany (2026-10-28):**
 
 - `docs/metodyka.md`, p. 2.2 „SLSA (H3b)”: próg L2 potwierdzony z uzasadnieniem, L3 jako cel rozszerzony z zastrzeżeniem,
