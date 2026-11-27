@@ -123,7 +123,8 @@ Decyzje agenta (techniczne, w ramach decyzji autora; potwierdzone w implementacj
 
   Każdy przypadek ma pusty `HOME` i nie ma tokenów (`env -i`), czyli warunki jak na instancji.
 - **`gh` na instancji:** v2.105.0 z tarballa wydania, przypiętego sumą SHA-256 z pliku `checksums.txt` wydania, instalowanego w `user-data.sh` tylko dla wariantu B. Instancja nie ma tokenu GitHuba (ADR-0032).
-- **Agent:** potrzebuje nazwy gałęzi (`--source-ref`), a nie tylko tagu GHCR (`exp-variant-b`). `ec2.tf` przekazuje `DEPLOY_BRANCH`, `VERIFY_ATTESTATION` (`true` tylko dla `exp/variant-b`) i skrypt weryfikacji (`VERIFY_GZ_B64`). „Czekaj” zapisuje się raz na digest w logu (plik stanu `waiting`).
+- **Agent:** potrzebuje nazwy gałęzi (`--source-ref`), a nie tylko tagu GHCR (`exp-variant-b`). `ec2.tf` przekazuje `DEPLOY_BRANCH`, `VERIFY_ATTESTATION` (`true` tylko dla `exp/variant-b`) i skrypt weryfikacji (`VERIFY_GZ_B64`). „Czekaj” zapisuje się raz na digest w logu (plik stanu `waiting`). Ustawienia z `deploy.conf` agent przekazuje skryptowi jawnie, bo plik jest wczytywany bez `export` (poprawka po teście na AWS).
+- **`user_data` skompresowany gzipem** (`user_data_base64 = base64gzip(...)`): po dodaniu skryptu weryfikacji i instalacji `gh` skrypt ma 16 645 B, a limit EC2 to 16 384 B. Po kompresji ma około 9,8 KB. cloud-init rozpakowuje gzip przed uruchomieniem (sprawdzone na instancji 2026-11-27: `harden: done, 15 change(s)`).
 - **Workflow:**
   - `devsecops-ci.yml`: joby `lint` i `test` skopiowane z `baseline-ci.yml` bez zmian (K2, porównane `diff`), bramki z `devsecops-gates.yml` bez zmian,
   - `build`: build z A, archiwum `docker save` (dla `sbom`), skan i bramka Trivy, potem login i push,
@@ -173,10 +174,24 @@ Decyzje agenta (techniczne, w ramach decyzji autora; potwierdzone w implementacj
   - **Test lokalny po B4a:** cztery przypadki joba `verify` w kontenerze z `gh` 2.105.0 (tarball przypięty po SHA-256), na obrazie `sha256:9e764a94…` z GHCR, bez logowania. Wyniki 0, 11, 11, 10, czyli zgodne z oczekiwanymi.
   - **Digest w SBOM ≠ digest w GHCR** (TODO z ADR-0049 rozstrzygnięte): SBOM przebiegu push podaje `sha256:0f76cdbe…` (purl `pkg:oci` w SPDX, `version` w CycloneDX), a obraz w GHCR ma `sha256:9e764a94…`. SBOM łączy z obrazem atestacja SBOM, której podmiotem jest digest z rejestru.
 - (−) Ponowienie joba `build` po błędzie GHCR zmienia przebieg: dla danych eksperymentu liczy się pierwsza próba. TODO: zweryfikować, jak skrypt zbierający czasy (ADR-0039) traktuje `run_attempt`.
+- **Push po poprawce B4a** (PR #37, `b8573f4`, przebieg 45994110024): wszystkie joby zielone w pierwszej próbie, w 3 min 6 s. `attest` trwał 19 s, `verify` 21 s, cztery przypadki dały 0, 11, 11, 10 (PASS). Obraz `main`: `sha256:0287877e…`.
+- **Test na AWS** (2026-11-27, plan zatwierdzony przez autora na wzór ADR-0037; tymczasowa gałąź `exp/variant-b` z `main`, czasy UTC). Pojedynczy przebieg, nie pomiar.
+
+  | Krok | Wynik |
+  |---|---|
+  | `terraform apply` z `deploy_branch = exp/variant-b` (12:00) | pierwsza próba odrzucona przy walidacji: `user_data` ponad 16 384 B (16 645 B po dodaniu skryptu i `gh`). Poprawka agenta: `user_data_base64 = base64gzip(...)`, około 9,8 KB, cloud-init rozpakowuje gzip. Instancja `i-0c550f90…` utworzona |
+  | gałąź `exp/variant-b` (12:03:54), przebieg 45995528608 | zielony; obraz `sha256:59369676…` (`build` do 12:06:16), atestacje 12:07:00, `verify` z `refs/heads/exp/variant-b` PASS |
+  | agent na `i-0c550f90…` | nie wdrożył: `ticketing-verify: SOURCE_REPOSITORY: parameter null or not set`, kod 1, ponowienie co minutę (`check-deploy.sh` w CloudShell). Przyczyna: `deploy.conf` jest wczytywany bez `export`; lokalny test agenta z atrapą weryfikatora tego nie wykrył. Poprawka: agent przekazuje `SOURCE_REPOSITORY` jawnie; test lokalny z prawdziwym skryptem i `gh` 2.105.0: weryfikacja przechodzi, a obraz z `main` jest odrzucany |
+  | nowa instancja `i-090bb679…` (12:20:04) | 12:21:27 agent zweryfikował atestację i wdrożył `59369676…` w 31 s (`result=deployed`), `/version` od 12:21:29, `/health` ok |
+  | N1: `rollback.yml` przesuwa tag na obraz bez atestacji `4b68b453…` (12:21:55) | 12:22:30 `verify: no provenance attestation` → `deploy: waiting for the attestation`, log raz na digest, bez `failed`; aplikacja bez zmian |
+  | N2: tag na `0287877e…` z atestacją z `refs/heads/main` (12:25:27) | 12:25:43 `gh`: „expected SourceRepositoryRef to be refs/heads/exp/variant-b, got refs/heads/main” → `REJECTED` → `deploy: FAILED`, wpis `result=failed`, `failed` = `0287877e…`; aplikacja bez zmian (`/version` do 12:27:57) |
+  | sprzątanie (12:29–12:35) | `terraform destroy` 23 zasoby, `terraform state list` pusty, brak instancji z `Project=devsecops-thesis`. Tag `exp-variant-b` cofnięty z obrazu `main` na `59369676…` (`rollback.yml`). Pięć wersji pakietu usuniętych z GHCR: obraz `59369676…`, indeks atestacji `sha256-59369676…`, jego poprzednia wersja i dwa manifesty bundli. Anonimowe zapytania o `exp-variant-b`, `exp-variant-b-sha-b8573f4…` i `sha256-59369676…` zwracają 404, `main` 200. Gałąź `exp/variant-b` usunięta. Atestacje w API repozytorium i wpisy w Rekorze zostają (publiczny log) |
+
+  Kryterium 2 E07-09 jest spełnione na instancji. Obraz bez atestacji nie zostaje wdrożony (agent czeka), a obraz z atestacją niezgodną z polityką (inny ref źródłowy) jest odrzucany.
+- (−) Ponowne odczytanie digestu po odrzuceniu: agent nie ponawia digestu z `failed`, dopóki tag się nie przesunie (ADR-0033). Po N2 tag wskazywał obraz `main`, ale aplikacja działała na poprzednim, zweryfikowanym obrazie.
 - Do sprawdzenia (TODO: zweryfikować):
-  - przebieg push po poprawce B4a (job `verify` zielony),
-  - wdrożenie na instancji AWS: czekanie, wdrożenie po atestacji, test negatywny,
-  - które wymagania z tabeli `docs/notes/slsa.md` (sekcja 2) spełnia gotowy potok: notatka o poziomie (kryterium 3, M8).
+  - które wymagania z tabeli `docs/notes/slsa.md` (sekcja 2) spełnia gotowy potok: notatka o poziomie (kryterium 3, M8),
+  - test idempotencji `user-data.sh` po przejściu na gzip (ścieżka `/var/lib/cloud/instance/scripts/part-001` w nagłówku skryptu) nie był powtarzany.
 
 ## Źródła
 
