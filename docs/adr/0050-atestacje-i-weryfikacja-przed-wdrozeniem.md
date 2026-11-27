@@ -190,7 +190,7 @@ Decyzje agenta (techniczne, w ramach decyzji autora; potwierdzone w implementacj
   Kryterium 2 E07-09 jest spełnione na instancji. Obraz bez atestacji nie zostaje wdrożony (agent czeka), a obraz z atestacją niezgodną z polityką (inny ref źródłowy) jest odrzucany.
 - (−) Ponowne odczytanie digestu po odrzuceniu: agent nie ponawia digestu z `failed`, dopóki tag się nie przesunie (ADR-0033). Po N2 tag wskazywał obraz `main`, ale aplikacja działała na poprzednim, zweryfikowanym obrazie.
 - Do sprawdzenia (TODO: zweryfikować):
-  - które wymagania z tabeli `docs/notes/slsa.md` (sekcja 2) spełnia gotowy potok: notatka o poziomie (kryterium 3, M8),
+  - ~~które wymagania z tabeli `docs/notes/slsa.md` (sekcja 2) spełnia gotowy potok~~: wstępna ocena w [`docs/ocena-slsa.md`](../ocena-slsa.md) (L2 spełniony, L3 z zastrzeżeniami), ostateczna przy zamrożeniu B,
   - test idempotencji `user-data.sh` po przejściu na gzip (ścieżka `/var/lib/cloud/instance/scripts/part-001` w nagłówku skryptu) nie był powtarzany.
 
 ## Źródła
